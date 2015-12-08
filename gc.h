@@ -116,4 +116,10 @@ size_t h_avail(heap_t *h);
 /// \return the bytes currently in use by user structures.
 size_t h_used(heap_t *h);
 
+/// Prints the stack
+/// For debugging purpose only.
+///
+/// \return none
+void print_stack();
+
 #endif
