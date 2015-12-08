@@ -1,6 +1,7 @@
 #include <CUnit/Basic.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "gc.h"
 
@@ -19,7 +20,13 @@ void testCUNITWORKS() {
   CU_ASSERT_EQUAL((1+1), 2);
 }
 
+void testPRINTSTACK() {
+  CU_ASSERT_EQUAL(true, true);
+}
+
 int main(int argc, char const *argv[]) {
+
+    print_stack();
 
     CU_pSuite pSuite = NULL;
 

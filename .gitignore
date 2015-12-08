@@ -35,3 +35,8 @@
 # Misc Directories
 labs/
 doc/
+
+# Misc Files
+.DS_Store
+thumbs.db
+*.gc*

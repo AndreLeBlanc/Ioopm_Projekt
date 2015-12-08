@@ -4,7 +4,7 @@
 
 extern void **environ; //bottom of the stack
 
-void print_stack(){
+void print_stack() {
 
   const int N = 10;
   int arr[N];
@@ -12,7 +12,7 @@ void print_stack(){
     arr[i] = i * 100 + i * 10 + i;
   }
 
-  int *top = &arr;
+  int *top = &arr[0];
 
 
   puts("\n-------------------------------\n");
