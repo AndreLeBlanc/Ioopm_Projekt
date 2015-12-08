@@ -42,7 +42,7 @@ test: gc_test
 .PHONY: test
 #compile test
 gc_test: gc_test.debug.o gc.debug.o
-	$(CC) $(FLAGS_CUNIT) -o $@.out $^
+	$(CC) -o $@.out $^ $(FLAGS_CUNIT) 
 
 #remove crap files.
 clean: gcov_clean
