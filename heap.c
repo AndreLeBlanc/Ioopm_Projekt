@@ -11,8 +11,10 @@ heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold) {
   ((heap_t*) new_heap)->meta_p = new_heap;
   ((heap_t*) new_heap)->user_start_p = new_heap + sizeof(heap_t);
   ((heap_t*) new_heap)->bump_p = new_heap + sizeof(heap_t);
+  ((heap_t*) new_heap)->end_p = new_heap + (bytes * 8);
   ((heap_t*) new_heap)->total_size = bytes;
   ((heap_t*) new_heap)->user_size = bytes - sizeof(heap_t);
+  ((heap_t*) new_heap)->unsafe_stack = unsafe_stack;
   ((heap_t*) new_heap)->gc_threshold = gc_threshold;;
   
   return new_heap;

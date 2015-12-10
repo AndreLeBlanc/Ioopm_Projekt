@@ -5,8 +5,7 @@
 #include "heap.h"
 
 extern void **environ; //bottom of the stack
-
-
+  
 void print_stack() {
 
   const int N = 10;
@@ -51,13 +50,14 @@ void print_stack() {
 
   //stack dump
   puts("\nStack dump: \n");
-  for (NULL; t < b; t++){
+  while(t < b){
     //trying to find our test var
     if(*t % 1337 == 0 && *t != 0) {
       printf("\n%p: %d ------TEST VALUE\n", t, *t);
     } else {
       printf("\n%p: %d\n", t, *t);
     }
+    t++;
   }
 
   puts("\n-------------------------------\n");
