@@ -5,6 +5,8 @@
 #ifndef __heap_h__
 #define __heap_h__
 
+#define PAGE_SIZE 2048
+
 // Heap struct
 // An opaque struct which holds all the necessary information we need. 
 
