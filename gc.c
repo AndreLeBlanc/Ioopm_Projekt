@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <unistd.h>
 
 extern void **environ; //bottom of the stack
@@ -8,16 +9,32 @@ extern void **environ; //bottom of the stack
 // An opaque struct which holds all the necessary information we need. 
 
 typedef struct heap{
-  void* meta_p;       // pointer to heap's meta data (maybe unnecessary)
+  void* meta_p;       // pointer to heap's metadata (maybe unnecessary)
   void* user_start_p; // pointer to start of user's allocated space
   void* bump_p;       // pointer to next free spot in user's space
-  size_t total_size;  // total size of the heap (with meta data)
-  size_t user_size;   // size of user's allocated space (total_size minus meta data)
+  size_t total_size;  // total size of the heap (with metadata)
+  size_t user_size;   // size of user's allocated space (total_size minus metadata)
   float gc_threshold; // garbage collector threshold (1.0 = full memory)
 } heap_t;
 
 
+// mallocates space for heap, places metadata in the front. 
 
+heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold) {
+  void *new_heap = malloc(bytes);
+
+  // create metadata struct and place it in the front of the heap
+  // the user sees this as a heap_t struct and is therefore not
+  // aware that it is the pointer to the whole heap. 
+  ((heap_t*) new_heap)->meta_p = new_heap;
+  ((heap_t*) new_heap)->user_start_p = new_heap + sizeof(heap_t);
+  ((heap_t*) new_heap)->bump_p = new_heap + sizeof(heap_t);
+  ((heap_t*) new_heap)->total_size = bytes;
+  ((heap_t*) new_heap)->user_size = bytes - sizeof(heap_t);
+  ((heap_t*) new_heap)->gc_threshold = gc_threshold;;
+  
+  return new_heap;
+}
 
 void print_stack() {
 
