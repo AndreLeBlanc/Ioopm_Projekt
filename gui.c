@@ -57,7 +57,8 @@ void menu_trigger_gc() {
 }
 
 void menu_delete_heap() {
-  printf("-- Delete heap --\n");
+  printf("-- Deleting heap --\n");
+  h_delete(heap_p);
 }
 
 void menu_exit() {

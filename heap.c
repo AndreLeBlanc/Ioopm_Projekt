@@ -24,3 +24,7 @@ heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold) {
   
   return new_heap;
 }
+
+void h_delete(heap_t *h) {
+  free(h);
+}

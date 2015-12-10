@@ -26,4 +26,6 @@ typedef struct heap{
 
 heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold);
 
+void h_delete(heap_t* h);
+
 #endif
