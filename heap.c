@@ -19,6 +19,7 @@ heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold) {
   ((heap_t*) new_heap)->end_p = new_heap + (bytes * 8);
   ((heap_t*) new_heap)->total_size = bytes;
   ((heap_t*) new_heap)->user_size = bytes - sizeof(heap_t);
+  ((heap_t*) new_heap)->avail_space = end_p - bump_p;
   ((heap_t*) new_heap)->unsafe_stack = unsafe_stack;
   ((heap_t*) new_heap)->gc_threshold = gc_threshold;;
   
@@ -26,5 +27,7 @@ heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold) {
 }
 
 void h_delete(heap_t *h) {
-  free(h);
+  if(h != NULL) {
+    free(h);
+  } 
 }

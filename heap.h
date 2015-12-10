@@ -14,9 +14,10 @@ typedef struct heap{
   void* meta_p;       // pointer to heap's metadata (maybe unnecessary)
   void* user_start_p; // pointer to start of user's allocated space
   void* bump_p;       // pointer to next free spot in user's space
-  void* end_p;       // pointer to end of allocated space
+  void* end_p;        // pointer to end of allocated space
   size_t total_size;  // total size of the heap (with metadata)
   size_t user_size;   // size of user's allocated space (total_size minus metadata)
+  size_t avail_space; // amount of allocatable space left.
   bool unsafe_stack;  // wether or not unsafe stack
   float gc_threshold; // garbage collector threshold (1.0 = full memory)
 } heap_t;

@@ -59,6 +59,7 @@ void menu_trigger_gc() {
 void menu_delete_heap() {
   printf("-- Deleting heap --\n");
   h_delete(heap_p);
+  heap_p = NULL;
 }
 
 void menu_exit() {
@@ -131,7 +132,8 @@ void print_heap() {
     printf("End pointer:\t\t\t%p\n", heap_p->end_p); 
     printf("Total size:\t\t\t%zu\n", heap_p->total_size);
     printf("User size:\t\t\t%zu\n", heap_p->user_size);
-    printf("Unsafe stacke:\t\t\t%s\n", heap_p->unsafe_stack ? "trprintf boprintf boue" : "false");
+    printf("Available space:\t\t%zu\n", heap_p->avail_space);
+    printf("Unsafe stack:\t\t\t%s\n", heap_p->unsafe_stack ? "trprintf boprintf boue" : "false");
     printf("Garbage collection threshold\t%f\n", heap_p->gc_threshold);
   } else {
     printf("-- Heap not initialized --\n");
@@ -158,7 +160,7 @@ int main(int argc, char *argv[])
      {"Delete heap", 'D', *menu_delete_heap},
      {"Exit", 'E', *menu_exit}};  
 
-  int exit_value = 4;
+  int exit_value = 6;
   
   do {
     print_heap(my_heap);
