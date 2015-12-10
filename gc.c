@@ -4,6 +4,21 @@
 
 extern void **environ; //bottom of the stack
 
+// Heap struct
+// An opaque struct which holds all the necessary information we need. 
+
+typedef struct heap{
+  void* meta_p;       // pointer to heap's meta data (maybe unnecessary)
+  void* user_start_p; // pointer to start of user's allocated space
+  void* bump_p;       // pointer to next free spot in user's space
+  size_t total_size;  // total size of the heap (with meta data)
+  size_t user_size;   // size of user's allocated space (total_size minus meta data)
+  float gc_threshold; // garbage collector threshold (1.0 = full memory)
+} heap_t;
+
+
+
+
 void print_stack() {
 
   const int N = 10;
@@ -12,11 +27,11 @@ void print_stack() {
     arr[i] = i * 100 + i * 10 + i;
   }
 
-  int *top = &arr[0];
+  //  int *top = &arr[0];
 
 
   puts("\n-------------------------------\n");
-  // void *top = __builtin_frame_address(1); //top of stack
+   void *top = __builtin_frame_address(1); //top of stack
   // *t = __builtin_frame_address(1); //top of stack (does not work in mac os x)
 
   printf("Top of stack: %p\nBottom of stack: %p\n", top, environ);
