@@ -5,7 +5,7 @@ FLAGS_CUNIT=$(FLAGS_DEBUG) -lcunit
 FLAGS_GCOV=$(FLAGS_DEBUG) --coverage
 
 FILES_GCOV=gc_test.c gc.c
-FILES_MAIN=gc.o collector.o heap.o traverser.o utilities.o
+FILES_MAIN=gc.o collector.o heap.o traverser.o utilities.o linked_list.o
 
 
 DIR_RESOURCES=./resources/

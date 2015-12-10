@@ -4,11 +4,22 @@
 #include "gc.h"
 #include "heap.h"
 #include "utilities.h"
+#include "linked_list.h"
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
-// heap global variable
+// global variables
+
+// heap
 extern heap_t* heap_p = NULL;
+// allocation pointers
+extern ll_node** pointer_list = NULL;
+
+/************************************/
+/*                                  */
+/*  Menu functions                  */
+/*                                  */
+/************************************/
 
 typedef struct menu_item{
   // name: Menu item name.
@@ -36,15 +47,24 @@ void menu_init_heap() {
   } else {
     printf("Heap already initialized, need to delete before initializing\n");
   }
+
+  pointer_list = LL_initRoot();
 }
 
 void menu_allocate_raw() {
   printf("-- Allocating raw --\n");
-  
+  int bytes;
+  inputInt("How much space should be allocated (in bytes)", &bytes);
+  void* pointer = h_alloc_data(heap_p, bytes);
+  printf("Pointer to allocated data:\t\t%p\n", pointer);
+
+  // add pointer to pointer_list
+  LL_createAndInsertSequentially(pointer_list, pointer);
 }
 
 void menu_allocate_format_string() {
   printf("-- Allocating format string --\n");
+  printf("Not yet implemented\n");
 }
 
 void menu_allocate_union() {
@@ -54,12 +74,15 @@ void menu_allocate_union() {
 
 void menu_trigger_gc() {
   printf("-- Triggering garbage collection --\n");
+  printf("Not yet implemented\n");
 }
 
 void menu_delete_heap() {
   printf("-- Deleting heap --\n");
   h_delete(heap_p);
   heap_p = NULL;
+
+  LL_purgeList(pointer_list);
 }
 
 void menu_exit() {
@@ -102,8 +125,10 @@ void print_heap() {
   if(heap_p != NULL) {
     printf("-- Heap --\n");
 
+
+
+    // Print heap percentages
     int cursor_loc = 0;
-    
     printf("[");
     // print meta space
     while(cursor_loc < ((intptr_t) heap_p->user_start_p - (intptr_t) heap_p)
@@ -116,7 +141,7 @@ void print_heap() {
     while(cursor_loc < ((intptr_t) heap_p->bump_p - (intptr_t) heap_p)
 	  * print_width / ((intptr_t) heap_p->end_p - (intptr_t) heap_p)  &&
 	  cursor_loc < print_width) {
-      printf("#");
+      printf("O");
       cursor_loc++;
     }
     // print free space
@@ -125,7 +150,25 @@ void print_heap() {
       cursor_loc++;
     }
     printf("]\n");
-      
+
+    // Print pointer locations in heap
+    ll_node* pointer_cursor = *pointer_list;
+    cursor_loc = 0;
+    printf("[");
+    while(cursor_loc < print_width) {
+      if(cursor_loc == ((intptr_t) LL_getContent(pointer_cursor) - (intptr_t) heap_p) * print_width / ((intptr_t) heap_p->end_p - (intptr_t) heap_p) || cursor_loc == ((intptr_t) heap_p->bump_p - (intptr_t) heap_p) * print_width / ((intptr_t) heap_p->end_p - (intptr_t) heap_p)) {
+	// print a line at beginning och allocations and at bump pointer
+	printf("|");
+	pointer_cursor = LL_getNext(pointer_cursor);
+      } else {
+	printf(" ");
+      }
+      cursor_loc++;
+    }
+    
+    printf("]\n");
+
+    
     printf("Meta pointer:\t\t\t%p\n", heap_p->meta_p);
     printf("User start pointer:\t\t%p\n", heap_p->user_start_p);
     printf("Bump pointer:\t\t\t%p\n", heap_p->bump_p);
@@ -153,13 +196,12 @@ int main(int argc, char *argv[])
   
   menu_item_t item_array[] =
     {{"Initialize heap", 'I', *menu_init_heap},
-     {"Allocate (format string)", 'F', *menu_allocate_format_string},
      {"Allocate (raw)", 'R', *menu_allocate_raw},
-     {"Allocate (union)", 'U', *menu_allocate_union},
-     {"Trigger garbage collection", 'T', *menu_trigger_gc},
+     {"Allocate (format string) [N/A]", 'F', *menu_allocate_format_string},
+     {"Allocate (union) [N/A]", 'U', *menu_allocate_union},
+     {"Trigger garbage collection [N/A]", 'T', *menu_trigger_gc},
      {"Delete heap", 'D', *menu_delete_heap},
      {"Exit", 'E', *menu_exit}};  
-
   int exit_value = 6;
   
   do {
