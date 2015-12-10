@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <unistd.h>
+#include "heap.h"
 
 extern void **environ; //bottom of the stack
+
 
 void print_stack() {
 
@@ -12,11 +15,11 @@ void print_stack() {
     arr[i] = i * 100 + i * 10 + i;
   }
 
-  int *top = &arr[0];
+  //  int *top = &arr[0];
 
 
   puts("\n-------------------------------\n");
-  // void *top = __builtin_frame_address(1); //top of stack
+   void *top = __builtin_frame_address(1); //top of stack
   // *t = __builtin_frame_address(1); //top of stack (does not work in mac os x)
 
   printf("Top of stack: %p\nBottom of stack: %p\n", top, environ);

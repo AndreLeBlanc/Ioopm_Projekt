@@ -1,6 +1,6 @@
 CC=gcc
 FLAGS_PROD=-Wall -std=c11
-FLAGS_DEBUG=$(FLAGS) -ggdb
+FLAGS_DEBUG=$(FLAGS_PROD) -ggdb
 FLAGS_CUNIT=$(FLAGS_DEBUG) -lcunit
 FLAGS_GCOV=$(FLAGS_DEBUG) --coverage
 
