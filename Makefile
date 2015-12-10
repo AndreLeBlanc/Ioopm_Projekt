@@ -5,6 +5,8 @@ FLAGS_CUNIT=$(FLAGS_DEBUG) -lcunit
 FLAGS_GCOV=$(FLAGS_DEBUG) --coverage
 
 FILES_GCOV=gc_test.c gc.c
+FILES_MAIN=gc.o collector.o heap.o traverser.o utilities.o linked_list.o
+
 
 DIR_RESOURCES=./resources/
 
@@ -40,9 +42,14 @@ gcov: gcov_clean $(FILES_GCOV)
 test: gc_test
 	@./gc_test.out
 .PHONY: test
+
 #compile test
 gc_test: gc_test.debug.o gc.debug.o
 	$(CC) -o $@.out $^ $(FLAGS_CUNIT) 
+
+#test with gui
+test_gui: $(FILES_MAIN) gui.c
+	$(CC) $(FLAGS_PROD) -o $@ $^
 
 #remove crap files.
 clean: gcov_clean

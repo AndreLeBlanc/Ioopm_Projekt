@@ -2,8 +2,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#ifndef __heap_h__
-#define __heap_h__
+#ifndef __heap__
+#define __heap__
 
 #define PAGE_SIZE 2048
 
@@ -14,8 +14,11 @@ typedef struct heap{
   void* meta_p;       // pointer to heap's metadata (maybe unnecessary)
   void* user_start_p; // pointer to start of user's allocated space
   void* bump_p;       // pointer to next free spot in user's space
+  void* end_p;        // pointer to end of allocated space
   size_t total_size;  // total size of the heap (with metadata)
   size_t user_size;   // size of user's allocated space (total_size minus metadata)
+  size_t avail_space; // amount of allocatable space left.
+  bool unsafe_stack;  // wether or not unsafe stack
   float gc_threshold; // garbage collector threshold (1.0 = full memory)
 } heap_t;
 
@@ -23,5 +26,9 @@ typedef struct heap{
 // mallocates space for heap, places metadata in the front. 
 
 heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold);
+
+void h_delete(heap_t* h);
+
+void *h_alloc_data(heap_t *h, size_t bytes);
 
 #endif
