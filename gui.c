@@ -40,6 +40,7 @@ void menu_init_heap() {
 
 void menu_allocate_raw() {
   printf("-- Allocating raw --\n");
+  
 }
 
 void menu_allocate_format_string() {
@@ -49,6 +50,10 @@ void menu_allocate_format_string() {
 void menu_allocate_union() {
   printf("-- Allocating union --\n");
   printf("Not yet implemented\n");
+}
+
+void menu_trigger_gc() {
+  printf("-- Triggering garbage collection --\n");
 }
 
 void menu_delete_heap() {
@@ -148,6 +153,8 @@ int main(int argc, char *argv[])
      {"Allocate (format string)", 'F', *menu_allocate_format_string},
      {"Allocate (raw)", 'R', *menu_allocate_raw},
      {"Allocate (union)", 'U', *menu_allocate_union},
+     {"Trigger garbage collection", 'T', *menu_trigger_gc},
+     {"Delete heap", 'D', *menu_delete_heap},
      {"Exit", 'E', *menu_exit}};  
 
   int exit_value = 4;
