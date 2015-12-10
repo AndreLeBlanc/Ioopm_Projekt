@@ -3,6 +3,11 @@
 // mallocates space for heap, places metadata in the front. 
 
 heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold) {
+  if(bytes < sizeof(heap_t)) {
+    // if space allocated is not even enough for metadata, don't allocate
+    return NULL;
+  }
+
   void *new_heap = malloc(bytes);
 
   // create metadata struct and place it in the front of the heap
