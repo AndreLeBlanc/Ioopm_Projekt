@@ -19,28 +19,30 @@ kommer att ladda upp din nyskapade publika nyckel (se ovan) till din hem-mapp p�
 *Detta kommando kommer även att skapa mappen fladdermusen/ i din hem-mapp*
 Du kommer att behöva ditt A-lösenord samt inloggningsnamn, kom ihåg att svara *yes* när ssh frågar om du litar på servern eller inte.
 
-### Third step - Ladda upp kod till UU
+~~### Third step - Ladda upp kod till UU~~
+
+~~### Fourth step - Köra tester på alla maskiner~~
+
+### Third step - Ladda upp och testa på alla maskiner
 ```
-make upload
+make go
 ```
 kommer att zippa alla filer i fladdermusen, ladda upp filen till din hem-mapp på UU:s datorer, radera gamla filer i mappen *fladdermusen/* och unzippa de nya filerna.
 
-### Fourth step - Köra tester på alla maskiner
-```
-make test
-```
-kommer att kompilera test-koden med CUnit, köra testet och spy ut alla output till en fil enligt följande format
+Go kommer även att kompilera test-koden som valts att köras under *test:*, spy ut alla output till en fil enligt följande format
 ```
 hostname.result.txt
 ```
-programmet kommer sedan att hämta hem filen ovan till din lokala maskin, en för varje test kommer att lägga sig i
+Go kommer sedan att hämta hem filen ovan till din lokala maskin, en för varje test kommer att lägga sig i
 ```
 resources/hostname.result.txt
 ```
+**TADDAAAA**
 
-### Fifth step - enjoy
+~~### Fifth step - enjoy~~
+### Fourth step - enjoy
 Så för att summera, *steg 1 och steg 2* är endast för att sätta upp test-miljön.
-Steg 3 och 4 ska repeteras varje gång du uppdaterar koden och vill testa den.
+Steg 3 ~~och 4~~ ska repeteras varje gång du uppdaterar koden och vill testa den.
 
 # Coding Convention
 

@@ -36,10 +36,24 @@ gcov: gcov_clean $(FILES_GCOV)
 	@gcov $(FILES_GCOV)
 .PHONY: gcov
 
-#run tests
-test: gc_test
-	@./gc_test.out
+# this part is executed when testing on multiple machines. change dependency to your needs (ex: os_dump, valgrind, gcov)
+# DEFAULT: run_test
+test: os_dump
 .PHONY: test
+
+# run tests
+run_test: gc_test
+	@./gc_test.out
+.PHONY: run_test
+
+os_dump:
+	@echo "-s : $(shell uname -s)"; \
+	echo "-m : $(shell uname -m)"; \
+	echo "-o : $(shell uname -o)"; \
+	echo "-r : $(shell uname -r)"; \
+	echo "-p : $(shell uname -p)"; \
+	echo "-v : $(shell uname -v)"; \
+
 #compile test
 gc_test: gc_test.debug.o gc.debug.o
 	$(CC) -o $@.out $^ $(FLAGS_CUNIT)

@@ -36,20 +36,23 @@ zip:
 	make clean; \
 	zip -r resources/$(ZIP_NAME) *
 
-upload: zip
+go: zip
 	@echo "$(RED)Vad är ditt användarnamn till UU? [ex: abcd1234]: $(NC)"; \
 	read username; \
-	scp $(ZIP_NAME) $$username@$(FIRST_HOST):$(DIR_REMOTE); \
-	ssh $$username@$(FIRST_HOST) "cd $(DIR_REMOTE); ls | grep -v $(ZIP_NAME) | xargs rm -rf; unzip -o $(ZIP_NAME) -d .; rm *.zip;"
-
-test:
-	@echo "$(RED)Vad är ditt användarnamn till UU? [ex: abcd1234]: $(NC)"; \
-	read username; \
-	@echo "$(RED)Kom ihåg att skriva YES om ssh frågar om du verkligen vill koppla upp dig."; \
-	for host in $(HOSTS); do \
-		echo "$(CYAN)Testing GC at $$host...$(NC)"; \
-		ssh $$username@$$host "cd $(DIR_REMOTE); make test > $$host.result.txt;"; \
-		echo "$(CYAN)Downloading results from $$host...$(NC)"; \
-		scp $$username@$$host:$(DIR_REMOTE)$$host.result.txt ./$$host.result.txt; \
-	done; \
-	echo "$(GREEN)Tests are done."
+	length=$${#username}; \
+	if [[ "$$length" -eq 8 ]]; then \
+		scp $(ZIP_NAME) $$username@$(FIRST_HOST):$(DIR_REMOTE); \
+		ssh $$username@$(FIRST_HOST) "cd $(DIR_REMOTE); ls | grep -v $(ZIP_NAME) | xargs rm -rf; unzip -o $(ZIP_NAME) -d .; rm *.zip;"; \
+		echo "$(RED)Kom ihåg att skriva YES om ssh frågar om du verkligen vill koppla upp dig.$(NC)"; \
+		for host in $(HOSTS); do \
+			echo "------------------------------------------------------------"; \
+			echo "$(CYAN)Testing GC at $$host...$(NC)"; \
+			ssh $$username@$$host "cd $(DIR_REMOTE); make test > $$host.result.txt;"; \
+			echo "Downloading results from $$host..."; \
+			scp $$username@$$host:$(DIR_REMOTE)$$host.result.txt ./$$host.result.txt; \
+		done; \
+		echo "------------------------------------------------------------"; \
+		echo "$(GREEN)Tests are done."; \
+	else \
+		echo "$(RED)Your username seems to be incorrect. [$$username]$(NC)"; \
+	fi
