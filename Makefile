@@ -42,7 +42,8 @@ test: gc_test
 .PHONY: test
 #compile test
 gc_test: gc_test.debug.o gc.debug.o
-	$(CC) -o $@.out $^ $(FLAGS_CUNIT) 
+	$(CC) -o $@.out $^ $(FLAGS_CUNIT)
+.PHONY: gc_test
 
 #remove crap files.
 clean: gcov_clean
@@ -51,6 +52,8 @@ clean: gcov_clean
 	@rm -rf ./doc/*
 	@rm -rf ./*.dSYM
 	@rm -rf .DS_Store
+	@rm -rf *.zip
+	@rm -rf *.result.txt
 	@echo "All cleaned up!"
 
 gcov_clean:

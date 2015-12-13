@@ -12,8 +12,7 @@ void WhichEndian() {
     puts("System is big-endian");
 }
 
-void main() {
+int main() {
   WhichEndian();
-  printf("%d\n", __BIG_ENDIAN);
-  printf("%d\n", __LITTLE_ENDIAN);
+  printf("%u", O32_HOST_ORDER);
 }
