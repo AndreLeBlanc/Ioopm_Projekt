@@ -16,7 +16,7 @@ bool is_big_endian() {
     if (c[0] == 1){
       return false;	
     }
-    else{ 
+    else { 
       return true;
     }
-}
+} 

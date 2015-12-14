@@ -43,6 +43,10 @@ test: gc_test
 	@./gc_test.out
 .PHONY: test
 
+#fly-make mode
+check-syntax:
+	gcc -o nul -S ${CHK_SOURCES}
+
 #compile test
 gc_test: gc_test.debug.o gc.debug.o
 	$(CC) -o $@.out $^ $(FLAGS_CUNIT) 

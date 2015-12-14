@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <unistd.h>
@@ -10,8 +11,10 @@ void print_stack() {
 
   const int N = 10;
   int arr[N];
-  for(int i = 0; i < N; i++) {
+  int i = 0;
+  while(i < N) {
     arr[i] = i * 100 + i * 10 + i;
+    i++;
   }
 
   //  int *top = &arr[0];
