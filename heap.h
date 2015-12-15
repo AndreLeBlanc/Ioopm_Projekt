@@ -72,6 +72,8 @@ bool md_get_copied_flag(void* objec);
 // them in a list.
 // @param object A pointer to the allocated object
 // @return A list with all pointers within an object. 
-ll_head get_pointers_within_object(void* object);
+ll_head fs_get_pointers_within_object(void* object);
+
+size_t fs_get_object_size(void* object);
 
 #endif

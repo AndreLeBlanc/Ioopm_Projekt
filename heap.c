@@ -1,4 +1,5 @@
 #include "heap.h"
+#include <string.h>
 
 // mallocates space for heap, places metadata in the front. 
 
@@ -47,7 +48,7 @@ typedef struct metadata {
 
 
 void *h_alloc_data(heap_t* h, size_t bytes) {
-  total_bytes = bytes + sizeof(metadata_t);
+  size_t total_bytes = bytes + sizeof(metadata_t);
 
   if(h->bump_p + (total_bytes * 8) <= h->end_p) {
     // if there is space
@@ -67,7 +68,49 @@ void *h_alloc_data(heap_t* h, size_t bytes) {
   }
 }
 
+size_t fs_calculate_size(char* format_string) {
+  int fs_length = strlen(format_string);
+
+  int multiplier = 0;
+  
+  for(int i = 0; i < fs_length; i++) {
+    switch(format_string[i]) {
+    case '*':
+      break;
+    case 'i':
+      break;
+    case 'f':
+      break;
+    case 'c':
+      break;
+    case 'l':
+      break;
+    case 'd':
+      break;
+    default:  // if none of these characters, then check if it is a multiplier
+      if(format_string[i] > '0' && format_string[i] <= '9') { // TODO: Check if this is right
+	// if the char is an integer, convert and save to multiplier.
+	int digit = format_string[i]; // TODO: Convert to int
+	if(multiplier == 0) {
+	  multiplier = digit;
+	} else {
+	  multiplier = multiplier * 10 + digit;
+	} 
+      }
+	break;
+    }
+  }
+}
+
 
 void *h_alloc_struct(heap_t* h, char* format_string) {
+  size_t total_bytes = fs_calculate_size(format_string) + sizeof(metadata_t);
+
+
+  
+}
+
+
+size_t fs_get_object_size(void* object) {
   
 }
