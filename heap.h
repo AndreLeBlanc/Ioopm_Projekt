@@ -25,14 +25,16 @@ typedef struct heap{
 
 
 // mallocates space for heap, places metadata in the front. 
-
 heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold);
 
 void h_delete(heap_t* h);
 
+// Allocates a certain amount of space on the heap. With metadata, though format string is blank.
+// This allocated space may NOT be used for pointers
 void *h_alloc_data(heap_t *h, size_t bytes);
 
-void* h_alloc_struct(heap_t *h, char *layout);
+// Allocates space on the heap based on the format string included. This is allocated with metadata.
+void* h_alloc_struct(heap_t *h, char *format_string);
 
 /************************************/
 /*                                  */
@@ -41,12 +43,16 @@ void* h_alloc_struct(heap_t *h, char *layout);
 /************************************/
 
 // @param object A pointer to the allocated object
+// @return Whether or not there is metadata at this object.
+bool md_validate(void* object);
+
+// @param object A pointer to the allocated object
 // @return A pointer to the format string
 char* md_get_format_string(void* object);
 
 // @param object A pointer to the allocated object
 // @return Bitvector
-char md_get_bitvector(void* object);
+char md_get_bit_vector(void* object);
 
 // @param object A pointer to the allocated object
 // @return The object's forwarding address
