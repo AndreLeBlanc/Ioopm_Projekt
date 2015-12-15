@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include "linked_list.h"
 
 #ifndef __heap__
 #define __heap__
@@ -30,5 +31,40 @@ heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold);
 void h_delete(heap_t* h);
 
 void *h_alloc_data(heap_t *h, size_t bytes);
+
+
+/************************************/
+/*                                  */
+/*  Metadata wrapper                */
+/*                                  */
+/************************************/
+
+// @param object A pointer to the allocated object
+// @return A pointer to the format string
+char* md_get_format_string(void* object);
+
+// @param object A pointer to the allocated object
+// @return Bitvector
+char md_get_bitvector(void* object);
+
+// @param object A pointer to the allocated object
+// @return The object's forwarding address
+void* md_get_forwarding_address(void* object);
+
+// @param object A pointer to the allocated object
+// @return The object's copied flag
+bool md_get_copied_flag(void* objec);
+
+/************************************/
+/*                                  */
+/*  Format string                   */
+/*                                  */
+/************************************/
+
+// Uses the format string to find all pointers in an object and puts
+// them in a list.
+// @param object A pointer to the allocated object
+// @return A list with all pointers within an object. 
+ll_head get_pointers_within_object(void* object);
 
 #endif
