@@ -40,3 +40,5 @@ doc/
 .DS_Store
 thumbs.db
 *.gc*
+*.zip
+*.result.txt

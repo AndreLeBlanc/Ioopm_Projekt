@@ -38,9 +38,9 @@ gcov: gcov_clean $(FILES_GCOV)
 	@gcov $(FILES_GCOV)
 .PHONY: gcov
 
-#run tests
-test: gc_test
-	@./gc_test.out
+# this part is executed when testing on multiple machines. change dependency to your needs (ex: os_dump, valgrind, gcov)
+# DEFAULT: run_test
+test: os_dump
 .PHONY: test
 
 #fly-make mode
@@ -49,9 +49,23 @@ test: gc_test
 check-syntax:
 	gcc -o nul -S ${CHK_SOURCES}
 
+# run tests
+run_test: gc_test
+	@./gc_test.out
+.PHONY: run_test
+
+os_dump:
+	@echo "-s : $(shell uname -s)"; \
+	echo "-m : $(shell uname -m)"; \
+	echo "-o : $(shell uname -o)"; \
+	echo "-r : $(shell uname -r)"; \
+	echo "-p : $(shell uname -p)"; \
+	echo "-v : $(shell uname -v)"; \
+
 #compile test
 gc_test: gc_test.debug.o gc.debug.o
-	$(CC) -o $@.out $^ $(FLAGS_CUNIT) 
+	$(CC) -o $@.out $^ $(FLAGS_CUNIT)
+.PHONY: gc_test
 
 #test with gui
 test_gui: $(FILES_MAIN) gui.c
@@ -64,6 +78,8 @@ clean: gcov_clean
 	@rm -rf ./doc/*
 	@rm -rf ./*.dSYM
 	@rm -rf .DS_Store
+	@rm -rf *.zip
+	@rm -rf *.result.txt
 	@echo "All cleaned up!"
 
 gcov_clean:

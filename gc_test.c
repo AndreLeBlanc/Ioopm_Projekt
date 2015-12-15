@@ -21,12 +21,11 @@ void testCUNITWORKS() {
 }
 
 void testPRINTSTACK() {
+  print_stack();
   CU_ASSERT_EQUAL(true, true);
 }
 
 int main(int argc, char const *argv[]) {
-
-    print_stack();
 
     CU_pSuite pSuite = NULL;
 
@@ -42,7 +41,8 @@ int main(int argc, char const *argv[]) {
         return CU_get_error();
     }
 
-    if ((NULL == CU_add_test(pSuite, "testing CUnit", testCUNITWORKS))) {
+    if ((NULL == CU_add_test(pSuite, "testing CUnit", testCUNITWORKS)) ||
+         NULL == CU_add_test(pSuite, "testing printStack", testPRINTSTACK)) {
         CU_cleanup_registry();
         return CU_get_error();
     }
