@@ -10,12 +10,36 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include <setjmp.h>
 #include "linked_list.h"
 #include "heap.h"
 
-extern void *environ; // bottom of the stack
+#define Dump_registers()			\
+  jmp_buf env;					\
+  if (setjmp(env)) abort();			\
 
-void print_stack() {
+extern char **environ; // bottom of the stack
+ll_node **LL_initRoot();
+ll_node* LL_createNode(void *content);
+void LL_insertSequentially(ll_node** root, ll_node* toInsert);
+
+void buildStackList() {
+  void *top = __builtin_frame_address(1); // top of the stack
+  ll_node **root = LL_initRoot();
+  for (top; top < environ; top + sizeof(void *)) {
+    ll_node *stackTop = LL_createNode(top);
+    LL_insertSequentially(root, stackTop);
+  }
+
+  
+  
+}
+
+ll_node *traverseStackList() {
+  return NULL;  
+}
+
+void printStackList() {
 
   const int N = 10;
   int arr[N];
@@ -31,52 +55,35 @@ void print_stack() {
 
   printf("Top of the stack: %p\nBottom of the stack %p\n", top, environ);
 
-  int *t = (int *)top;
-  int *b = (int *)environ;
-
-  int n = 0;
+  int n = 12345678;
   n = 1337;
 
-  printf("Top: %d\nBottom: %d\n", *t, *b);
+  printf("Top: %p\nBottom: %p\n", top, environ);
   
   int stacksize;
   int bottomBigger = 0;
   
-  if (b > t) {
-    stacksize = b-t;
+  if (environ > top) {
     bottomBigger = 1;
-  }
-  else {
-    stacksize = t-b;
   }
 
   printf("Stacksize: %d", stacksize);
 
   // stack dump
   puts("\nStack dump: \n");
-
-  while (t < b) {
-    if (*t % n == 0 && *t != 0) {
-      printf("\n%p: %d -------TEST VALUE\n", t, *t);
-    }
-    else {
-      printf("\n%p: %d\n", t, *t);
-    }
-    t++;
+  
+  while (top < environ) {
+    printf("\n%p\n", top);
+    top = top + sizeof(void *);
   }
   puts("\n----------------------------------------\n");  
 }
 
 int main() {
-  print_stack();
+  int n = 3;
+  void *top = &n;
+  Dump_registers();
+  buildStackList();
+  printStackList();
   return 0;
 }
-
-
-
-
-
-
-
-
-
