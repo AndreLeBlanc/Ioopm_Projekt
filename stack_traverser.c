@@ -6,12 +6,19 @@
 - returnera alla giltliga pekare till heaptraverseringen i form av en länkad lista.
 */
 
+/*
+  Kompilera med:
+  gcc -std=c11 -Wall -ggdb -o stack_traverser stack_traverser.c
+
+  tills vidare.
+*/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <unistd.h>
 #include <setjmp.h>
-#include "linked_list.h"
+#include "linked_list.c"
 #include "heap.h"
 
 #define Dump_registers()			\
@@ -19,27 +26,43 @@
   if (setjmp(env)) abort();			\
 
 extern char **environ; // bottom of the stack
-ll_node **LL_initRoot();
-ll_node* LL_createNode(void *content);
-void LL_insertSequentially(ll_node** root, ll_node* toInsert);
 
-void buildStackList() {
+ll_node **buildStackList() {
   void *top = __builtin_frame_address(1); // top of the stack
   ll_node **root = LL_initRoot();
-  for (top; top < environ; top + sizeof(void *)) {
-    ll_node *stackTop = LL_createNode(top);
-    LL_insertSequentially(root, stackTop);
-  }
+  int counter = 0;
 
-  
-  
+  while (top < environ) {
+    ll_node *stackTop = LL_createAndInsertSequentially(root, top);
+    //printf("stackTop: %p\n", stackTop);
+    printf("Count %d: New stackpointer %p with content %p was added to the list.\n", counter, top, stackTop);
+    if (stackTop->previous)
+      printf("%p has previous pointer at %p\n", stackTop, stackTop->previous);
+    if (stackTop->next)
+      printf("%p has next pointer at %p\n", stackTop, stackTop->next);
+    top += sizeof(void *);
+    counter++;
+  }
+  return root;
 }
 
-ll_node *traverseStackList() {
+ll_node **traverseStackList() {
   return NULL;  
 }
 
-void printStackList() {
+void printStackList(ll_node **root) {
+  /*int n = 3;
+  void *top = &n //__builtin_frame_address(1); // top of the stack*/
+  void *top = &root;
+  int counter = 0;
+  while (top < environ) {
+    printf("\n%p, Counter: %d\n", top, counter);
+    top += sizeof(void *);
+    counter++;
+  }
+}
+
+void printStack() {
 
   const int N = 10;
   int arr[N];
@@ -54,23 +77,12 @@ void printStackList() {
   void *top = __builtin_frame_address(1); // top of the stack
 
   printf("Top of the stack: %p\nBottom of the stack %p\n", top, environ);
-
-  int n = 12345678;
-  n = 1337;
-
-  printf("Top: %p\nBottom: %p\n", top, environ);
   
-  int stacksize;
   int bottomBigger = 0;
   
   if (environ > top) {
     bottomBigger = 1;
   }
-
-  printf("Stacksize: %d", stacksize);
-
-  // stack dump
-  puts("\nStack dump: \n");
   
   while (top < environ) {
     printf("\n%p\n", top);
@@ -80,10 +92,8 @@ void printStackList() {
 }
 
 int main() {
-  int n = 3;
-  void *top = &n;
   Dump_registers();
-  buildStackList();
-  printStackList();
+  ll_node **root = buildStackList();
+  printStackList(root);
   return 0;
 }
