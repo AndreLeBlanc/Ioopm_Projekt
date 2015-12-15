@@ -44,6 +44,8 @@ test: gc_test
 .PHONY: test
 
 #fly-make mode
+#To put in practical use: M-x flymake-mode RET
+#Live syntax check
 check-syntax:
 	gcc -o nul -S ${CHK_SOURCES}
 
