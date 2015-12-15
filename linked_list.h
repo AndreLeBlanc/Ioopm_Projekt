@@ -11,6 +11,7 @@
 
 */
 typedef struct node ll_node;
+typedef ll_node** ll_head;
 
 // CREATE FUNCTIONS
 /**
@@ -22,7 +23,7 @@ typedef struct node ll_node;
    @brief Initializes the root
    @return Returns a double-pointer which will always point to a pointer to the root node. 
 */
-ll_node** LL_initRoot();
+ll_head LL_initRoot();
 
 /**
    @brief A creation function which will allocate memory for a node and set the content pointer as the parameter.
