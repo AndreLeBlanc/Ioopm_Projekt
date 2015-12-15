@@ -32,6 +32,7 @@ void h_delete(heap_t* h);
 
 void *h_alloc_data(heap_t *h, size_t bytes);
 
+void* h_alloc_struct(heap_t *h, char *layout);
 
 /************************************/
 /*                                  */
