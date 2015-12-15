@@ -13,6 +13,12 @@ Formatsträngar, kollar om minnet är fullt
 
 formatsträng eller vad den innehåller
 
+[ pekare till formatsträng : bitvektor : forwarding address : kopieringsflagga ]
+
+
+
+
+
 1. En pekare till en formatsträng
 2. En mer kompakt representation av objektets layout
 3. En pekare till en funktion som hanterar skräpsamling av ett objekt
