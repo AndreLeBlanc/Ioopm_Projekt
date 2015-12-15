@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include "linked_list.h"
 
 #ifndef __heap__
 #define __heap__
@@ -24,11 +25,55 @@ typedef struct heap{
 
 
 // mallocates space for heap, places metadata in the front. 
-
 heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold);
 
 void h_delete(heap_t* h);
 
+// Allocates a certain amount of space on the heap. With metadata, though format string is blank.
+// This allocated space may NOT be used for pointers
 void *h_alloc_data(heap_t *h, size_t bytes);
+
+// Allocates space on the heap based on the format string included. This is allocated with metadata.
+void* h_alloc_struct(heap_t *h, char *format_string);
+
+/************************************/
+/*                                  */
+/*  Metadata wrapper                */
+/*                                  */
+/************************************/
+
+// @param object A pointer to the allocated object
+// @return Whether or not there is metadata at this object.
+bool md_validate(void* object);
+
+// @param object A pointer to the allocated object
+// @return A pointer to the format string
+char* md_get_format_string(void* object);
+
+// @param object A pointer to the allocated object
+// @return Bitvector
+char md_get_bit_vector(void* object);
+
+// @param object A pointer to the allocated object
+// @return The object's forwarding address
+void* md_get_forwarding_address(void* object);
+
+// @param object A pointer to the allocated object
+// @return The object's copied flag
+bool md_get_copied_flag(void* objec);
+
+/************************************/
+/*                                  */
+/*  Format string                   */
+/*                                  */
+/************************************/
+
+// Uses the format string to find all pointers in an object and puts
+// them in a list.
+// @param object A pointer to the allocated object
+// @return A list with all pointers within an object. 
+ll_head fs_get_pointers_within_object(void* object);
+
+size_t fs_get_object_size(void* object);
 
 #endif
