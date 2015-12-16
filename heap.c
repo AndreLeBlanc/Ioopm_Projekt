@@ -110,6 +110,31 @@ void *h_alloc_struct(heap_t* h, char* format_string) {
   
 }
 
+/************************************/
+/*                                  */
+/*  Metadata wrapper                */
+/*                                  */
+/************************************/
+
+bool md_validate(void* object) {
+  return false;
+}
+
+char* md_get_format_string(void* object) {
+  return (char*) object - sizeof(metadata_t);
+}
+
+char md_get_bit_vector(void* object) {
+  return (char) object - sizeof(metadata_t) + sizeof(char*);
+}
+
+void* md_get_forwarding_address(void* object) {
+  return (void*) object - sizeof(metadata_t) + sizeof(void*) + sizeof(char);
+}
+
+bool md_get_copied_flag(void* object) {
+  return (bool) object - sizeof(metadata_t) + sizeof(void*) + sizeof(char) + sizeof(void*);
+}
 
 size_t fs_get_object_size(void* object) {
   

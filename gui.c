@@ -17,6 +17,91 @@ extern ll_node** pointer_list = NULL;
 
 /************************************/
 /*                                  */
+/*  Print functions                 */
+/*                                  */
+/************************************/
+
+void print_heap() {
+  int print_width = 75;
+
+  if(heap_p != NULL) {
+    printf("-- Heap --\n");
+
+
+
+    // Print heap percentages
+    int cursor_loc = 0;
+    printf("[");
+    // print meta space
+    while(cursor_loc < ((intptr_t) heap_p->user_start_p - (intptr_t) heap_p)
+	  * print_width / ((intptr_t) heap_p->end_p - (intptr_t) heap_p)  &&
+	  cursor_loc < print_width) {
+      printf("#");
+      cursor_loc++;
+    }
+    // print allocated space
+    while(cursor_loc < ((intptr_t) heap_p->bump_p - (intptr_t) heap_p)
+	  * print_width / ((intptr_t) heap_p->end_p - (intptr_t) heap_p)  &&
+	  cursor_loc < print_width) {
+      printf("O");
+      cursor_loc++;
+    }
+    // print free space
+    while(true && cursor_loc < print_width) {
+      printf("-");
+      cursor_loc++;
+    }
+    printf("]\n");
+
+    // Print pointer locations in heap
+    ll_node* pointer_cursor = *pointer_list;
+    cursor_loc = 0;
+    printf("[");
+    while(cursor_loc < print_width) {
+      if(cursor_loc == ((intptr_t) LL_getContent(pointer_cursor) - (intptr_t) heap_p) * print_width / ((intptr_t) heap_p->end_p - (intptr_t) heap_p) || cursor_loc == ((intptr_t) heap_p->bump_p - (intptr_t) heap_p) * print_width / ((intptr_t) heap_p->end_p - (intptr_t) heap_p)) {
+	// print a line at beginning och allocations and at bump pointer
+	printf("|");
+	pointer_cursor = LL_getNext(pointer_cursor);
+      } else {
+	printf(" ");
+      }
+      cursor_loc++;
+    }
+    
+    printf("]\n");
+
+    
+    printf("Meta pointer:\t\t\t%p\n", heap_p->meta_p);
+    printf("User start pointer:\t\t%p\n", heap_p->user_start_p);
+    printf("Bump pointer:\t\t\t%p\n", heap_p->bump_p);
+    printf("End pointer:\t\t\t%p\n", heap_p->end_p); 
+    printf("Total size:\t\t\t%zu\n", heap_p->total_size);
+    printf("User size:\t\t\t%zu\n", heap_p->user_size);
+    printf("Available space:\t\t%zu\n", heap_p->avail_space);
+    printf("Unsafe stack:\t\t\t%s\n", heap_p->unsafe_stack ? "trprintf boprintf boue" : "false");
+    printf("Garbage collection threshold\t%f\n", heap_p->gc_threshold);
+  } else {
+    printf("-- Heap not initialized --\n");
+  }
+  printf("\n");
+}
+
+void print_object(void* object) {
+  printf("--------------\n");
+  printf("Object pointer:\t\t%p\n", object);
+  if(md_validate(object)) {
+    printf("Format string:\t\t%s\n", md_get_format_string(object));
+    printf("Bitvector:\t\t%c\n", md_get_bit_vector(object));
+    printf("Forwarding address:\t\t%s\n", md_get_forwarding_address(object));
+    printf("Format string:\t\t%s\n", md_get_format_string(object) ? "true" : "false");
+  } else {
+    printf("No metadata found!\n");
+  }
+}
+
+
+/************************************/
+/*                                  */
 /*  Menu functions                  */
 /*                                  */
 /************************************/
@@ -85,6 +170,12 @@ void menu_delete_heap() {
   LL_purgeList(pointer_list);
 }
 
+void menu_print_pointers() {
+  printf("-- Printing all objects --\n");
+  LL_map(pointer_list, *print_object);
+}
+
+
 void menu_exit() {
   printf("-- Goodbye --\n");
 }
@@ -119,70 +210,6 @@ int menu(menu_item_t item_array[], int item_array_size) {
   return -1;
 }
  
-void print_heap() {
-  int print_width = 75;
-
-  if(heap_p != NULL) {
-    printf("-- Heap --\n");
-
-
-
-    // Print heap percentages
-    int cursor_loc = 0;
-    printf("[");
-    // print meta space
-    while(cursor_loc < ((intptr_t) heap_p->user_start_p - (intptr_t) heap_p)
-	  * print_width / ((intptr_t) heap_p->end_p - (intptr_t) heap_p)  &&
-	  cursor_loc < print_width) {
-      printf("#");
-      cursor_loc++;
-    }
-    // print allocated space
-    while(cursor_loc < ((intptr_t) heap_p->bump_p - (intptr_t) heap_p)
-	  * print_width / ((intptr_t) heap_p->end_p - (intptr_t) heap_p)  &&
-	  cursor_loc < print_width) {
-      printf("O");
-      cursor_loc++;
-    }
-    // print free space
-    while(true && cursor_loc < print_width) {
-      printf("-");
-      cursor_loc++;
-    }
-    printf("]\n");
-
-    // Print pointer locations in heap
-    ll_node* pointer_cursor = *pointer_list;
-    cursor_loc = 0;
-    printf("[");
-    while(cursor_loc < print_width) {
-      if(cursor_loc == ((intptr_t) LL_getContent(pointer_cursor) - (intptr_t) heap_p) * print_width / ((intptr_t) heap_p->end_p - (intptr_t) heap_p) || cursor_loc == ((intptr_t) heap_p->bump_p - (intptr_t) heap_p) * print_width / ((intptr_t) heap_p->end_p - (intptr_t) heap_p)) {
-	// print a line at beginning och allocations and at bump pointer
-	printf("|");
-	pointer_cursor = LL_getNext(pointer_cursor);
-      } else {
-	printf(" ");
-      }
-      cursor_loc++;
-    }
-    
-    printf("]\n");
-
-    
-    printf("Meta pointer:\t\t\t%p\n", heap_p->meta_p);
-    printf("User start pointer:\t\t%p\n", heap_p->user_start_p);
-    printf("Bump pointer:\t\t\t%p\n", heap_p->bump_p);
-    printf("End pointer:\t\t\t%p\n", heap_p->end_p); 
-    printf("Total size:\t\t\t%zu\n", heap_p->total_size);
-    printf("User size:\t\t\t%zu\n", heap_p->user_size);
-    printf("Available space:\t\t%zu\n", heap_p->avail_space);
-    printf("Unsafe stack:\t\t\t%s\n", heap_p->unsafe_stack ? "trprintf boprintf boue" : "false");
-    printf("Garbage collection threshold\t%f\n", heap_p->gc_threshold);
-  } else {
-    printf("-- Heap not initialized --\n");
-  }
-  printf("\n");
-}
 
 /************************************/
 /*                                  */
@@ -201,8 +228,9 @@ int main(int argc, char *argv[])
      {"Allocate (union) [N/A]", 'U', *menu_allocate_union},
      {"Trigger garbage collection [N/A]", 'T', *menu_trigger_gc},
      {"Delete heap", 'D', *menu_delete_heap},
+     {"Print pointers", 'P', *menu_print_pointers},
      {"Exit", 'E', *menu_exit}};  
-  int exit_value = 6;
+  int exit_value = 7;
   
   do {
     print_heap(my_heap);
