@@ -40,7 +40,7 @@ go: zip
 	@echo "$(RED)Vad är ditt användarnamn till UU? [ex: abcd1234]: $(NC)"; \
 	read username; \
 	length=$${#username}; \
-	if [[ "$$length" -eq 8 ]]; then \
+	if [ "$$length" -eq 8 ]; then \
 		scp $(ZIP_NAME) $$username@$(FIRST_HOST):$(DIR_REMOTE); \
 		ssh $$username@$(FIRST_HOST) "cd $(DIR_REMOTE); ls | grep -v $(ZIP_NAME) | xargs rm -rf; unzip -o $(ZIP_NAME) -d .; rm *.zip;"; \
 		echo "$(RED)Kom ihåg att skriva YES om ssh frågar om du verkligen vill koppla upp dig.$(NC)"; \
