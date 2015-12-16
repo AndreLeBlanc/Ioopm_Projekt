@@ -43,24 +43,28 @@ void* h_alloc_struct(heap_t *h, char *format_string);
 /************************************/
 
 // @param object A pointer to the allocated object
-// @return Whether or not there is metadata at this object.
-bool md_validate(void* object);
+// @return Whether or not the pointer points to a valid object.
+bool validate_object(void* object);
 
 // @param object A pointer to the allocated object
 // @return A pointer to the format string
 char* md_get_format_string(void* object);
+void md_set_format_string(void* object, char* format_string);
 
 // @param object A pointer to the allocated object
 // @return Bitvector
 char md_get_bit_vector(void* object);
+void md_set_bit_vector(void* object, char bit_vector);
 
 // @param object A pointer to the allocated object
 // @return The object's forwarding address
 void* md_get_forwarding_address(void* object);
+void md_set_forwarding_address(void* object, void* forward_address);
 
 // @param object A pointer to the allocated object
 // @return The object's copied flag
 bool md_get_copied_flag(void* objec);
+void md_set_copied_flag(void* object, bool copied_flag);
 
 /************************************/
 /*                                  */
