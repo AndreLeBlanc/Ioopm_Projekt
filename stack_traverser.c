@@ -27,7 +27,7 @@
 
 extern char **environ; // bottom of the stack
 
-ll_node **buildStackList() {
+ll_node **build_stack_list() {
   void *top = __builtin_frame_address(1); // top of the stack
   ll_node **root = LL_initRoot();
   int counter = 0;
@@ -46,11 +46,11 @@ ll_node **buildStackList() {
   return root;
 }
 
-ll_node **traverseStackList() {
+ll_node **traverse_stack_list() {
   return NULL;  
 }
 
-void printStackList(ll_node **root) {
+void print_stack_list(ll_node **root) {
   /*int n = 3;
   void *top = &n //__builtin_frame_address(1); // top of the stack*/
   void *top = &root;
@@ -62,7 +62,7 @@ void printStackList(ll_node **root) {
   }
 }
 
-void printStack() {
+void print_stack() {
 
   const int N = 10;
   int arr[N];
@@ -93,7 +93,7 @@ void printStack() {
 
 int main() {
   Dump_registers();
-  ll_node **root = buildStackList();
-  printStackList(root);
+  ll_node **root = build_stack_list();
+  print_stack_list(root);
   return 0;
 }
