@@ -28,18 +28,19 @@
 extern char **environ; // bottom of the stack
 
 ll_node **build_stack_list() {
-  void *top = __builtin_frame_address(1); // top of the stack
+  int *top = __builtin_frame_address(1); // top of the stack
   ll_node **root = LL_initRoot();
   int counter = 0;
 
   while (top < environ) {
     ll_node *stackTop = LL_createAndInsertSequentially(root, top);
     //printf("stackTop: %p\n", stackTop);
-    printf("Count %d: New stackpointer %p with content %p was added to the list.\n", counter, top, stackTop);
+    int i = *(int *)(stackTop->nodeContent);
+    printf("Count %d: New stackpointer %04x with content %04x was added to the list.\n", counter, stackTop->nodeContent, i);
     if (stackTop->previous)
-      printf("%p has previous pointer at %p\n", stackTop, stackTop->previous);
+      printf("%p has previous pointer at %p\n", stackTop->nodeContent, stackTop->previous);
     if (stackTop->next)
-      printf("%p has next pointer at %p\n", stackTop, stackTop->next);
+      printf("%p has next pointer at %p\n", stackTop->nodeContent, stackTop->next);
     top += sizeof(void *);
     counter++;
   }
