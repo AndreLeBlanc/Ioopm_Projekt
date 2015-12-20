@@ -27,10 +27,25 @@
 
 extern char **environ; // bottom of the stack
 
-int function() {
+void fuckOff(){}
+void endiannessTestAux(){}
+
+void endiannessTest() { // this function investigates whether the stack grows upwards or downwards.
+  int stack;
+  void *heap = malloc(1);
+  void *heap2 = malloc(1);
+  Dump_registers();
+  puts("");
+  printf("printf:             %15p\n", printf);
+  printf("puts:               %15p\n", puts);
+  printf("fuckOff:            %15p\n", fuckOff);
+  printf("endiannessTestAux:  %15p\n", endiannessTestAux);
+  printf("endiannessTest:     %15p\n", endiannessTest);
+  printf("heap:     %15p\n", heap);
+  printf("heap2:    %15p\n", heap2);
+  printf("stack:    %15p\n", &stack);
   int stack2;
-  printf("stack2:  %15p\n", &stack2);
-  return &stack2;
+  printf("stack2:   %15p\n", &stack2);
 }
 
 ll_node **build_stack_list() {
@@ -67,11 +82,9 @@ void print_stack_list(ll_node **root) {
       printf("%04x has next pointer at %04x\n", iterator->nodeContent, iterator->next->nodeContent);
     iterator = iterator->next;
     }
-  
 }
 
-void print_stack() {
-
+void print_stack() { // Not used. Was here just for testing and getting started in the beginning. Gonna be kept for testing purposes
   const int N = 10;
   int arr[N];
   int i = 0;
@@ -103,6 +116,6 @@ int main() {
   Dump_registers();
   ll_node **root = build_stack_list();
   print_stack_list(root);
-  function();
+  endiannessTest();
   return 0;
 }
