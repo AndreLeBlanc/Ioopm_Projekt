@@ -27,20 +27,20 @@
 
 extern char **environ; // bottom of the stack
 
+int function() {
+  int stack2;
+  printf("stack2:  %15p\n", &stack2);
+  return &stack2;
+}
+
 ll_node **build_stack_list() {
-  int *top = __builtin_frame_address(1); // top of the stack
+  void *top = __builtin_frame_address(1); // top of the stack
   ll_node **root = LL_initRoot();
   int counter = 0;
-
   while (top < environ) {
     ll_node *stackTop = LL_createAndInsertSequentially(root, top);
-    //printf("stackTop: %p\n", stackTop);
-    int i = *(int *)(stackTop->nodeContent);
-    printf("Count %d: New stackpointer %04x with content %04x was added to the list.\n", counter, stackTop->nodeContent, i);
-    if (stackTop->previous)
-      printf("%p has previous pointer at %p\n", stackTop->nodeContent, stackTop->previous);
-    if (stackTop->next)
-      printf("%p has next pointer at %p\n", stackTop->nodeContent, stackTop->next);
+    //printf("stackTop: %p\n", stackTop);,
+    printf("Count %d: New stackpointer %p with content %04x was added to the list.\n", counter, stackTop, stackTop->nodeContent);
     top += sizeof(void *);
     counter++;
   }
@@ -52,15 +52,22 @@ ll_node **traverse_stack_list() {
 }
 
 void print_stack_list(ll_node **root) {
-  /*int n = 3;
-  void *top = &n //__builtin_frame_address(1); // top of the stack*/
-  void *top = &root;
+  puts("Printing stacklist");
+  void *top = __builtin_frame_address(1);
+  ll_node *iterator = *root;
   int counter = 0;
-  while (top < environ) {
-    printf("\n%p, Counter: %d\n", top, counter);
+
+  while (iterator) {
+    printf("\nCounter: %d\n%04x\n", counter, iterator->nodeContent);
     top += sizeof(void *);
     counter++;
-  }
+    if (iterator->previous)
+      printf("%04x has previous pointer at %04x\n", iterator->nodeContent, iterator->previous->nodeContent);
+    if (iterator->next)
+      printf("%04x has next pointer at %04x\n", iterator->nodeContent, iterator->next->nodeContent);
+    iterator = iterator->next;
+    }
+  
 }
 
 void print_stack() {
@@ -96,5 +103,6 @@ int main() {
   Dump_registers();
   ll_node **root = build_stack_list();
   print_stack_list(root);
+  function();
   return 0;
 }
