@@ -89,10 +89,10 @@ void print_heap() {
 void print_object(void* object) {
   printf("--------------\n");
   printf("Object pointer:\t\t%p\n", object);
-  if(md_validate(object)) {
+  if(validate_object(object)) {
     printf("Format string:\t\t%s\n", md_get_format_string(object));
     printf("Bitvector:\t\t%c\n", md_get_bit_vector(object));
-    printf("Forwarding address:\t\t%s\n", md_get_forwarding_address(object));
+    printf("Forwarding address:\t%p\n", md_get_forwarding_address(object));
     printf("Format string:\t\t%s\n", md_get_format_string(object) ? "true" : "false");
   } else {
     printf("No metadata found!\n");
@@ -149,7 +149,13 @@ void menu_allocate_raw() {
 
 void menu_allocate_format_string() {
   printf("-- Allocating format string --\n");
-  printf("Not yet implemented\n");
+  char input[10];
+  inputString("Enter format string\n", input);
+  void* pointer = h_alloc_struct(heap_p, input);
+  printf("Pointer to allocated data:\t\t%p\n", pointer);
+
+  // add pointer to pointer_list
+  LL_createAndInsertSequentially(pointer_list, pointer);
 }
 
 void menu_allocate_union() {
@@ -224,7 +230,7 @@ int main(int argc, char *argv[])
   menu_item_t item_array[] =
     {{"Initialize heap", 'I', *menu_init_heap},
      {"Allocate (raw)", 'R', *menu_allocate_raw},
-     {"Allocate (format string) [N/A]", 'F', *menu_allocate_format_string},
+     {"Allocate (format string)", 'F', *menu_allocate_format_string},
      {"Allocate (union) [N/A]", 'U', *menu_allocate_union},
      {"Trigger garbage collection [N/A]", 'T', *menu_trigger_gc},
      {"Delete heap", 'D', *menu_delete_heap},

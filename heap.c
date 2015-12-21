@@ -59,6 +59,11 @@ void *h_alloc_data(heap_t* h, size_t bytes) {
     h->bump_p += (total_bytes * 8);
     h->avail_space -= total_bytes;
 
+    // update metadata
+    md_set_format_string(new_pointer, "none");
+    md_set_bit_vector(new_pointer, '\0');
+    md_set_forwarding_address(new_pointer, NULL);
+    md_set_copied_flag(new_pointer, false);
     
     // return pointer
     return new_pointer;    
@@ -70,8 +75,9 @@ void *h_alloc_data(heap_t* h, size_t bytes) {
 
 size_t fs_calculate_size(char* format_string) {
   int fs_length = strlen(format_string);
-
   int multiplier = 0;
+
+  size_t size = 0;
   
   for(int i = 0; i < fs_length; i++) {
     switch(format_string[i]) {
@@ -100,15 +106,41 @@ size_t fs_calculate_size(char* format_string) {
 	break;
     }
   }
+  return size;
 }
 
 
 void *h_alloc_struct(heap_t* h, char* format_string) {
   size_t total_bytes = fs_calculate_size(format_string) + sizeof(metadata_t);
 
+  if(h->bump_p + (total_bytes * 8) <= h->end_p) {
+    // if there is space
+    
+    // save bump pointer for returning. This pointer skips the metadata
+    void* new_pointer = h->bump_p + sizeof(metadata_t);
+    // update bump pointer and avail space
+    h->bump_p += (total_bytes * 8);
+    h->avail_space -= total_bytes;
 
-  
+    // update metadata
+    md_set_format_string(new_pointer, format_string);
+    md_set_bit_vector(new_pointer, '\0');
+    md_set_forwarding_address(new_pointer, NULL);
+    md_set_copied_flag(new_pointer, false);
+    
+    // return pointer
+    return new_pointer;    
+  } else {
+    // if there is no space
+    return NULL;
+  }
 }
+
+bool validate_object(void* object) {
+  // TODO: Doesn't validate anything yet. 
+  return true; 
+}
+
 
 /************************************/
 /*                                  */
@@ -116,26 +148,54 @@ void *h_alloc_struct(heap_t* h, char* format_string) {
 /*                                  */
 /************************************/
 
-bool md_validate(void* object) {
-  return false;
-}
+// Format string
+
+#define FORMAT_STRING_PTR(object) ((char*) object - sizeof(metadata_t))
 
 char* md_get_format_string(void* object) {
-  return (char*) object - sizeof(metadata_t);
+  return FORMAT_STRING_PTR(object);
 }
+
+void md_set_format_string(void* object, char* format_string) {
+  strcpy(FORMAT_STRING_PTR(object), format_string);
+}
+
+// Bit vector
+
+#define BIT_VECTOR_PTR(object) ((char*) object - sizeof(metadata_t) + sizeof(char*))
 
 char md_get_bit_vector(void* object) {
-  return (char) object - sizeof(metadata_t) + sizeof(char*);
+  return *BIT_VECTOR_PTR(object);
 }
+
+void md_set_bit_vector(void* object, char bit_vector) {
+  *BIT_VECTOR_PTR(object) = bit_vector;
+}
+
+// Forwarding address
+
+#define FORWARDING_ADDRESS_PTR(object) ((void**) object - sizeof(metadata_t) + sizeof(void*) + sizeof(char))
 
 void* md_get_forwarding_address(void* object) {
-  return (void*) object - sizeof(metadata_t) + sizeof(void*) + sizeof(char);
+  return *FORWARDING_ADDRESS_PTR(object);
 }
 
+void md_set_forwarding_address(void* object, void* forwarding_address) {
+  *FORWARDING_ADDRESS_PTR(object) = forwarding_address;
+}
+
+// Copied flag
+
+#define COPIED_FLAG_PTR(object) ((bool*) object - sizeof(metadata_t) + sizeof(void*) + sizeof(char) + sizeof(void*))
+
 bool md_get_copied_flag(void* object) {
-  return (bool) object - sizeof(metadata_t) + sizeof(void*) + sizeof(char) + sizeof(void*);
+  return *COPIED_FLAG_PTR(object);
+}
+
+void md_set_copied_flag(void* object, bool copied_flag) {
+  *COPIED_FLAG_PTR(object) = copied_flag;
 }
 
 size_t fs_get_object_size(void* object) {
-  
+  return fs_calculate_size(md_get_format_string(object));
 }
