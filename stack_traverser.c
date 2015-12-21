@@ -49,18 +49,47 @@ void endiannessTest() { // this function investigates whether the stack grows up
   printf("stack2:   %15p\n", &stack2);
 }
 
+void *get_stack_top() {
+  int top_of_stack;
+  return &top_of_stack;
+}
+
+bool stack_grows_upwards() {
+  int stack;
+  int stack2;
+
+  if (&stack < &stack2)
+    return true;
+  else
+    return false;
+}
+
 ll_node **traverse_stack_list() {
-  void *top = __builtin_frame_address(1); // top of the stack
+  void *top = get_stack_top();
   ll_node **root = LL_initRoot();
   int counter = 0;
-  while (top < environ) {
-    if (md_validate(top)) { // checks the pointers metadata to check whether it's valid or not
-      ll_node *stackTop = LL_createAndInsertSequentially(root, top);
-      //printf("stackTop: %p\n", stackTop);,
-      printf("Count %d: New stackpointer %04x has valid metadata and was added to the list.\n", counter, stackTop->nodeContent);
+
+  if (stack_grows_upwards()) {
+    while (top < environ) {
+      if (md_validate(top)) { // checks the pointers metadata to check whether it's valid or not
+	ll_node *stackTop = LL_createAndInsertSequentially(root, top);
+	//printf("stackTop: %p\n", stackTop);,
+	printf("Count %d: New stackpointer %04x has valid metadata and was added to the list.\n", counter, stackTop->nodeContent);
+      }
+      top += sizeof(void *);
+      counter++;
     }
-    top += sizeof(void *);
-    counter++;
+  }
+  else {
+    while (top > environ) {
+      if (md_validate(top)) { // checks the pointers metadata to check whether it's valid or not
+	ll_node *stackTop = LL_createAndInsertSequentially(root, top);
+	//printf("stackTop: %p\n", stackTop);,
+	printf("Count %d: New stackpointer %04x has valid metadata and was added to the list.\n", counter, stackTop->nodeContent);
+      }
+      top -= sizeof(void *);
+      counter++;
+    }
   }
   return root;
 }
