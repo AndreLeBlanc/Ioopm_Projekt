@@ -71,7 +71,7 @@ ll_node **traverse_stack_list() {
   if (stack_grows_upwards()) {
     while (top < environ) {
       printf("top: %04x\n", top);
-      if (validate_object(&top)) { // checks the pointers metadata to check whether it's valid or not
+      if (validate_object(top)) { // checks the pointers metadata to check whether it's valid or not
 	ll_node *stackTop = LL_createAndInsertSequentially(root, top);
 	//printf("stackTop: %p\n", stackTop);,
 	printf("Count %d: New stackpointer %04x has valid metadata and was added to the list.\n", counter, stackTop->nodeContent);
