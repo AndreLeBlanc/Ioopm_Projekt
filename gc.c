@@ -4,65 +4,60 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include "heap.h"
+#include <setjmp.h>
+
+#define Dump_registers() \
+jmp_buf env; \
+if (setjmp(env)) abort(); \
 
 extern void **environ; //bottom of the stack
   
 void print_stack() {
 
-  const int N = 10;
-  int arr[N];
-  int i = 0;
-  while(i < N) {
-    arr[i] = i * 100 + i * 10 + i;
-    i++;
-  }
-
-  //  int *top = &arr[0];
-
+  Dump_registers();
 
   puts("\n-------------------------------\n");
-   void *top = __builtin_frame_address(1); //top of stack
-  // *t = __builtin_frame_address(1); //top of stack (does not work in mac os x)
+  void *top;
+  int el_top = 123; 
+  top = & el_top;
 
-  printf("Top of stack: %p\nBottom of stack: %p\n", top, environ);
+  printf("Top of stack: %p\nBottom of stack: %p\n", *top, *environ);
 
   int *t = (int *)top;
   int *b = (int *)environ;
 
-  int n = 0;
-  n = 1337;
-
-  // t = &n;
   /*
   Så för att traversera stacken är tanken att man tar sista variablens adress och använder
     den som topp i stacken. Eftersom allting som pushas till stacken läggs högst upp så
     måste den här pekaren uppdateras för varje stack-variabel som läggs till.
   */
-  printf("Top: %d\nBottom: %d\n", *t, *b);
-
+  printf("Content of top: %d\nContent of bottom: %d\n", *t, *b);
+  /*
   int stacksize;
-  int bottomBigger = 0;
   if(b > t) {
     stacksize = b-t;
-    bottomBigger = 1;
   } else {
     stacksize = t-b;
   }
 
   printf("Stack size: %d", stacksize);
-
-  //stack dump
+  */
+  //stack dump 
   puts("\nStack dump: \n");
-  while(t < b){
-    //trying to find our test var
-    if(*t % 1337 == 0 && *t != 0) {
-      printf("\n%p: %d ------TEST VALUE\n", t, *t);
-    } else {
-      printf("\n%p: %d\n", t, *t);
+  if(t < b){
+    while(t < b){ 
+      int *hola = (int *)top;
+      printf("\n%p: %d\n", *top, hola);
+      *top += sizeof(void*);
     }
-    t++;
   }
-
+  else if(b < t){
+    while(b < t){
+      int *hola2 = (int *)top;
+      printf("\n%p: %d\n", *top, hola2);
+      *top -= sizeof(void*);
+    }
+  }
   puts("\n-------------------------------\n");
 
 }
