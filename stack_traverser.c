@@ -48,22 +48,20 @@ void endiannessTest() { // this function investigates whether the stack grows up
   printf("stack2:   %15p\n", &stack2);
 }
 
-ll_node **build_stack_list() {
+ll_node **traverse_stack_list() {
   void *top = __builtin_frame_address(1); // top of the stack
   ll_node **root = LL_initRoot();
   int counter = 0;
   while (top < environ) {
-    ll_node *stackTop = LL_createAndInsertSequentially(root, top);
-    //printf("stackTop: %p\n", stackTop);,
-    printf("Count %d: New stackpointer %p with content %04x was added to the list.\n", counter, stackTop, stackTop->nodeContent);
+    if (md_validate(top)) { // checks the pointers metadata to check whether it's valid or not
+      ll_node *stackTop = LL_createAndInsertSequentially(root, top);
+      //printf("stackTop: %p\n", stackTop);,
+      printf("Count %d: New stackpointer %04x has valid metadata and was added to the list.\n", counter, stackTop->nodeContent);
+    }
     top += sizeof(void *);
     counter++;
   }
   return root;
-}
-
-ll_node **traverse_stack_list() {
-  return NULL;  
 }
 
 void print_stack_list(ll_node **root) {
