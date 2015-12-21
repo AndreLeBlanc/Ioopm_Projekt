@@ -40,7 +40,7 @@ gcov: gcov_clean $(FILES_GCOV)
 
 # this part is executed when testing on multiple machines. change dependency to your needs (ex: os_dump, valgrind, gcov)
 # DEFAULT: run_test
-test: os_dump
+test: stack
 .PHONY: test
 
 # Flymake mode (Live syntax and error check)
@@ -69,8 +69,9 @@ gc_test: gc_test.debug.o gc.debug.o
 	$(CC) -o $@.out $^ $(FLAGS_CUNIT)
 .PHONY: gc_test 
 
-stack: stack_traverser 
+stack: stack_traverser.o 
 	$(CC) $(FLAGS_PROD) -o stack_traverser stack_traverser.c
+	@./stack_traverser
 
 #test with gui
 test_gui: $(FILES_MAIN) gui.c
