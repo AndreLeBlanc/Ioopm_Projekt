@@ -20,6 +20,7 @@
 #include <setjmp.h>
 #include "linked_list.c"
 #include "heap.h"
+#include "heap.c"
 
 #define Dump_registers()			\
   jmp_buf env;					\
@@ -112,7 +113,7 @@ void print_stack() { // Not used. Was here just for testing and getting started 
 
 int main() {
   Dump_registers();
-  ll_node **root = build_stack_list();
+  ll_node **root = traverse_stack_list();
   print_stack_list(root);
   endiannessTest();
   return 0;
