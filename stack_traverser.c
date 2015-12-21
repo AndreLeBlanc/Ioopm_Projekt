@@ -68,10 +68,10 @@ ll_node **traverse_stack_list() {
   void *top = get_stack_top();
   ll_node **root = LL_initRoot();
   int counter = 0;
-
   if (stack_grows_upwards()) {
     while (top < environ) {
-      if (md_validate(top)) { // checks the pointers metadata to check whether it's valid or not
+      printf("top: %04x\n", top);
+      if (validate_object(&top)) { // checks the pointers metadata to check whether it's valid or not
 	ll_node *stackTop = LL_createAndInsertSequentially(root, top);
 	//printf("stackTop: %p\n", stackTop);,
 	printf("Count %d: New stackpointer %04x has valid metadata and was added to the list.\n", counter, stackTop->nodeContent);
@@ -82,7 +82,8 @@ ll_node **traverse_stack_list() {
   }
   else {
     while (top > environ) {
-      if (md_validate(top)) { // checks the pointers metadata to check whether it's valid or not
+      printf("top: %04x\n", top);
+      if (validate_object(top)) { // checks the pointers metadata to check whether it's valid or not
 	ll_node *stackTop = LL_createAndInsertSequentially(root, top);
 	//printf("stackTop: %p\n", stackTop);,
 	printf("Count %d: New stackpointer %04x has valid metadata and was added to the list.\n", counter, stackTop->nodeContent);
@@ -96,16 +97,16 @@ ll_node **traverse_stack_list() {
 
 void print_stack_list(ll_node **root) {
   puts("Printing stacklist");
-  void *top = __builtin_frame_address(1);
   ll_node *iterator = *root;
   int counter = 0;
 
   while (iterator) {
     printf("\nCounter: %d\n%04x\n", counter, iterator->nodeContent);
-    top += sizeof(void *);
     counter++;
-    if (iterator->previous)
+    if (iterator->previous) {
       printf("%04x has previous pointer at %04x\n", iterator->nodeContent, iterator->previous->nodeContent);
+      printf("Difference between this %04x and %04x is %04x\n", iterator->nodeContent, iterator->previous->nodeContent, (iterator->nodeContent - iterator->previous->nodeContent));
+    }
     if (iterator->next)
       printf("%04x has next pointer at %04x\n", iterator->nodeContent, iterator->next->nodeContent);
     iterator = iterator->next;
@@ -143,7 +144,7 @@ void print_stack() { // Not used. Was here just for testing and getting started 
 int main() {
   Dump_registers();
   ll_node **root = traverse_stack_list();
-  print_stack_list(root);
+  //print_stack_list(root);
   endiannessTest();
   return 0;
 }
