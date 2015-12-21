@@ -43,9 +43,11 @@ gcov: gcov_clean $(FILES_GCOV)
 test: os_dump
 .PHONY: test
 
-#fly-make mode
-#To put in practical use: M-x flymake-mode RET
-#Live syntax check
+# Flymake mode (Live syntax and error check)
+# Insert the following lines in your .emacs file:
+#	(require 'flymake) 
+#	(add-hook 'find-file-hook 'flymake-find-file-hook)
+# To put in practical use: M-x flymake-mode RET
 check-syntax:
 	gcc -o nul -S ${CHK_SOURCES}
 
