@@ -67,7 +67,10 @@ os_dump:
 #compile test
 gc_test: gc_test.debug.o gc.debug.o
 	$(CC) -o $@.out $^ $(FLAGS_CUNIT)
-.PHONY: gc_test
+.PHONY: gc_test 
+
+stack: stack_traverser 
+	$(CC) $(FLAGS_PROD) -o stack_traverser stack_traverser.c
 
 #test with gui
 test_gui: $(FILES_MAIN) gui.c
