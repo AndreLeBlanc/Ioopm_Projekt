@@ -20,7 +20,6 @@
 #include <setjmp.h>
 #include "linked_list.c"
 #include "heap.h"
-#include "heap.c"
 
 #define Dump_registers()			\
   jmp_buf env;					\
@@ -49,6 +48,26 @@ void endiannessTest() { // this function investigates whether the stack grows up
   printf("stack2:   %15p\n", &stack2);
 }
 
+bool is_pointing_at_heap(void *ptr) {
+  if (ptr > heap_t->user_start_p && ptr < heap_t->end_p)
+
+}
+
+bool heap_grows_upwards() {
+  void *first = malloc(1);
+  void *second = malloc(1);
+  if (first < second) {
+    free(first);
+    free(second);
+    return true;
+  }
+  else {
+    free(first);
+    free(second);
+    return false;
+  }  
+}
+
 void *get_stack_top() {
   int top_of_stack;
   return &top_of_stack;
@@ -69,6 +88,7 @@ ll_node **traverse_stack_list() {
   ll_node **root = LL_initRoot();
   int counter = 0;
   if (stack_grows_upwards()) {
+    puts("Stack grows upwards.");
     while (top < environ) {
       printf("top: %04x\n", top);
       if (validate_object(top)) { // checks the pointers metadata to check whether it's valid or not
@@ -82,6 +102,7 @@ ll_node **traverse_stack_list() {
   }
   else {
     while (top > environ) {
+      puts("Stack grows downwards.");
       printf("top: %04x\n", top);
       if (validate_object(top)) { // checks the pointers metadata to check whether it's valid or not
 	ll_node *stackTop = LL_createAndInsertSequentially(root, top);
