@@ -48,11 +48,6 @@ void endiannessTest() { // this function investigates whether the stack grows up
   printf("stack2:   %15p\n", &stack2);
 }
 
-bool is_pointing_at_heap(void *ptr) {
-  if (ptr > heap_t->user_start_p && ptr < heap_t->end_p)
-
-}
-
 bool heap_grows_upwards() {
   void *first = malloc(1);
   void *second = malloc(1);
@@ -66,6 +61,21 @@ bool heap_grows_upwards() {
     free(second);
     return false;
   }  
+}
+
+bool is_pointing_at_heap(void *ptr) {
+  if (heap_grows_upwards()) {
+    if (ptr > heap_t->user_start_p && ptr < heap_t->end_p)
+      return true;
+    else
+      false;
+  }
+  else {
+    if (ptr < heap_t->user_start_p && ptr > heap_t->end_p)
+      return true;
+    else
+      false;
+  }
 }
 
 void *get_stack_top() {
@@ -91,11 +101,12 @@ ll_node **traverse_stack_list() {
     puts("Stack grows upwards.");
     while (top < environ) {
       printf("top: %04x\n", top);
-      if (validate_object(top)) { // checks the pointers metadata to check whether it's valid or not
-	ll_node *stackTop = LL_createAndInsertSequentially(root, top);
-	//printf("stackTop: %p\n", stackTop);,
-	printf("Count %d: New stackpointer %04x has valid metadata and was added to the list.\n", counter, stackTop->nodeContent);
-      }
+      if (is_pointing_at_heap(top)) {
+	if (validate_object(top)) { // checks the pointers metadata to check whether it's valid or not
+	  ll_node *stackTop = LL_createAndInsertSequentially(root, top);
+	  //printf("stackTop: %p\n", stackTop);,
+	  printf("Count %d: New stackpointer %04x has valid metadata and was added to the list.\n", counter, stackTop->nodeContent);
+	}}
       top += sizeof(void *);
       counter++;
     }
@@ -104,10 +115,12 @@ ll_node **traverse_stack_list() {
     while (top > environ) {
       puts("Stack grows downwards.");
       printf("top: %04x\n", top);
-      if (validate_object(top)) { // checks the pointers metadata to check whether it's valid or not
-	ll_node *stackTop = LL_createAndInsertSequentially(root, top);
-	//printf("stackTop: %p\n", stackTop);,
-	printf("Count %d: New stackpointer %04x has valid metadata and was added to the list.\n", counter, stackTop->nodeContent);
+      if (is_pointing_at_heap(top)) {
+	if (validate_object(top)) { // checks the pointers metadata to check whether it's valid or not
+	  ll_node *stackTop = LL_createAndInsertSequentially(root, top);
+	  //printf("stackTop: %p\n", stackTop);,
+	  printf("Count %d: New stackpointer %04x has valid metadata and was added to the list.\n", counter, stackTop->nodeContent);
+	}
       }
       top -= sizeof(void *);
       counter++;
