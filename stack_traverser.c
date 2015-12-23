@@ -20,6 +20,7 @@
 #include <setjmp.h>
 #include "linked_list.c"
 #include "heap.h"
+#include "heap.c"
 
 #define Dump_registers()			\
   jmp_buf env;					\
@@ -62,7 +63,7 @@ bool heap_grows_upwards() {
     return false;
   }  
 }
-
+/*
 bool is_pointing_at_heap(void *ptr) {
   if (heap_grows_upwards()) {
     if (ptr > heap_t->user_start_p && ptr < heap_t->end_p)
@@ -77,51 +78,60 @@ bool is_pointing_at_heap(void *ptr) {
       false;
   }
 }
-
+*/
 void *get_stack_top() {
   int top_of_stack;
-  return &top_of_stack;
+  int *top = &top_of_stack;
+  return top;
 }
 
 bool stack_grows_upwards() {
-  int stack;
+  int stack1;
   int stack2;
 
-  if (&stack < &stack2)
+  if (&stack1 < &stack2){
+    printf("stack_grows_upwards == true\n");
     return true;
-  else
+  }
+  else{
+    printf("stack_grows_upwards == false\n");  
     return false;
+  }
 }
 
 ll_node **traverse_stack_list() {
+  printf("du är i traverse stack list\n");
   void *top = get_stack_top();
   ll_node **root = LL_initRoot();
   int counter = 0;
   if (stack_grows_upwards()) {
-    puts("Stack grows upwards.");
-    while (top < environ) {
-      printf("top: %04x\n", top);
-      if (is_pointing_at_heap(top)) {
-	if (validate_object(top)) { // checks the pointers metadata to check whether it's valid or not
-	  ll_node *stackTop = LL_createAndInsertSequentially(root, top);
-	  //printf("stackTop: %p\n", stackTop);,
-	  printf("Count %d: New stackpointer %04x has valid metadata and was added to the list.\n", counter, stackTop->nodeContent);
-	}}
+    puts("Stack grows upwards.\n");
+    // prinft((*(int *)top,*(int *)environ)
+    while (top > environ) {
+      printf("top: %p\n", top);
+      //   if (is_pointing_at_heap(top)) {
+      if (validate_object(top)) { // checks the pointers metadata to check whether it's valid or not
+	ll_node *stackTop = LL_createAndInsertSequentially(root, top);
+	//printf("stackTop: %p\n", stackTop);,
+	printf("Count %d: New stackpointer %p has valid metadata and was added to the list.\n", counter, stackTop->nodeContent);
+      }
+      //  }
       top += sizeof(void *);
       counter++;
-    }
+    }    
   }
-  else {
-    while (top > environ) {
-      puts("Stack grows downwards.");
-      printf("top: %04x\n", top);
-      if (is_pointing_at_heap(top)) {
+  else { 
+    printf("hej igen, stacken borde växa neråt nu va\n");
+    while (top < environ) { 
+      puts("Stack grows downwards.\n");
+      printf("top: %p\n", top);
+      //     if (is_pointing_at_heap(top)) {
 	if (validate_object(top)) { // checks the pointers metadata to check whether it's valid or not
 	  ll_node *stackTop = LL_createAndInsertSequentially(root, top);
 	  //printf("stackTop: %p\n", stackTop);,
-	  printf("Count %d: New stackpointer %04x has valid metadata and was added to the list.\n", counter, stackTop->nodeContent);
+	  printf("Count %d: New stackpointer %p has valid metadata and was added to the list.\n", counter, stackTop->nodeContent);
 	}
-      }
+	// }
       top -= sizeof(void *);
       counter++;
     }
@@ -147,38 +157,11 @@ void print_stack_list(ll_node **root) {
     }
 }
 
-void print_stack() { // Not used. Was here just for testing and getting started in the beginning. Gonna be kept for testing purposes
-  const int N = 10;
-  int arr[N];
-  int i = 0;
-  while (i < N) {
-    arr[i] = i * 100 + i * 10 + i;
-    printf("arr[%d]: %d\n", i, arr[i]);
-    i++;
-  }
-
-  puts("\n----------------------------------------\n");
-  void *top = __builtin_frame_address(1); // top of the stack
-
-  printf("Top of the stack: %p\nBottom of the stack %p\n", top, environ);
-  
-  int bottomBigger = 0;
-  
-  if (environ > top) {
-    bottomBigger = 1;
-  }
-  
-  while (top < environ) {
-    printf("\n%p\n", top);
-    top = top + sizeof(void *);
-  }
-  puts("\n----------------------------------------\n");  
-}
 
 int main() {
   Dump_registers();
+  printf("hej där\n");
   ll_node **root = traverse_stack_list();
-  //print_stack_list(root);
   endiannessTest();
   return 0;
 }
