@@ -63,38 +63,47 @@ bool heap_grows_upwards() {
     return false;
   }  
 }
-/*
+
 bool is_pointing_at_heap(void *ptr) {
+  heap_t *new_heap = h_init(1024, true, 100.0);
   if (heap_grows_upwards()) {
-    if (ptr > heap_t->user_start_p && ptr < heap_t->end_p)
+    if (ptr > new_heap->user_start_p && ptr < new_heap->end_p) {
+      free(new_heap);
       return true;
-    else
-      false;
+    }
+    else {
+      free(new_heap);
+      return false;
+    }
   }
   else {
-    if (ptr < heap_t->user_start_p && ptr > heap_t->end_p)
+    if (ptr < new_heap->user_start_p && ptr > new_heap->end_p) {
+      free(new_heap);
       return true;
-    else
-      false;
+    }
+    else {
+      free(new_heap);
+      return false;
+    }
   }
 }
-*/
+
 void *get_stack_top() {
   int top_of_stack;
   int *top = &top_of_stack;
   return top;
 }
 
-bool stack_grows_upwards() {
+bool stack_grows_from_top() {
   int stack1;
   int stack2;
 
-  if (&stack1 < &stack2){
-    printf("stack_grows_upwards == true\n");
+  if (&stack1 < &stack2) {
+    printf("stack_grows_from_top == true\n");
     return true;
   }
-  else{
-    printf("stack_grows_upwards == false\n");  
+  else {
+    printf("stack_grows_from_top == false\n");  
     return false;
   }
 }
@@ -104,48 +113,48 @@ ll_node **traverse_stack_list() {
   void *top = get_stack_top();
   ll_node **root = LL_initRoot();
   int counter = 0;
-  if (stack_grows_upwards()) {
+  if (!stack_grows_from_top()) {
     puts("Stack grows upwards.\n");
     // prinft((*(int *)top,*(int *)environ)
     while (top > environ) {
       printf("top: %p\n", top);
-      //   if (is_pointing_at_heap(top)) {
-      if (validate_object(top)) { // checks the pointers metadata to check whether it's valid or not
-	ll_node *stackTop = LL_createAndInsertSequentially(root, top);
-	//printf("stackTop: %p\n", stackTop);,
-	printf("Count %d: New stackpointer %p has valid metadata and was added to the list.\n", counter, stackTop->nodeContent);
+      if (is_pointing_at_heap(top)) {
+	if (validate_object(top)) { // checks the pointers metadata to check whether it's pointing at an object or not
+	  ll_node *stackTop = LL_createAndInsertSequentially(root, top);
+	  //printf("stackTop: %p\n", stackTop);,
+	  printf("Count %d: New stackpointer %p has valid metadata and was added to the list.\n", counter, stackTop->nodeContent);
+	}
       }
-      //  }
-      top += sizeof(void *);
+      top -= sizeof(void *);
       counter++;
-    }    
-  }
+    }
+  }   
   else { 
     printf("hej igen, stacken borde växa neråt nu va\n");
     while (top < environ) { 
       puts("Stack grows downwards.\n");
       printf("top: %p\n", top);
-      //     if (is_pointing_at_heap(top)) {
+      if (is_pointing_at_heap(top)) {
 	if (validate_object(top)) { // checks the pointers metadata to check whether it's valid or not
 	  ll_node *stackTop = LL_createAndInsertSequentially(root, top);
 	  //printf("stackTop: %p\n", stackTop);,
 	  printf("Count %d: New stackpointer %p has valid metadata and was added to the list.\n", counter, stackTop->nodeContent);
 	}
-	// }
-      top -= sizeof(void *);
+      }
+      top += sizeof(void *);
       counter++;
     }
+    return root;
   }
-  return root;
 }
 
 void print_stack_list(ll_node **root) {
   puts("Printing stacklist");
   ll_node *iterator = *root;
   int counter = 0;
-
+  
   while (iterator) {
-    printf("\nCounter: %d\n%04x\n", counter, iterator->nodeContent);
+    printf("\nCounter: %d\n%p\n", counter, iterator->nodeContent);
     counter++;
     if (iterator->previous) {
       printf("%04x has previous pointer at %04x\n", iterator->nodeContent, iterator->previous->nodeContent);
@@ -154,7 +163,7 @@ void print_stack_list(ll_node **root) {
     if (iterator->next)
       printf("%04x has next pointer at %04x\n", iterator->nodeContent, iterator->next->nodeContent);
     iterator = iterator->next;
-    }
+  }
 }
 
 
@@ -162,6 +171,7 @@ int main() {
   Dump_registers();
   printf("hej där\n");
   ll_node **root = traverse_stack_list();
+  print_stack_list(root);
   endiannessTest();
   return 0;
 }
