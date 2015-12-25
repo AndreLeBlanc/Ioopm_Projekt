@@ -64,25 +64,24 @@ bool heap_grows_upwards() {
   }  
 }
 
-bool is_pointing_at_heap(void *ptr) {
-  heap_t *new_heap = h_init(1024, true, 100.0);
+void allocate_on_heap() {
+  
+}
+
+bool is_pointing_at_heap(void *ptr, heap_t *h) {
   if (heap_grows_upwards()) {
-    if (ptr > new_heap->user_start_p && ptr < new_heap->end_p) {
-      free(new_heap);
+    if (ptr > h->user_start_p && ptr < h->end_p) {
       return true;
     }
     else {
-      free(new_heap);
       return false;
     }
   }
   else {
-    if (ptr < new_heap->user_start_p && ptr > new_heap->end_p) {
-      free(new_heap);
+    if (ptr < h->user_start_p && ptr > h->end_p) {
       return true;
     }
     else {
-      free(new_heap);
       return false;
     }
   }
@@ -108,7 +107,7 @@ bool stack_grows_from_top() {
   }
 }
 
-ll_node **traverse_stack_list() {
+ll_node **traverse_stack_list(heap_t *h) {
   printf("du är i traverse stack list\n");
   void *top = get_stack_top();
   ll_node **root = LL_initRoot();
@@ -118,7 +117,7 @@ ll_node **traverse_stack_list() {
     // prinft((*(int *)top,*(int *)environ)
     while (top > environ) {
       printf("top: %p\n", top);
-      if (is_pointing_at_heap(top)) {
+      if (is_pointing_at_heap(top, h)) {
 	if (validate_object(top)) { // checks the pointers metadata to check whether it's pointing at an object or not
 	  ll_node *stackTop = LL_createAndInsertSequentially(root, top);
 	  //printf("stackTop: %p\n", stackTop);,
@@ -134,7 +133,7 @@ ll_node **traverse_stack_list() {
     while (top < environ) { 
       puts("Stack grows downwards.\n");
       printf("top: %p\n", top);
-      if (is_pointing_at_heap(top)) {
+      if (is_pointing_at_heap(top, h)) {
 	if (validate_object(top)) { // checks the pointers metadata to check whether it's valid or not
 	  ll_node *stackTop = LL_createAndInsertSequentially(root, top);
 	  //printf("stackTop: %p\n", stackTop);,
@@ -149,7 +148,7 @@ ll_node **traverse_stack_list() {
 }
 
 void print_stack_list(ll_node **root) {
-  puts("Printing stacklist");
+  puts("Printing list of alive stackpointers:");
   ll_node *iterator = *root;
   int counter = 0;
   
@@ -168,10 +167,28 @@ void print_stack_list(ll_node **root) {
 
 
 int main() {
+  // create a new heap
+  heap_t *new_heap = h_init(1024, true, 100.0);
+  
+  // allocate on this heap. For testing purposes
+  void *ptr = h_alloc_data(new_heap, 1024); 
+
+  // Dump pointers from the registers to the stack, if any.
   Dump_registers();
+  
   printf("hej där\n");
-  ll_node **root = traverse_stack_list();
-  print_stack_list(root);
+
+  // the list contains all alive pointers
+  ll_node **root = traverse_stack_list(new_heap); 
+
+  // print the list for debugging purposes
+  print_stack_list(root); 
+
+  // Just a test to see how the stack and the heap grow on the platform we're on
   endiannessTest();
+
+  // deletes the heap we created
+  h_delete(new_heap);
+  
   return 0;
 }
