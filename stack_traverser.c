@@ -107,14 +107,10 @@ bool stack_grows_from_top() {
   }
 }
 
-ll_node **traverse_stack_list(heap_t *h) {
-  printf("du är i traverse stack list\n");
-  void *top = get_stack_top();
-  ll_node **root = LL_initRoot();
+void create_stack_list(int flag, void *top, heap_t *h, ll_node **root) {
+  puts("Welcome to create_stack_list");
   int counter = 0;
-  if (!stack_grows_from_top()) {
-    puts("Stack grows upwards.\n");
-    // prinft((*(int *)top,*(int *)environ)
+  if (flag == 0) {
     while (top > environ) {
       printf("top: %p\n", top);
       if (is_pointing_at_heap(top, h)) {
@@ -127,9 +123,8 @@ ll_node **traverse_stack_list(heap_t *h) {
       top -= sizeof(void *);
       counter++;
     }
-  }   
-  else { 
-    printf("hej igen, stacken borde växa neråt nu va\n");
+  }
+  else {
     while (top < environ) { 
       puts("Stack grows downwards.\n");
       printf("top: %p\n", top);
@@ -143,8 +138,26 @@ ll_node **traverse_stack_list(heap_t *h) {
       top += sizeof(void *);
       counter++;
     }
-    return root;
   }
+}
+
+ll_node **traverse_stack_list(heap_t *h) {
+  printf("du är i traverse stack list\n");
+  void *top = get_stack_top();
+  ll_node **root = LL_initRoot();
+  int counter = 0;
+
+  if (!stack_grows_from_top()) {
+    puts("Stack grows upwards.\n");
+    // prinft((*(int *)top,*(int *)environ)
+    create_stack_list(0, top, h, root);
+  }
+  
+  else { 
+    printf("hej igen, stacken borde växa neråt nu va\n");
+    create_stack_list(1, top, h, root);
+  }  
+  return root;  
 }
 
 void print_stack_list(ll_node **root) {
