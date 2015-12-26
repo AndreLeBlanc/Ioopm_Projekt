@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <ctype.h>
 #include "gc.h"
 #include "heap.h"
 #include "utilities.h"
@@ -94,6 +95,7 @@ void print_object(void* object) {
     printf("Bitvector:\t\t%c\n", md_get_bit_vector(object));
     printf("Forwarding address:\t%p\n", md_get_forwarding_address(object));
     printf("Format string:\t\t%s\n", md_get_format_string(object) ? "true" : "false");
+    printf("Object size:\t\t%u\n", (unsigned int) fs_get_object_size(object));
   } else {
     printf("No metadata found!\n");
   }
@@ -154,8 +156,10 @@ void menu_allocate_format_string() {
   void* pointer = h_alloc_struct(heap_p, input);
   printf("Pointer to allocated data:\t\t%p\n", pointer);
 
-  // add pointer to pointer_list
-  LL_createAndInsertSequentially(pointer_list, pointer);
+  // add pointer to pointer_list if it wan't null
+  if(pointer) {
+    LL_createAndInsertSequentially(pointer_list, pointer);
+  }
 }
 
 void menu_allocate_union() {
@@ -201,7 +205,8 @@ int menu(menu_item_t item_array[], int item_array_size) {
   
   char input;
   inputChar("Choose menu item", &input);
-
+  input = toupper(input);
+  
   printf("\n");
   
   for(int i = 0; i < item_array_size + first_item_number; i++) {
