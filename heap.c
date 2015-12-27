@@ -1,4 +1,5 @@
 #include "heap.h"
+#include "linked_list.h"
 #include <string.h>
 #include <ctype.h>
 
@@ -231,7 +232,63 @@ size_t fs_get_object_size(void* object) {
 ll_head fs_get_pointers_within_object(void* object) {
   char* format_string = md_get_format_string(object);
 
-  for(int i = 0; i < strlen(format_string); i++) {
-    
+  int multiplier = 1;
+
+  void *pointer = object;
+
+  ll_head pointer_list = LL_initRoot();
+  
+  for(int i = 0; i < strlen(format_string); i++) { 
+    switch(format_string[i]) {
+      // if a pointer, add to list and increment pointer appropriately
+      // if any of the other characters, increment pointer appropriately
+      // Pointers
+    case '*':
+      for(int i = 0; i < multiplier; i++) {
+	LL_createAndInsertSequentially(pointer_list, pointer);
+	//((void*) pointer)++;
+      }
+      multiplier = 1;
+      break;
+      // Integers
+    case 'i':
+      pointer += sizeof(int) * multiplier;
+      multiplier = 1;
+      break;
+      // Floats
+    case 'f':
+      pointer += sizeof(float) * multiplier;
+      multiplier = 1;
+      break;
+      // Characters
+    case 'c':
+      pointer += sizeof(char) * multiplier;
+      multiplier = 1;
+      break;
+      // Longs
+    case 'l':
+      pointer += sizeof(long) * multiplier;
+      multiplier = 1;
+      break;
+      // Doubles
+    case 'd':
+      pointer += sizeof(double) * multiplier;
+      multiplier = 1;
+      break;
+      // if none of these characters, then check if it is a multiplier
+    default:  
+      if(format_string[i] >= '0' && format_string[i] <= '9') { 
+	// if the char is an integer, convert and save to multiplier.
+	int digit = format_string[i] -  '0'; 
+	if(multiplier == 1) {
+	  multiplier = digit;
+	} else {
+	  multiplier = multiplier * 10 + digit;
+	} 
+      } else {
+	// if an invalid character is in the string, return 0
+	return 0;
+      }
+    }
   }
 }
