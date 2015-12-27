@@ -21,7 +21,7 @@ void print_stack() {
   int el_top = 123; 
   top = & el_top;
 
-  printf("Top of stack: %p\nBottom of stack: %p\n", *top, *environ);
+  printf("Top of stack: %p\nBottom of stack: %p\n", top, *environ);
 
   int *t = (int *)top;
   int *b = (int *)environ;
@@ -47,15 +47,15 @@ void print_stack() {
   if(t < b){
     while(t < b){ 
       int *hola = (int *)top;
-      printf("\n%p: %d\n", *top, hola);
-      *top += sizeof(void*);
+      printf("\n%p: %d\n", top, *hola);
+      top += sizeof(void *);
     }
   }
   else if(b < t){
     while(b < t){
       int *hola2 = (int *)top;
-      printf("\n%p: %d\n", *top, hola2);
-      *top -= sizeof(void*);
+      printf("\n%p: %d\n", top, *hola2);
+      top -= sizeof(void *);
     }
   }
   puts("\n-------------------------------\n");
