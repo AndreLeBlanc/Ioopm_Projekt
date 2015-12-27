@@ -246,33 +246,33 @@ ll_head fs_get_pointers_within_object(void* object) {
     case '*':
       for(int i = 0; i < multiplier; i++) {
 	LL_createAndInsertSequentially(pointer_list, pointer);
-	//((void*) pointer)++;
+	pointer = ((void*) pointer) + 1;
       }
       multiplier = 1;
       break;
       // Integers
     case 'i':
-      pointer += sizeof(int) * multiplier;
+      pointer = ((int*) pointer) + 1;
       multiplier = 1;
       break;
       // Floats
     case 'f':
-      pointer += sizeof(float) * multiplier;
+      pointer = ((float*) pointer) + 1;
       multiplier = 1;
       break;
       // Characters
     case 'c':
-      pointer += sizeof(char) * multiplier;
+      pointer = ((char*) pointer) + 1;
       multiplier = 1;
       break;
       // Longs
     case 'l':
-      pointer += sizeof(long) * multiplier;
+      pointer = ((long*) pointer) + 1;
       multiplier = 1;
       break;
       // Doubles
     case 'd':
-      pointer += sizeof(double) * multiplier;
+      pointer = ((double*) pointer) + 1;
       multiplier = 1;
       break;
       // if none of these characters, then check if it is a multiplier
@@ -286,9 +286,10 @@ ll_head fs_get_pointers_within_object(void* object) {
 	  multiplier = multiplier * 10 + digit;
 	} 
       } else {
-	// if an invalid character is in the string, return 0
-	return 0;
+	// if an invalid character is in the string, return null
+	return NULL;
       }
     }
   }
+  return pointer_list;
 }
