@@ -16,8 +16,11 @@ void bartlettCompact() { // performs the bartlett operations
   return;
 }
 
-int main(int argc, const char** argv, const char** envp) { // just testing
-  register void* stack asm("esp");
-  // put stack somewhere
-  return do_main(argc, argv, envp);
-}
+/*
+  Removed because of confusion. /V
+*/
+// int main(int argc, const char** argv, const char** envp) { // just testing
+//   // register void* stack asm("esp");
+//   // put stack somewhere
+//   return do_main(argc, argv, envp);
+// }

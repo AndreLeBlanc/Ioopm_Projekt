@@ -5,7 +5,8 @@ FLAGS_CUNIT=$(FLAGS_DEBUG) -lcunit
 FLAGS_GCOV=$(FLAGS_DEBUG) --coverage
 
 FILES_GCOV=gc_test.c gc.c
-FILES_MAIN=gc.o collector.o heap.o traverser.o utilities.o linked_list.o
+FILES_MAIN=gc.o heap.o traverser.o utilities.o linked_list.o
+#removed collector.o from above temporarily (duplicate functions otherwise)
 
 
 DIR_RESOURCES=./resources/
@@ -45,7 +46,7 @@ test: stack_c stack_run
 
 # Flymake mode (Live syntax and error check)
 # Insert the following lines in your .emacs file:
-#	(require 'flymake) 
+#	(require 'flymake)
 #	(add-hook 'find-file-hook 'flymake-find-file-hook)
 # To put in practical use: M-x flymake-mode RET
 check-syntax:
@@ -67,9 +68,9 @@ os_dump:
 #compile test
 gc_test: gc_test.debug.o gc.debug.o
 	$(CC) -o $@.out $^ $(FLAGS_CUNIT)
-.PHONY: gc_test 
+.PHONY: gc_test
 
-stack_c: stack_traverser.o 
+stack_c: stack_traverser.o
 	$(CC) $(FLAGS_PROD) -o stack_traverser stack_traverser.c
 
 stack_run:
@@ -77,7 +78,7 @@ stack_run:
 
 #test with gui
 test_gui: $(FILES_MAIN) gui.c
-	$(CC) $(FLAGS_PROD) -o $@ $^
+	$(CC) $(FLAGS_PROD) -o $@.run $^
 
 #remove crap files.
 clean: gcov_clean

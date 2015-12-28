@@ -1,1 +1,1 @@
-void print_heap(heap_t *heap);
+void print_traversed_heap(heap_t *heap);
