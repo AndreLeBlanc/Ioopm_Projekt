@@ -49,59 +49,124 @@ void endiannessTest() { // this function investigates whether the stack grows up
   printf("stack2:   %15p\n", &stack2);
 }
 
-void *get_stack_top() {
-  int top_of_stack;
-  return &top_of_stack;
-}
-
-bool stack_grows_upwards() {
-  int stack;
-  int stack2;
-
-  if (&stack < &stack2)
+bool heap_grows_upwards() {
+  void *first = malloc(1);
+  void *second = malloc(1);
+  if (first < second) {
+    free(first);
+    free(second);
     return true;
-  else
+  }
+  else {
+    free(first);
+    free(second);
     return false;
+  }  
 }
 
-ll_node **traverse_stack_list() {
-  void *top = get_stack_top();
-  ll_node **root = LL_initRoot();
-  int counter = 0;
-  if (stack_grows_upwards()) {
-    while (top < environ) {
-      printf("top: %04x\n", top);
-      if (validate_object(&top)) { // checks the pointers metadata to check whether it's valid or not
-	ll_node *stackTop = LL_createAndInsertSequentially(root, top);
-	//printf("stackTop: %p\n", stackTop);,
-	printf("Count %d: New stackpointer %04x has valid metadata and was added to the list.\n", counter, stackTop->nodeContent);
-      }
-      top += sizeof(void *);
-      counter++;
+void allocate_on_heap() {
+  
+}
+
+bool is_pointing_at_heap(void *ptr, heap_t *h) {
+  if (heap_grows_upwards()) {
+    if (ptr > h->user_start_p && ptr < h->end_p) {
+      return true;
+    }
+    else {
+      return false;
     }
   }
   else {
+    if (ptr < h->user_start_p && ptr > h->end_p) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+}
+
+void *get_stack_top() {
+  int top_of_stack;
+  int *top = &top_of_stack;
+  return top;
+}
+
+bool stack_grows_from_top() {
+  int stack1;
+  int stack2;
+
+  if (&stack1 < &stack2) {
+    printf("stack_grows_from_top == true\n");
+    return true;
+  }
+  else {
+    printf("stack_grows_from_top == false\n");  
+    return false;
+  }
+}
+
+void create_stack_list(int flag, void *top, heap_t *h, ll_node **root) {
+  puts("Welcome to create_stack_list");
+  int counter = 0;
+  if (flag == 0) {
     while (top > environ) {
-      printf("top: %04x\n", top);
-      if (validate_object(top)) { // checks the pointers metadata to check whether it's valid or not
-	ll_node *stackTop = LL_createAndInsertSequentially(root, top);
-	//printf("stackTop: %p\n", stackTop);,
-	printf("Count %d: New stackpointer %04x has valid metadata and was added to the list.\n", counter, stackTop->nodeContent);
+      printf("top: %p\n", top);
+      if (is_pointing_at_heap(top, h)) {
+	if (validate_object(top)) { // checks the pointers metadata to check whether it's pointing at an object or not
+	  ll_node *stackTop = LL_createAndInsertSequentially(root, top);
+	  //printf("stackTop: %p\n", stackTop);,
+	  printf("Count %d: New stackpointer %p has valid metadata and was added to the list.\n", counter, stackTop->nodeContent);
+	}
       }
       top -= sizeof(void *);
       counter++;
     }
   }
-  return root;
+  else {
+    while (top < environ) { 
+      puts("Stack grows downwards.\n");
+      printf("top: %p\n", top);
+      if (is_pointing_at_heap(top, h)) {
+	if (validate_object(top)) { // checks the pointers metadata to check whether it's valid or not
+	  ll_node *stackTop = LL_createAndInsertSequentially(root, top);
+	  //printf("stackTop: %p\n", stackTop);,
+	  printf("Count %d: New stackpointer %p has valid metadata and was added to the list.\n", counter, stackTop->nodeContent);
+	}
+      }
+      top += sizeof(void *);
+      counter++;
+    }
+  }
+}
+
+ll_node **traverse_stack_list(heap_t *h) {
+  printf("du är i traverse stack list\n");
+  void *top = get_stack_top();
+  ll_node **root = LL_initRoot();
+  int counter = 0;
+
+  if (!stack_grows_from_top()) {
+    puts("Stack grows upwards.\n");
+    // prinft((*(int *)top,*(int *)environ)
+    create_stack_list(0, top, h, root);
+  }
+  
+  else { 
+    printf("hej igen, stacken borde växa neråt nu va\n");
+    create_stack_list(1, top, h, root);
+  }  
+  return root;  
 }
 
 void print_stack_list(ll_node **root) {
-  puts("Printing stacklist");
+  puts("Printing list of alive stackpointers:");
   ll_node *iterator = *root;
   int counter = 0;
-
+  
   while (iterator) {
-    printf("\nCounter: %d\n%04x\n", counter, iterator->nodeContent);
+    printf("\nCounter: %d\n%p\n", counter, iterator->nodeContent);
     counter++;
     if (iterator->previous) {
       printf("%04x has previous pointer at %04x\n", iterator->nodeContent, iterator->previous->nodeContent);
@@ -110,41 +175,33 @@ void print_stack_list(ll_node **root) {
     if (iterator->next)
       printf("%04x has next pointer at %04x\n", iterator->nodeContent, iterator->next->nodeContent);
     iterator = iterator->next;
-    }
+  }
 }
 
-void print_stack() { // Not used. Was here just for testing and getting started in the beginning. Gonna be kept for testing purposes
-  const int N = 10;
-  int arr[N];
-  int i = 0;
-  while (i < N) {
-    arr[i] = i * 100 + i * 10 + i;
-    printf("arr[%d]: %d\n", i, arr[i]);
-    i++;
-  }
-
-  puts("\n----------------------------------------\n");
-  void *top = __builtin_frame_address(1); // top of the stack
-
-  printf("Top of the stack: %p\nBottom of the stack %p\n", top, environ);
-  
-  int bottomBigger = 0;
-  
-  if (environ > top) {
-    bottomBigger = 1;
-  }
-  
-  while (top < environ) {
-    printf("\n%p\n", top);
-    top = top + sizeof(void *);
-  }
-  puts("\n----------------------------------------\n");  
-}
 
 int main() {
+  // create a new heap
+  heap_t *new_heap = h_init(1024, true, 100.0);
+  
+  // allocate on this heap. For testing purposes
+  void *ptr = h_alloc_data(new_heap, 1024); 
+
+  // Dump pointers from the registers to the stack, if any.
   Dump_registers();
-  ll_node **root = traverse_stack_list();
-  //print_stack_list(root);
+  
+  printf("hej där\n");
+
+  // the list contains all alive pointers
+  ll_node **root = traverse_stack_list(new_heap); 
+
+  // print the list for debugging purposes
+  print_stack_list(root); 
+
+  // Just a test to see how the stack and the heap grow on the platform we're on
   endiannessTest();
+
+  // deletes the heap we created
+  h_delete(new_heap);
+  
   return 0;
 }
