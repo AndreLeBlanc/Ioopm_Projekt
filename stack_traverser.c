@@ -13,14 +13,7 @@
   tills vidare.
 */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <unistd.h>
-#include <setjmp.h>
-#include "linked_list.c"
-#include "heap.h"
-#include "heap.c"
+#include "stack_traverser.h"
 
 #define Dump_registers()			\
   jmp_buf env;					\
@@ -108,7 +101,7 @@ bool stack_grows_from_top() {
   }
 }
 
-void create_stack_list(int flag, void *top, heap_t *h, ll_node **root) {
+void build_stack_list(int flag, void *top, heap_t *h, ll_node **root) {
   puts("Welcome to create_stack_list");
   int counter = 0;
   if (flag == 0) {
@@ -151,14 +144,14 @@ ll_node **traverse_stack_list(heap_t *h) {
   if (!stack_grows_from_top()) {
     puts("Stack grows upwards.\n");
     // prinft((*(int *)top,*(int *)environ)
-    create_stack_list(0, top, h, root);
+    build_stack_list(0, top, h, root);
   }
 
   else {
     printf("hej igen, stacken borde växa neråt nu va\n");
-    create_stack_list(1, top, h, root);
+    build_stack_list(1, top, h, root);
   }
-  return root;
+  return root;  
 }
 
 void print_stack_list(ll_node **root) {
@@ -185,7 +178,7 @@ int main() {
   heap_t *new_heap = h_init(1024, true, 100.0);
 
   // allocate on this heap. For testing purposes
-  void *ptr = h_alloc_data(new_heap, 1024);
+  void *ptr = h_alloc_struct(new_heap, "***i");
 
   // Dump pointers from the registers to the stack, if any.
   Dump_registers();
