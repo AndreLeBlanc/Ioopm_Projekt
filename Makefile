@@ -22,6 +22,10 @@ all:
 %.debug.o: %.c
 	$(CC) $(FLAGS_DEBUG) -o $@ -c $^
 
+traverser.run: traverser.c heap.o linked_list.o
+	$(CC) $(FLAGS_DEBUG) -o $@ $^
+	./$@
+
 #generate documentation with doxygen
 doc: $(DIR_RESOURCES)gc.doxy
 	@doxygen $^

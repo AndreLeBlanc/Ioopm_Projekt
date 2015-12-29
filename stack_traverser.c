@@ -1,4 +1,4 @@
-/* 
+/*
 - kolla igenom alla stackpekare
 - kolla metadatan för varje objekt som pekas på
 - om metadata finns så ska pekaren skickas vidare till heaptraverseringen
@@ -8,7 +8,7 @@
 
 /*
   Kompilera med:
-  gcc -std=c11 -Wall -ggdb -o stack_traverser stack_traverser.c
+  gcc -std=c11 -Wall -ggdb -o stack_traverser.run stack_traverser.c
 
   tills vidare.
 */
@@ -61,11 +61,11 @@ bool heap_grows_upwards() {
     free(first);
     free(second);
     return false;
-  }  
+  }
 }
 
 void allocate_on_heap() {
-  
+
 }
 
 bool is_pointing_at_heap(void *ptr, heap_t *h) {
@@ -97,12 +97,13 @@ bool stack_grows_from_top() {
   int stack1;
   int stack2;
 
+  //tips: return &stack1 < &stack2
   if (&stack1 < &stack2) {
     printf("stack_grows_from_top == true\n");
     return true;
   }
   else {
-    printf("stack_grows_from_top == false\n");  
+    printf("stack_grows_from_top == false\n");
     return false;
   }
 }
@@ -125,7 +126,7 @@ void create_stack_list(int flag, void *top, heap_t *h, ll_node **root) {
     }
   }
   else {
-    while (top < environ) { 
+    while (top < environ) {
       puts("Stack grows downwards.\n");
       printf("top: %p\n", top);
       if (is_pointing_at_heap(top, h)) {
@@ -152,19 +153,19 @@ ll_node **traverse_stack_list(heap_t *h) {
     // prinft((*(int *)top,*(int *)environ)
     create_stack_list(0, top, h, root);
   }
-  
-  else { 
+
+  else {
     printf("hej igen, stacken borde växa neråt nu va\n");
     create_stack_list(1, top, h, root);
-  }  
-  return root;  
+  }
+  return root;
 }
 
 void print_stack_list(ll_node **root) {
   puts("Printing list of alive stackpointers:");
   ll_node *iterator = *root;
   int counter = 0;
-  
+
   while (iterator) {
     printf("\nCounter: %d\n%p\n", counter, iterator->nodeContent);
     counter++;
@@ -182,26 +183,26 @@ void print_stack_list(ll_node **root) {
 int main() {
   // create a new heap
   heap_t *new_heap = h_init(1024, true, 100.0);
-  
+
   // allocate on this heap. For testing purposes
-  void *ptr = h_alloc_data(new_heap, 1024); 
+  void *ptr = h_alloc_data(new_heap, 1024);
 
   // Dump pointers from the registers to the stack, if any.
   Dump_registers();
-  
+
   printf("hej där\n");
 
   // the list contains all alive pointers
-  ll_node **root = traverse_stack_list(new_heap); 
+  ll_node **root = traverse_stack_list(new_heap);
 
   // print the list for debugging purposes
-  print_stack_list(root); 
+  print_stack_list(root);
 
   // Just a test to see how the stack and the heap grow on the platform we're on
   endiannessTest();
 
   // deletes the heap we created
   h_delete(new_heap);
-  
+
   return 0;
 }
