@@ -110,7 +110,7 @@ void build_stack_list(int flag, void *top, heap_t *h, ll_node **root) {
 	if (validate_object(top)) { // checks the pointers metadata to check whether it's pointing at an object or not
 	  ll_node *stackTop = LL_createAndInsertSequentially(root, top);
 	  //printf("stackTop: %p\n", stackTop);,
-	  printf("Count %d: New stackpointer %p has valid metadata and was added to the list.\n", counter, stackTop->nodeContent);
+	  printf("Count %d: New stackpointer %p has valid metadata and was added to the list.\n", counter, LL_getContent(stackTop));
 	}
       }
       top -= sizeof(void *);
@@ -125,7 +125,7 @@ void build_stack_list(int flag, void *top, heap_t *h, ll_node **root) {
 	if (validate_object(top)) { // checks the pointers metadata to check whether it's valid or not
 	  ll_node *stackTop = LL_createAndInsertSequentially(root, top);
 	  //printf("stackTop: %p\n", stackTop);,
-	  printf("Count %d: New stackpointer %p has valid metadata and was added to the list.\n", counter, stackTop->nodeContent);
+	  printf("Count %d: New stackpointer %p has valid metadata and was added to the list.\n", counter, LL_getContent(stackTop));
 	}
       }
       top += sizeof(void *);
@@ -159,19 +159,19 @@ void print_stack_list(ll_node **root) {
   int counter = 0;
   
   while (iterator) {
-    printf("\nCounter: %d\n%p\n", counter, iterator->nodeContent);
+    printf("\nCounter: %d\n%p\n", counter, LL_getContent(iterator));
     counter++;
-    if (iterator->previous) {
-      printf("%04x has previous pointer at %04x\n", iterator->nodeContent, iterator->previous->nodeContent);
-      printf("Difference between this %04x and %04x is %04x\n", iterator->nodeContent, iterator->previous->nodeContent, (iterator->nodeContent - iterator->previous->nodeContent));
+    if (LL_getPrevious(root, iterator)) {
+      printf("%04x has previous pointer at %04x\n", LL_getContent(iterator), LL_getContent(LL_getPrevious(root, iterator)));
+      printf("Difference between this %04x and %04x is %04x\n", LL_getContent(iterator), LL_getContent(LL_getPrevious(root, iterator)), (LL_getContent(iterator) - LL_getContent(LL_getPrevious(root, iterator))));
     }
-    if (iterator->next)
-      printf("%04x has next pointer at %04x\n", iterator->nodeContent, iterator->next->nodeContent);
-    iterator = iterator->next;
+    if (LL_getNext(iterator))
+      printf("%04x has next pointer at %04x\n", LL_getContent(iterator), LL_getContent(LL_getNext(iterator)));
+    iterator = LL_getNext(iterator);
   }
 }
 
-
+/*
 int main() {
   // create a new heap
   heap_t *new_heap = h_init(1024, true, 100.0);
@@ -198,3 +198,4 @@ int main() {
   
   return 0;
 }
+*/
