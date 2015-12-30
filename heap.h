@@ -15,6 +15,8 @@
 typedef struct heap{
   void* meta_p;       // pointer to heap's metadata (maybe unnecessary)
   void* user_start_p; // pointer to start of user's allocated space
+  void* active_page_list;
+  void* passive_page_list;
   void* bump_p;       // pointer to next free spot in user's space
   void* end_p;        // pointer to end of allocated space
   size_t total_size;  // total size of the heap (with metadata)
@@ -30,7 +32,7 @@ typedef struct page{
   void* end_p;        // pointer to end of allocated space
   bool active;        // boolean keeping track if the page is active (true) or passive (false)
   bool unsure;        // boolean keeping track of whether a page is unsure or not 
-  page* next_page;    // a pointer to the next page
+  struct page* next_page;    // a pointer to the next page
 } page_t;
 
 // mallocates space for heap, places metadata in the front. 

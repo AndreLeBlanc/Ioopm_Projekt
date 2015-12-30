@@ -6,8 +6,8 @@
 // mallocates space for heap, places metadata in the front. 
 
 heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold) {
-  if(bytes < sizeof(heap_t)) {
-    // if space allocated is not even enough for metadata, don't allocate
+  if(bytes < sizeof(heap_t) + sizeof(page_t)) {
+    // if space allocated is not even enough for heap and page metadata, don't allocate
     return NULL;
   }
 
@@ -16,15 +16,42 @@ heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold) {
   // create metadata struct and place it in the front of the heap
   // the user sees this as a heap_t struct and is therefore not
   // aware that it is the pointer to the whole heap. 
-  ((heap_t*) new_heap)->meta_p = new_heap;
-  ((heap_t*) new_heap)->user_start_p = new_heap + sizeof(heap_t);
-  ((heap_t*) new_heap)->bump_p = new_heap + sizeof(heap_t);
-  ((heap_t*) new_heap)->end_p = new_heap + bytes;
-  ((heap_t*) new_heap)->total_size = bytes;
-  ((heap_t*) new_heap)->user_size = bytes - sizeof(heap_t);
-  ((heap_t*) new_heap)->avail_space = bytes - sizeof(heap_t);
-  ((heap_t*) new_heap)->unsafe_stack = unsafe_stack;
-  ((heap_t*) new_heap)->gc_threshold = gc_threshold;
+  ((heap_t*) new_heap)->meta_p            = new_heap;
+  ((heap_t*) new_heap)->user_start_p      = new_heap + sizeof(heap_t);
+  ((heap_t*) new_heap)->active_page_list  = NULL;
+  ((heap_t*) new_heap)->passive_page_list = new_heap + sizeof(heap_t);
+  ((heap_t*) new_heap)->bump_p            = new_heap + sizeof(heap_t);
+  ((heap_t*) new_heap)->end_p             = new_heap + bytes;
+  ((heap_t*) new_heap)->total_size        = bytes;
+  ((heap_t*) new_heap)->user_size         = bytes - sizeof(heap_t);
+  ((heap_t*) new_heap)->avail_space       = bytes - sizeof(heap_t);
+  ((heap_t*) new_heap)->unsafe_stack      = unsafe_stack;
+  ((heap_t*) new_heap)->gc_threshold      = gc_threshold;
+
+  // set up pages
+  size_t bytes_left = bytes;
+  page_t* cursor = ((heap_t*) new_heap)->passive_page_list;
+  
+  while(bytes_left > sizeof(page_t)) {
+    
+    // set defaults for page
+    cursor->user_start_p = cursor + sizeof(page_t);
+    cursor->bump_p       = cursor + sizeof(page_t);
+    cursor->end_p        = cursor + (bytes_left - PAGE_SIZE > 0 ? PAGE_SIZE : bytes_left) - 1;
+    cursor->active       = false;
+    cursor->unsure       = false;
+    cursor->next_page    = (bytes_left - PAGE_SIZE > 0 ? cursor->end_p + 1 : NULL);
+
+    // go to next page and update bytes_left as well as user_size and avail_space in heap
+    cursor = cursor->next_page;
+    bytes_left -= PAGE_SIZE;
+    ((heap_t*) new_heap)->total_size -= sizeof(page_t);
+    ((heap_t*) new_heap)->avail_space -= sizeof(page_t);
+  }
+
+
+
+  // return pointer to heap
   return new_heap;
 }
 
