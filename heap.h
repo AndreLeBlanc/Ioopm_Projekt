@@ -30,7 +30,7 @@ typedef struct page{
   void* end_p;        // pointer to end of allocated space
   bool active;        // boolean keeping track if the page is active (true) or passive (false)
   bool unsure;        // boolean keeping track of whether a page is unsure or not 
-  page* next_page;    // a pointer to the next page
+  struct page* next_page;    // a pointer to the next page
 } page_t;
 
 // mallocates space for heap, places metadata in the front. 
