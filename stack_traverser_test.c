@@ -21,7 +21,7 @@
 
 #include <assert.h>
 
-#include "stack_traverser.c"
+#include "stack_traverser.h"
 
 void test_function() {
   puts("Just for testing.");
