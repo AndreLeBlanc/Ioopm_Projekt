@@ -63,7 +63,7 @@ void allocate_on_heap() {
 
 bool is_pointing_at_heap(void *ptr, heap_t *h) {
   if (heap_grows_upwards()) {
-    if (ptr > h->user_start_p && ptr < h->end_p) {
+    if (ptr > get_heap_start(h) && ptr < get_heap_end(h)) {
       return true;
     }
     else {
@@ -171,7 +171,6 @@ void print_stack_list(ll_node **root) {
   }
 }
 
-/*
 int main() {
   // create a new heap
   heap_t *new_heap = h_init(1024, true, 100.0);
@@ -198,4 +197,3 @@ int main() {
   
   return 0;
 }
-*/
