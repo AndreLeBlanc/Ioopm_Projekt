@@ -45,6 +45,13 @@ void *h_alloc_data(heap_t *h, size_t bytes);
 // Allocates space on the heap based on the format string included. This is allocated with metadata.
 void* h_alloc_struct(heap_t *h, char *format_string);
 
+// Returns a pointer to the start of the heap
+void* get_heap_start(heap_t *h);
+
+// Returns a pointer to the end of the heap
+void* get_heap_end(heap_t *h);
+
+
 /************************************/
 /*                                  */
 /*  Metadata wrapper                */
