@@ -75,7 +75,7 @@ stack_c: stack_traverser.o
 stack_run:
 	@./stack_traverser 
 
-stack_test_c: stack_traverser_test.debug.o stack_traverser.debug.o
+stack_test_c: stack_traverser_test.debug.o stack_traverser.debug.o linked_list.debug.o heap.debug.o
 	$(CC) -o $@.out $^ $(FLAGS_CUNIT)
 
 stack_test_run: 
