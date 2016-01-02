@@ -170,7 +170,7 @@ void print_stack_list(ll_node **root) {
     iterator = LL_getNext(iterator);
   }
 }
-
+/*
 int main() {
   // create a new heap
   heap_t *new_heap = h_init(1024, true, 100.0);
@@ -197,3 +197,4 @@ int main() {
   
   return 0;
 }
+*/
