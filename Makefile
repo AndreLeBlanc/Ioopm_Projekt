@@ -74,16 +74,22 @@ gc_test:  gc_test.debug.o gc.debug.o
 	$(CC) -o $@.out $^ $(FLAGS_CUNIT)
 .PHONY: gc_test
 
-stack_c: stack_traverser.o
-	$(CC) $(FLAGS_PROD) -o stack_traverser stack_traverser.c
+linked_list.o: linked_list.c linked_list.h
+	$(CC) $(FLAGS_PROD) linked_list.c -o linked_list.o -c
+
+heap.o: heap.c heap.h
+	$(CC) $(FLAGS_PROD) heap.c -o heap.o -c
+
+stack_c: stack_traverser.o linked_list.o heap.o
+	$(CC) $(FLAGS_DEBUG) -o stack_traverser stack_traverser.c
 
 stack_run:
-	@./stack_traverser 
+	@./stack_traverser
 
-stack_test_c: stack_traverser_test.debug.o stack_traverser.debug.o
+stack_test_c: stack_traverser_test.debug.o stack_traverser.debug.o linked_list.debug.o heap.debug.o
 	$(CC) -o $@.out $^ $(FLAGS_CUNIT)
 
-stack_test_run: 
+stack_test_run:
 	@./stack_traverser_test.out
 
 #test with gui

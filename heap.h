@@ -6,6 +6,7 @@
 #ifndef __heap__
 #define __heap__
 
+#define NUMBER_OF_PAGES 1
 #define PAGE_SIZE 2048
 
 // Heap struct
@@ -19,10 +20,18 @@ typedef struct heap{
   size_t total_size;  // total size of the heap (with metadata)
   size_t user_size;   // size of user's allocated space (total_size minus metadata)
   size_t avail_space; // amount of allocatable space left.
-  bool unsafe_stack;  // wether or not unsafe stack
+  bool unsafe_stack;  // whether or not unsafe stack
   float gc_threshold; // garbage collector threshold (1.0 = full memory)
 } heap_t;
 
+typedef struct page{
+  void* user_start_p; // pointer to start of user's allocated space
+  void* bump_p;       // pointer to next free spot in user's space
+  void* end_p;        // pointer to end of allocated space
+  bool active;        // boolean keeping track if the page is active (true) or passive (false)
+  bool unsure;        // boolean keeping track of whether a page is unsure or not 
+  struct page* next_page;    // a pointer to the next page
+} page_t;
 
 // mallocates space for heap, places metadata in the front. 
 heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold);
@@ -35,6 +44,13 @@ void *h_alloc_data(heap_t *h, size_t bytes);
 
 // Allocates space on the heap based on the format string included. This is allocated with metadata.
 void* h_alloc_struct(heap_t *h, char *format_string);
+
+// Returns a pointer to the start of the heap
+void* get_heap_start(heap_t *h);
+
+// Returns a pointer to the end of the heap
+void* get_heap_end(heap_t *h);
+
 
 /************************************/
 /*                                  */
