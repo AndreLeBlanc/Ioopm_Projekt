@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <setjmp.h>
+#include "linked_list.h"
 #include "heap.h"
 
 #ifndef __stack_traverser__
@@ -43,7 +44,7 @@ bool stack_grows_from_top();
 /// \param root is the root of the list
 void create_stack_list(bool stack_grows_upwards, char *top, heap_t *h, ll_node **root);
 
-/// Calls other functions to traverse the stack and create the stack list
+/// Calls other functions to traverse the stack and create the stack list.
 ///
 /// \param h is the heap to be checked
 /// \returns ll_node, the first node of the list containing all the pointers that point to the heap h

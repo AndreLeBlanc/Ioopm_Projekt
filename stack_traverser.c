@@ -1,6 +1,4 @@
 #include "stack_traverser.h"
-#include "linked_list.c"
-#include "heap.c"
 
 #define Dump_registers()			\
   jmp_buf env;					\
