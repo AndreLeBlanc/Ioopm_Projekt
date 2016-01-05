@@ -14,6 +14,13 @@ int main() {
 
 }
 
+/*
+  Hallåjsan. Ni kanske vill hämta stackpekarna som pekar i heapen också! 
+  Bara att använda traverser_stack_list(heap_t *h) som finns i stack_traverser.c.
+  Denna lista med pekare kommer vara i samma format som den i linked_list-modulen.
+*/
+
+
 ll_head traverse_pointers_from_LL(ll_head pointers) {
 
     if(!LL_isEmpty(pointers)) {
@@ -41,7 +48,7 @@ ll_head traverse_pointers_from_LL(ll_head pointers) {
 
 void print_traversed_heap(heap_t *heap) {
   int count = 1;
-  void *user_start_p = heap->user_start_p;
+  void *user_start_p = heap->user_start_p; // Det finns en get_heap_start(heap_t* h) funktion som ger startpekaren då själva strukten numera är dold. Samma gäller endpekaren!
   while(user_start_p < heap->bump_p) {
       printf("%d:: %p\n", count, user_start_p);
       user_start_p += sizeof(void *);
