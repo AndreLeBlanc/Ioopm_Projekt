@@ -3,7 +3,6 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <setjmp.h>
-#include "linked_list.h"
 #include "heap.h"
 
 #ifndef __stack_traverser__

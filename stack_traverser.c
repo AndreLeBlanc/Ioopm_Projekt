@@ -14,6 +14,8 @@
 */
 
 #include "stack_traverser.h"
+#include "linked_list.c"
+#include "heap.c"
 
 #define Dump_registers()			\
   jmp_buf env;					\
@@ -57,13 +59,10 @@ bool heap_grows_upwards() {
   }  
 }
 
-void allocate_on_heap() {
-  
-}
-
 bool is_pointing_at_heap(void *ptr, heap_t *h) {
+  //  int *ptr_cast = (int *)ptr;
   if (heap_grows_upwards()) {
-    if (ptr > get_heap_start(h) && ptr < get_heap_end(h)) {
+    if (*(int *)ptr > *(int *)get_heap_start(h) && *(int *)ptr < *(int *)get_heap_end(h)) {
       return true;
     }
     else {
@@ -71,7 +70,7 @@ bool is_pointing_at_heap(void *ptr, heap_t *h) {
     }
   }
   else {
-    if (ptr < h->user_start_p && ptr > h->end_p) {
+    if (*(int *)ptr < *(int *)get_heap_start(h) && *(int *)ptr > *(int *)get_heap_end(h)) {
       return true;
     }
     else {
@@ -100,17 +99,19 @@ bool stack_grows_from_top() {
   }
 }
 
-void build_stack_list(int flag, void *top, heap_t *h, ll_node **root) {
-  puts("Welcome to create_stack_list");
+void build_stack_list(int flag, char *top, heap_t *h, ll_node **root) {
+  puts("Welcome to build_stack_list");
+  int total = 0;
   int counter = 0;
   if (flag == 0) {
-    while (top > environ) {
-      printf("top: %p\n", top);
+    while (top > *environ) {
+      printf("Count %d: \ntop: %p\n", counter, top);
       if (is_pointing_at_heap(top, h)) {
 	if (validate_object(top)) { // checks the pointers metadata to check whether it's pointing at an object or not
 	  ll_node *stackTop = LL_createAndInsertSequentially(root, top);
 	  //printf("stackTop: %p\n", stackTop);,
-	  printf("Count %d: New stackpointer %p has valid metadata and was added to the list.\n", counter, LL_getContent(stackTop));
+	  printf("New stackpointer %p has valid metadata and was added to the list.\n", LL_getContent(stackTop));
+	  total++;
 	}
       }
       top -= sizeof(void *);
@@ -118,25 +119,27 @@ void build_stack_list(int flag, void *top, heap_t *h, ll_node **root) {
     }
   }
   else {
-    while (top < environ) { 
+    while (top < *environ) { 
       puts("Stack grows downwards.\n");
-      printf("top: %p\n", top);
+      printf("Count %d: \ntop: %p\n", counter, top);
       if (is_pointing_at_heap(top, h)) {
 	if (validate_object(top)) { // checks the pointers metadata to check whether it's valid or not
 	  ll_node *stackTop = LL_createAndInsertSequentially(root, top);
 	  //printf("stackTop: %p\n", stackTop);,
-	  printf("Count %d: New stackpointer %p has valid metadata and was added to the list.\n", counter, LL_getContent(stackTop));
+	  printf("New stackpointer %p has valid metadata and was added to the list.\n", LL_getContent(stackTop));
+	  total++;
 	}
       }
       top += sizeof(void *);
       counter++;
     }
   }
+  printf("Total pointers added to the list: %d\n", total);
 }
 
 ll_node **traverse_stack_list(heap_t *h) {
   printf("du är i traverse stack list\n");
-  void *top = get_stack_top();
+  char *top = get_stack_top();
   ll_node **root = LL_initRoot();
   int counter = 0;
 
@@ -170,13 +173,14 @@ void print_stack_list(ll_node **root) {
     iterator = LL_getNext(iterator);
   }
 }
-/*
+
+
 int main() {
   // create a new heap
   heap_t *new_heap = h_init(1024, true, 100.0);
   
   // allocate on this heap. For testing purposes
-  void *ptr = h_alloc_struct(new_heap, "***i"); 
+  void *ptr = h_alloc_struct(new_heap, "cccc"); 
 
   // Dump pointers from the registers to the stack, if any.
   Dump_registers();
@@ -197,4 +201,3 @@ int main() {
   
   return 0;
 }
-*/
