@@ -1,18 +1,3 @@
-/* 
-- kolla igenom alla stackpekare
-- kolla metadatan för varje objekt som pekas på
-- om metadata finns så ska pekaren skickas vidare till heaptraverseringen
-- sålla bort pekare som inte pekar på något
-- returnera alla giltliga pekare till heaptraverseringen i form av en länkad lista.
-*/
-
-/*
-  Kompilera med:
-  gcc -std=c11 -Wall -ggdb -o stack_traverser stack_traverser.c
-
-  tills vidare.
-*/
-
 #include "stack_traverser.h"
 #include "linked_list.c"
 #include "heap.c"
@@ -26,7 +11,7 @@ extern char **environ; // bottom of the stack
 void fuckOff(){}
 void endiannessTestAux(){}
 
-void endiannessTest() { // this function investigates whether the stack grows upwards or downwards.
+void endiannessTest() { // Haubir trollar
   int stack;
   void *heap = malloc(1);
   void *heap2 = malloc(1);
@@ -99,11 +84,11 @@ bool stack_grows_from_top() {
   }
 }
 
-void build_stack_list(int flag, char *top, heap_t *h, ll_node **root) {
+void create_stack_list(bool stack_grows_upwards, char *top, heap_t *h, ll_node **root) {
   puts("Welcome to build_stack_list");
   int total = 0;
   int counter = 0;
-  if (flag == 0) {
+  if (stack_grows_upwards == true) {
     while (top > *environ) {
       printf("Count %d: \ntop: %p\n", counter, top);
       if (is_pointing_at_heap(top, h)) {
@@ -137,7 +122,7 @@ void build_stack_list(int flag, char *top, heap_t *h, ll_node **root) {
   printf("Total pointers added to the list: %d\n", total);
 }
 
-ll_node **traverse_stack_list(heap_t *h) {
+ll_node **function_does_not_have_a_good_name(heap_t *h) {
   printf("du är i traverse stack list\n");
   char *top = get_stack_top();
   ll_node **root = LL_initRoot();
@@ -146,12 +131,12 @@ ll_node **traverse_stack_list(heap_t *h) {
   if (!stack_grows_from_top()) {
     puts("Stack grows upwards.\n");
     // prinft((*(int *)top,*(int *)environ)
-    build_stack_list(0, top, h, root);
+    create_stack_list(true, top, h, root);
   }
   
   else { 
     printf("hej igen, stacken borde växa neråt nu va\n");
-    build_stack_list(1, top, h, root);
+    create_stack_list(false, top, h, root);
   }  
   return root;  
 }
@@ -174,7 +159,7 @@ void print_stack_list(ll_node **root) {
   }
 }
 
-
+/*
 int main() {
   // create a new heap
   heap_t *new_heap = h_init(1024, true, 100.0);
@@ -188,7 +173,7 @@ int main() {
   printf("hej där\n");
 
   // the list contains all alive pointers
-  ll_node **root = traverse_stack_list(new_heap); 
+  ll_node **root = function_does_not_have_a_good_name(new_heap); 
 
   // print the list for debugging purposes
   print_stack_list(root); 
@@ -201,3 +186,4 @@ int main() {
   
   return 0;
 }
+*/
