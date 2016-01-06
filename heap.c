@@ -61,6 +61,15 @@ void h_delete(heap_t *h) {
   } 
 }
 
+
+void* get_heap_start(heap_t* h) {
+  return h->user_start_p;
+}
+
+void* get_heap_end(heap_t* h) {
+  return h->end_p;
+}
+
 /************************************/
 /*                                  */
 /*  Allocation                      */
