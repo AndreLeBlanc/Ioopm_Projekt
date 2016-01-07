@@ -76,8 +76,30 @@ void *h_alloc_data(heap_t *h, size_t bytes);
  */
 void* h_alloc_struct(heap_t *h, char *format_string);
 
+/**
+   h_gc
+   @brief Manually trigger garbage collection.
+   @param h The pointer to the heap.
+   @return The number of bytes collected.
+ */
+size_t h_gc(heap_t* h);
 
-// Returns a pointer to the start of the heap
+/**
+   h_avail
+   @brief Returns the available free memory.
+   @param h The pointer to the heap.
+   @return The available free memory.
+*/
+size_t h_avail(heap_t *h);
+
+/**
+   h_used
+   @brief Returns the amount of used memory. Does not count metadata.
+   @param h The pointer to the heap.
+   @return The amount of used memory.
+*/
+size_t h_used(heap_t *h);
+
 /**
    get_heap_start
    @brief Returns the pointer to the start of the user-allocation area of the heap.
