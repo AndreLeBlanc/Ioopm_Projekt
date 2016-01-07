@@ -70,7 +70,7 @@ os_dump:
 	echo "-v : $(shell uname -v)"; \
 
 #compile test
-gc_test:  gc_test.debug.o gc.debug.o
+gc_test: traverser.debug.o linked_list.debug.o heap.debug.o gc.debug.o gc_test.c
 	$(CC) -o $@.out $^ $(FLAGS_CUNIT)
 .PHONY: gc_test
 

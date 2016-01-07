@@ -2,12 +2,17 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include "heap.h"
+#include "traverser.h"
 
 #include "gc.h"
+
+heap_t *heap = NULL;
 
 int init_suite(void)
 {
     //create a new stack
+    heap = h_init(2048, 1, 1.0);
     return 0;
 }
 
@@ -16,12 +21,19 @@ int clean_suite(void) {
   return 0;
 }
 
+void testPRINTHEAP() {
+  void *pointer = h_alloc_data(heap, 16);
+  void *pointer2 = h_alloc_struct(heap, "***iii");
+  print_traversed_heap(heap);
+  CU_ASSERT_EQUAL(true ,true);
+}
+
 void testCUNITWORKS() {
   CU_ASSERT_EQUAL((1+1), 2);
 }
 
 void testPRINTSTACK() {
-  print_stack();
+  // print_stack();
   CU_ASSERT_EQUAL(true, true);
 }
 
@@ -35,14 +47,15 @@ int main(int argc, char const *argv[]) {
     }
 
     //add a suite to the registry
-    pSuite = CU_add_suite("Shit", init_suite, clean_suite);
+    pSuite = CU_add_suite("Heap Suite", init_suite, clean_suite);
     if (NULL == pSuite) {
         CU_cleanup_registry();
         return CU_get_error();
     }
 
     if ((NULL == CU_add_test(pSuite, "testing CUnit", testCUNITWORKS)) ||
-         NULL == CU_add_test(pSuite, "testing printStack", testPRINTSTACK)) {
+         NULL == CU_add_test(pSuite, "testing printStack", testPRINTSTACK) ||
+         NULL == CU_add_test(pSuite, "testing printHeap", testPRINTHEAP)) {
         CU_cleanup_registry();
         return CU_get_error();
     }
