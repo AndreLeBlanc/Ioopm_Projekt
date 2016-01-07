@@ -83,7 +83,7 @@ void print_heap() {
 	               ((intptr_t) heap_p->end_p - (intptr_t) heap_p)) {
 	printf("|");
 	filler = (page_cursor->active ? '-' : ' ');
-	page_cursor = page_cursor->end_p + 1;
+	page_cursor = (void*) page_cursor->end_p + 1;
       } else {
 	printf("%c", filler);
       }
