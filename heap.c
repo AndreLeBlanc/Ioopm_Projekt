@@ -67,9 +67,7 @@ typedef struct metadata {
 void *h_alloc_data(heap_t* h, size_t bytes) {
   size_t total_bytes = bytes + sizeof(metadata_t);
 
-  if(h->bump_p + total_bytes <= h->end_p) {
-    // if there is space
-    
+  if(h->bump_p + total_bytes <= h->end_p) {// if there is space, allocate
     // save bump pointer for returning. This pointer skips the metadata
     void* new_pointer = h->bump_p + sizeof(metadata_t);
     // update bump pointer and avail space
@@ -85,8 +83,7 @@ void *h_alloc_data(heap_t* h, size_t bytes) {
     
     // return pointer
     return new_pointer;    
-  } else {
-    // if there is no space
+  } else { // if there is no space, return null
     return NULL;
   }
 }
