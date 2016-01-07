@@ -1,6 +1,7 @@
 #include <CUnit/Basic.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <stdbool.h>
 #include "heap.h"
 #include "traverser.h"
@@ -21,11 +22,58 @@ int clean_suite(void) {
   return 0;
 }
 
+struct test {
+    void *link;
+};
+
+void testTRAVERSE_LL_HEAP() {
+
+    ll_head stack_pointers = LL_initRoot();
+
+    struct test *pt_a = h_alloc_struct(heap, "*");
+    struct test *pt_b = h_alloc_struct(heap, "*");
+    struct test *pt_c = h_alloc_struct(heap, "*");
+    struct test *pt_d = h_alloc_struct(heap, "*");
+
+    struct test a, b, c, d;
+    *pt_b = b;
+    *pt_c = c;
+    *pt_a = a;
+    *pt_d = d;
+
+    pt_c->link = NULL;
+    pt_b->link = pt_c;
+    pt_a->link = pt_b;
+    pt_d->link = NULL;
+
+    int objectsA = LL_length(fs_get_pointers_within_object(pt_a));
+    printf("Objects in A: %d\n", objectsA);
+
+    LL_createAndInsertSequentially(stack_pointers, pt_a);
+    LL_createAndInsertSequentially(stack_pointers, pt_d);
+
+    int length = LL_length(traverse_pointers_from_LL(stack_pointers));
+    printf("length: %d\n", length);
+    CU_ASSERT_EQUAL(length, 4);
+
+}
+
 void testPRINTHEAP() {
-  void *pointer = h_alloc_data(heap, 16);
-  void *pointer2 = h_alloc_struct(heap, "***iii");
-  print_traversed_heap(heap);
+  // void *pointer = h_alloc_data(heap, 16);
+  // void *pointer2 = h_alloc_struct(heap, "***iii");
+  // print_traversed_heap(heap);
   CU_ASSERT_EQUAL(true ,true);
+}
+
+void testTRAVERSE() {
+  ll_head stack_pointers = LL_initRoot();
+  int a,b,c,d;
+  LL_createAndInsertSequentially(stack_pointers, &a);
+  LL_createAndInsertSequentially(stack_pointers, &b);
+  LL_createAndInsertSequentially(stack_pointers, &c);
+  LL_createAndInsertSequentially(stack_pointers, &d);
+
+  CU_ASSERT_EQUAL(LL_length(traverse_pointers_from_LL(stack_pointers)),4);
 }
 
 void testCUNITWORKS() {
@@ -55,6 +103,8 @@ int main(int argc, char const *argv[]) {
 
     if ((NULL == CU_add_test(pSuite, "testing CUnit", testCUNITWORKS)) ||
          NULL == CU_add_test(pSuite, "testing printStack", testPRINTSTACK) ||
+         NULL == CU_add_test(pSuite, "testing traverseHeap", testTRAVERSE) ||
+         NULL == CU_add_test(pSuite, "testing traverseLLHeap", testTRAVERSE_LL_HEAP) ||
          NULL == CU_add_test(pSuite, "testing printHeap", testPRINTHEAP)) {
         CU_cleanup_registry();
         return CU_get_error();

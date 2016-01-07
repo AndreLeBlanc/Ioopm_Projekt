@@ -3,7 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 
-// mallocates space for heap, places metadata in the front. 
+// mallocates space for heap, places metadata in the front.
 
 heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold) {
   if(bytes < sizeof(heap_t)) {
@@ -15,7 +15,7 @@ heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold) {
 
   // create metadata struct and place it in the front of the heap
   // the user sees this as a heap_t struct and is therefore not
-  // aware that it is the pointer to the whole heap. 
+  // aware that it is the pointer to the whole heap.
   ((heap_t*) new_heap)->meta_p = new_heap;
   ((heap_t*) new_heap)->user_start_p = new_heap + sizeof(heap_t);
   ((heap_t*) new_heap)->bump_p = new_heap + sizeof(heap_t);
@@ -31,7 +31,7 @@ heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold) {
 void h_delete(heap_t *h) {
   if(h != NULL) {
     free(h);
-  } 
+  }
 }
 
 
@@ -61,7 +61,7 @@ void *h_alloc_data(heap_t* h, size_t bytes) {
 
   if(h->bump_p + total_bytes <= h->end_p) {
     // if there is space
-    
+
     // save bump pointer for returning. This pointer skips the metadata
     void* new_pointer = h->bump_p + sizeof(metadata_t);
     // update bump pointer and avail space
@@ -73,9 +73,9 @@ void *h_alloc_data(heap_t* h, size_t bytes) {
     md_set_bit_vector(new_pointer, '\0');
     md_set_forwarding_address(new_pointer, NULL);
     md_set_copied_flag(new_pointer, false);
-    
+
     // return pointer
-    return new_pointer;    
+    return new_pointer;
   } else {
     // if there is no space
     return NULL;
@@ -87,13 +87,13 @@ size_t fs_calculate_size(char* format_string) {
   int multiplier = 1;
 
   size_t size = 0;
-  
+
   for(int i = 0; i < fs_length; i++) {
     if(format_string[i] >= 'A' && format_string[i] <= 'Z') {
       format_string[i] = tolower(format_string[i]);
     }
     switch(format_string[i]) {
-      // if any of the following characters: multiply size with multiplier and add to size. 
+      // if any of the following characters: multiply size with multiplier and add to size.
       // Pointers
     case '*':
       size += sizeof(void*) * multiplier;
@@ -125,20 +125,20 @@ size_t fs_calculate_size(char* format_string) {
       multiplier = 1;
       break;
       // if none of these characters, then check if it is a multiplier
-    default:  
-      if(format_string[i] >= '0' && format_string[i] <= '9') { 
+    default:
+      if(format_string[i] >= '0' && format_string[i] <= '9') {
 	// if the char is an integer, convert and save to multiplier.
-	int digit = format_string[i] -  '0'; 
+	int digit = format_string[i] -  '0';
 	if(multiplier == 1) {
 	  multiplier = digit;
 	} else {
 	  multiplier = multiplier * 10 + digit;
-	} 
+	}
       } else {
 	// if an invalid character is in the string, return 0
 	return 0;
       }
-	    
+
 	break;
     }
   }
@@ -153,7 +153,7 @@ void *h_alloc_struct(heap_t* h, char* format_string) {
 
   if(object_bytes && h->bump_p + total_bytes <= h->end_p) {
     // if there is space or if calculation succeeded
-    
+
     // save bump pointer for returning. This pointer skips the metadata
     void* new_pointer = h->bump_p + metadata_bytes;
     // update bump pointer and avail space
@@ -165,9 +165,9 @@ void *h_alloc_struct(heap_t* h, char* format_string) {
     md_set_bit_vector(new_pointer, '\0');
     md_set_forwarding_address(new_pointer, NULL);
     md_set_copied_flag(new_pointer, false);
-    
+
     // return pointer
-    return new_pointer;    
+    return new_pointer;
   } else {
     // if there is no space or if calculation failed
     return NULL;
@@ -175,8 +175,8 @@ void *h_alloc_struct(heap_t* h, char* format_string) {
 }
 
 bool validate_object(void* object) {
-  // TODO: Doesn't validate anything yet. 
-  return true; 
+  // TODO: Doesn't validate anything yet.
+  return true;
 }
 
 
@@ -246,8 +246,8 @@ ll_head fs_get_pointers_within_object(void* object) {
   void *pointer = object;
 
   ll_head pointer_list = LL_initRoot();
-  
-  for(int i = 0; i < strlen(format_string); i++) { 
+
+  for(int i = 0; i < strlen(format_string); i++) {
     switch(format_string[i]) {
       // if a pointer, add to list and increment pointer appropriately
       // if any of the other characters, increment pointer appropriately
@@ -285,15 +285,15 @@ ll_head fs_get_pointers_within_object(void* object) {
       multiplier = 1;
       break;
       // if none of these characters, then check if it is a multiplier
-    default:  
-      if(format_string[i] >= '0' && format_string[i] <= '9') { 
+    default:
+      if(format_string[i] >= '0' && format_string[i] <= '9') {
 	// if the char is an integer, convert and save to multiplier.
-	int digit = format_string[i] -  '0'; 
+	int digit = format_string[i] -  '0';
 	if(multiplier == 1) {
 	  multiplier = digit;
 	} else {
 	  multiplier = multiplier * 10 + digit;
-	} 
+	}
       } else {
 	// if an invalid character is in the string, return null
 	return NULL;

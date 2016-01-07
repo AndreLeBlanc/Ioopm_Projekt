@@ -19,11 +19,25 @@ ll_head traverse_pointers_from_LL(ll_head pointers) {
         while(cursor != NULL) {
             //grab pointers within object.
             ll_head child_pointers = fs_get_pointers_within_object(cursor);
+            printf("\nCursor: %p\n", cursor);
+            printf("\nChild_pointers: %p\n", child_pointers);
             if(child_pointers != NULL) {
-                //TODO är rädd att vi insertar listor, vi måste fixa det /V
-                LL_insertSequentially(pointers, traverse_pointers_from_LL(child_pointers)); //add to list and recursive call
-            } else {
-                continue;
+                puts("Inside recursive call.");
+                ll_head recursive_pointers = traverse_pointers_from_LL(child_pointers);
+                if(recursive_pointers != NULL) {
+                    while(recursive_pointers != NULL) {
+                        printf("\nRec_cursor: %p\n", recursive_pointers);
+                        LL_createAndInsertSequentially(pointers, recursive_pointers);
+                        recursive_pointers = LL_getNext(recursive_pointers);
+                    }
+                } else {
+                    while(child_pointers != NULL) {
+                        printf("\nChild_cursor: %p\n", child_pointers);
+                        LL_createAndInsertSequentially(pointers, child_pointers);
+                        child_pointers = LL_getNext(child_pointers);
+                    }
+                }
+                // LL_insertSequentially(pointers, traverse_pointers_from_LL(child_pointers)); //add to list and recursive call
             }
             cursor = LL_getNext(cursor);
         }
