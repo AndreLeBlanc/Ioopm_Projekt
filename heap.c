@@ -1,6 +1,7 @@
 #include "heap.h"
 #include "linked_list.h"
 #include <string.h>
+#include <stdio.h>
 #include <ctype.h>
 
 // mallocates space for heap, places metadata in the front. 
@@ -24,6 +25,7 @@ heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold) {
   new_heap->end_p             = new_heap + bytes;
   new_heap->total_size        = bytes;
   new_heap->user_size         = bytes - sizeof(heap_t);
+  new_heap->used_space        = 0;
   new_heap->avail_space       = bytes - sizeof(heap_t);
   new_heap->unsafe_stack      = unsafe_stack;
   new_heap->gc_threshold      = gc_threshold;
@@ -61,6 +63,13 @@ void h_delete(heap_t *h) {
   } 
 }
 
+size_t h_avail(heap_t *h) {
+  return h->avail_space;
+}
+
+size_t h_used(heap_t *h) {
+  return h->used_space;
+}
 
 void* get_heap_start(heap_t* h) {
   return h->user_start_p;
@@ -86,15 +95,14 @@ typedef struct metadata {
 void *h_alloc_data(heap_t* h, size_t bytes) {
   size_t total_bytes = bytes + sizeof(metadata_t);
 
-  if(h->bump_p + total_bytes <= h->end_p) {
-    // if there is space
-    
+  if(h->bump_p + total_bytes <= h->end_p) {// if there is space, allocate
     // save bump pointer for returning. This pointer skips the metadata
     void* new_pointer = h->bump_p + sizeof(metadata_t);
     // update bump pointer and avail space
     h->bump_p += total_bytes;
+    h->used_space += total_bytes;
     h->avail_space -= total_bytes;
-
+    
     // update metadata
     md_set_format_string(new_pointer, "none");
     md_set_bit_vector(new_pointer, '\0');
@@ -103,8 +111,7 @@ void *h_alloc_data(heap_t* h, size_t bytes) {
     
     // return pointer
     return new_pointer;    
-  } else {
-    // if there is no space
+  } else { // if there is no space, return null
     return NULL;
   }
 }
@@ -164,8 +171,7 @@ size_t fs_calculate_size(char* format_string) {
       } else {
 	// if an invalid character is in the string, return 0
 	return 0;
-      }
-	    
+      }	    
 	break;
     }
   }
@@ -185,6 +191,7 @@ void *h_alloc_struct(heap_t* h, char* format_string) {
     void* new_pointer = h->bump_p + metadata_bytes;
     // update bump pointer and avail space
     h->bump_p += total_bytes;
+    h->used_space += total_bytes;
     h->avail_space -= total_bytes;
 
     // update metadata
