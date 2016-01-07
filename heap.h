@@ -9,7 +9,7 @@
 #define __heap__
 
 #define NUMBER_OF_PAGES 1
-#define PAGE_SIZE 2048
+#define PAGE_SIZE (size_t) 2048
 
 // TODO: THIS IS TEMPORARY! If you are accessing the heap through this struct then you need to use a get-function (which might need creating)
 struct heap{

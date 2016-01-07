@@ -90,8 +90,8 @@ typedef struct metadata {
 
 size_t fs_calculate_size(char* format_string) {
   int fs_length = strlen(format_string);
-  int multiplier = 1;
-
+  int multiplier = 0;
+  
   size_t size = 0;
   
   for(int i = 0; i < fs_length; i++) {
@@ -102,44 +102,40 @@ size_t fs_calculate_size(char* format_string) {
       // if any of the following characters: multiply size with multiplier and add to size. 
       // Pointers
     case '*':
-      size += sizeof(void*) * multiplier;
-      multiplier = 1;
+      size += sizeof(void*) * (multiplier ? multiplier : 1);
+      multiplier = 0;
       break;
       // Integers
     case 'i':
-      size += sizeof(int) * multiplier;
-      multiplier = 1;
+      size += sizeof(int) * (multiplier ? multiplier : 1);
+      multiplier = 0;
       break;
       // Floats
     case 'f':
-      size += sizeof(float) * multiplier;
-      multiplier = 1;
+      size += sizeof(float) * (multiplier ? multiplier : 1);
+      multiplier = 0;
       break;
       // Characters
     case 'c':
-      size += sizeof(char) * multiplier;
-      multiplier = 1;
+      size += sizeof(char) * (multiplier ? multiplier : 1);
+      multiplier = 0;
       break;
       // Longs
     case 'l':
-      size += sizeof(long) * multiplier;
-      multiplier = 1;
+      size += sizeof(long) * (multiplier ? multiplier : 1);
+      multiplier = 0;
       break;
       // Doubles
     case 'd':
-      size += sizeof(double) * multiplier;
-      multiplier = 1;
+      size += sizeof(double) * (multiplier ? multiplier : 1);
+      multiplier = 0;
       break;
       // if none of these characters, then check if it is a multiplier
     default:  
       if(format_string[i] >= '0' && format_string[i] <= '9') { 
 	// if the char is an integer, convert and save to multiplier.
 	int digit = format_string[i] -  '0'; 
-	if(multiplier == 1) {
-	  multiplier = digit;
-	} else {
-	  multiplier = multiplier * 10 + digit;
-	} 
+        multiplier = multiplier * 10 + digit;
       } else {
 	// if an invalid character is in the string, return 0
 	return 0;
@@ -151,28 +147,60 @@ size_t fs_calculate_size(char* format_string) {
 }
 
 page_t *get_allocation_page(heap_t* h, size_t bytes) {
-  page_t *cursor = h->active_page_list;
+  page_t *active_page_cursor = h->active_page_list;
+  page_t *previous_active_page_cursor = NULL;
+  
+  while(active_page_cursor) {
 
-  while(cursor) {
     // go through all active pages
-    if(cursor->bump_p + bytes < cursor->end_p) {
+    if(active_page_cursor->bump_p + bytes < active_page_cursor->end_p) {
       // if object fits in page return that page
-      return cursor;
+      return active_page_cursor;
     }
-    // go to next active page
-    cursor = cursor->next_page;
-  }
-  // if this point is reached, then no active pages are suitable
-  cursor = h->passive_page_list;
 
-  while(cursor) {
-    // go through all passive pages
-    if(cursor->bump_p + bytes < cursor->end_p) {
-      // if object fits in page make active and return that page
-      cursor->active = true;
-      return cursor;
-    }
+    // go to next active page
+    previous_active_page_cursor = active_page_cursor;
+    active_page_cursor = active_page_cursor->next_page;
   }
+
+  // if this point is reached, then no active pages are suitable
+  page_t *passive_page_cursor = h->passive_page_list;
+  page_t *previous_passive_page_cursor = NULL;
+  while(passive_page_cursor) {
+    // go through all passive pages
+
+    if(passive_page_cursor->bump_p + bytes < passive_page_cursor->end_p) {
+      // if object fits in page make active and return that page
+      passive_page_cursor->active = true;
+
+      // TODO: make this a comparative insertion so pages are always in order.   
+      // add passive page to active page list 
+      if(previous_active_page_cursor == NULL) {
+        // if active page list is empty
+        h->active_page_list = passive_page_cursor;
+      } else {
+        // if active page list is not empty
+        previous_active_page_cursor->next_page = passive_page_cursor;
+      }
+      
+      // remove passive page from passive page list
+      if(previous_passive_page_cursor == NULL) {
+        // if it is the first page in list, change heaps list pointer
+        h->passive_page_list = passive_page_cursor->next_page;
+      } else {
+        // if it is not the first page in list, change previous page's next pointer
+        previous_passive_page_cursor->next_page = passive_page_cursor->next_page;
+      }
+      passive_page_cursor->next_page = NULL;
+      return passive_page_cursor;
+    }
+
+    // go to next passive page
+    previous_passive_page_cursor = passive_page_cursor;
+    passive_page_cursor = passive_page_cursor->next_page;
+  }
+  // if no page was found, return NULL
+  return NULL;
 }
 
 void *h_alloc(heap_t* h, size_t bytes, char* format_string) {

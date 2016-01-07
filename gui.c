@@ -29,8 +29,6 @@ void print_heap() {
   if(heap_p != NULL) {
     printf("-- Heap --\n");
 
-
-
     // Print heap percentages
     page_t* page_cursor = (page_t*) heap_p->user_start_p;  
     int cursor_loc = 0;
@@ -41,6 +39,8 @@ void print_heap() {
           (cursor_loc >= RELATIVE_LOCATION_IN_HEAP(page_cursor, print_width) &&
            cursor_loc <= RELATIVE_LOCATION_IN_HEAP(page_cursor->user_start_p, print_width))) {
         printf("#");
+      } else if(cursor_loc < RELATIVE_LOCATION_IN_HEAP(page_cursor->bump_p, print_width)) {
+        printf("O");
       } else {
         if(cursor_loc == RELATIVE_LOCATION_IN_HEAP(page_cursor->end_p, print_width)) {
           page_cursor = (void*) page_cursor->end_p + 1;
