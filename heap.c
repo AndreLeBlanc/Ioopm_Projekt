@@ -7,7 +7,6 @@
 // mallocates space for heap, places metadata in the front. 
 
 heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold) {
-  printf("1\n");
   if(bytes < sizeof(heap_t) + sizeof(page_t)) {
     // if space allocated is not even enough for heap and page metadata, don't allocate
     return NULL;    
@@ -22,7 +21,6 @@ heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold) {
   new_heap->user_start_p      = (void*) new_heap + sizeof(heap_t);
   new_heap->active_page_list  = NULL;
   new_heap->passive_page_list = (void*) new_heap + sizeof(heap_t);
-  new_heap->bump_p            = (void*) new_heap + sizeof(heap_t);
   new_heap->end_p             = (void*) new_heap + bytes - 1;
   new_heap->total_size        = bytes;
   new_heap->user_size         = bytes - sizeof(heap_t);
@@ -31,29 +29,23 @@ heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold) {
   new_heap->unsafe_stack      = unsafe_stack;
   new_heap->gc_threshold      = gc_threshold;
 
-  printf("2 - %p |-| %p\n", new_heap->user_start_p, new_heap->end_p);
-  
   // set up pages
   size_t bytes_left = bytes;
   page_t* cursor = new_heap->passive_page_list;
 
   while(cursor) {    
     // set defaults for page
-    printf("3 - %p\n", cursor);
-    cursor->user_start_p = cursor + sizeof(page_t);
-    cursor->bump_p       = cursor + sizeof(page_t);
+    cursor->user_start_p = (void*) cursor + sizeof(page_t);
+    cursor->bump_p       = (void*) cursor + sizeof(page_t);
     cursor->end_p        = (void*) cursor + (bytes_left > PAGE_SIZE ? PAGE_SIZE : bytes_left);
     cursor->active       = false;
     cursor->unsure       = false;
     cursor->next_page    = (bytes_left > PAGE_SIZE ? (void*) cursor->end_p + 1 : NULL);
-    printf("4  - end:%p - cur:%p = %ld\n", new_heap->end_p, cursor, (intptr_t) new_heap->end_p - (intptr_t) cursor);    
     // go to next page and update bytes_left as well as user_size and avail_space in heap
     cursor = cursor->next_page;
     bytes_left -= PAGE_SIZE;
-    printf("5\n");
     new_heap->total_size -= sizeof(page_t);
     new_heap->avail_space -= sizeof(page_t);
-    printf("6\n");
   }
 
 
@@ -158,14 +150,40 @@ size_t fs_calculate_size(char* format_string) {
   return size;
 }
 
+page_t *get_allocation_page(heap_t* h, size_t bytes) {
+  page_t *cursor = h->active_page_list;
+
+  while(cursor) {
+    // go through all active pages
+    if(cursor->bump_p + bytes < cursor->end_p) {
+      // if object fits in page return that page
+      return cursor;
+    }
+    // go to next active page
+    cursor = cursor->next_page;
+  }
+  // if this point is reached, then no active pages are suitable
+  cursor = h->passive_page_list;
+
+  while(cursor) {
+    // go through all passive pages
+    if(cursor->bump_p + bytes < cursor->end_p) {
+      // if object fits in page make active and return that page
+      cursor->active = true;
+      return cursor;
+    }
+  }
+}
+
 void *h_alloc(heap_t* h, size_t bytes, char* format_string) {
   size_t total_bytes = bytes + sizeof(metadata_t);
-
-  if(h->bump_p + total_bytes <= h->end_p) {// if there is space, allocate
+  page_t *p = get_allocation_page(h, total_bytes);
+  
+  if(p && p->bump_p + total_bytes <= p->end_p) {// if there is a page and it has space, allocate
     // save bump pointer for returning. This pointer skips the metadata
-    void* new_pointer = h->bump_p + sizeof(metadata_t);
+    void* new_pointer = p->bump_p + sizeof(metadata_t);
     // update bump pointer and avail space
-    h->bump_p += total_bytes;
+    p->bump_p += total_bytes;
     h->used_space += total_bytes;
     h->avail_space -= total_bytes;
     
@@ -177,7 +195,7 @@ void *h_alloc(heap_t* h, size_t bytes, char* format_string) {
     
     // return pointer
     return new_pointer;    
-  } else { // if there is no space, return null
+  } else { // if there is no page or space, return null
     return NULL;
   }
 }

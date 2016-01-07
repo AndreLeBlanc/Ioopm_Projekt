@@ -8,6 +8,7 @@
 #include "linked_list.h"
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+#define RELATIVE_LOCATION_IN_HEAP(p, fidelity) (((intptr_t) p - (intptr_t) heap_p) * fidelity / ((intptr_t) heap_p->end_p - (intptr_t) heap_p))
 
 // global variables
 
@@ -31,25 +32,21 @@ void print_heap() {
 
 
     // Print heap percentages
+    page_t* page_cursor = (page_t*) heap_p->user_start_p;  
     int cursor_loc = 0;
     printf("Allocation chart \t[");
     // print meta space
-    while(cursor_loc < ((intptr_t) heap_p->user_start_p - (intptr_t) heap_p)
-	  * print_width / ((intptr_t) heap_p->end_p - (intptr_t) heap_p)  &&
-	  cursor_loc < print_width) {
-      printf("#");
-      cursor_loc++;
-    }
-    // print allocated space
-    while(cursor_loc < ((intptr_t) heap_p->bump_p - (intptr_t) heap_p)
-	  * print_width / ((intptr_t) heap_p->end_p - (intptr_t) heap_p)  &&
-	  cursor_loc < print_width) {
-      printf("O");
-      cursor_loc++;
-    }
-    // print free space
-    while(true && cursor_loc < print_width) {
-      printf("-");
+    while(cursor_loc < print_width) {
+      if(cursor_loc < RELATIVE_LOCATION_IN_HEAP(heap_p->user_start_p, print_width) ||
+          (cursor_loc >= RELATIVE_LOCATION_IN_HEAP(page_cursor, print_width) &&
+           cursor_loc <= RELATIVE_LOCATION_IN_HEAP(page_cursor->user_start_p, print_width))) {
+        printf("#");
+      } else {
+        if(cursor_loc == RELATIVE_LOCATION_IN_HEAP(page_cursor->end_p, print_width)) {
+          page_cursor = (void*) page_cursor->end_p + 1;
+        }
+        printf("-");
+      }
       cursor_loc++;
     }
     printf("]\n");
@@ -59,10 +56,7 @@ void print_heap() {
     cursor_loc = 0;
     printf("Pointer locations \t[");
     while(cursor_loc < print_width) {
-      if(cursor_loc == ((intptr_t) LL_getContent(pointer_cursor) - (intptr_t) heap_p) * print_width /
-	               ((intptr_t) heap_p->end_p - (intptr_t) heap_p) ||
-	 cursor_loc == ((intptr_t) heap_p->bump_p - (intptr_t) heap_p) * print_width /
-	               ((intptr_t) heap_p->end_p - (intptr_t) heap_p)) {
+      if(cursor_loc == RELATIVE_LOCATION_IN_HEAP(LL_getContent(pointer_cursor), print_width)) {
 	// print a line at beginning och allocations and at bump pointer
 	printf("|");
 	pointer_cursor = LL_getNext(pointer_cursor);
@@ -74,13 +68,12 @@ void print_heap() {
     printf("]\n");
 
     // print pages
-    page_t* page_cursor = (page_t*) heap_p->user_start_p;  
+    page_cursor = (page_t*) heap_p->user_start_p;  
     cursor_loc = 0;
     char filler = ' ';
     printf("Pages \t\t\t[");
     while(cursor_loc < print_width) {
-      if(cursor_loc == ((intptr_t) page_cursor - (intptr_t) heap_p) * print_width /
-	               ((intptr_t) heap_p->end_p - (intptr_t) heap_p)) {
+      if(cursor_loc == RELATIVE_LOCATION_IN_HEAP(page_cursor, print_width)) {
 	printf("|");
 	filler = (page_cursor->active ? '-' : ' ');
 	page_cursor = (void*) page_cursor->end_p + 1;
@@ -112,7 +105,6 @@ void print_heap() {
     printf("User start pointer:\t\t%p\n", heap_p->user_start_p);
     printf("Number of active pages:\t\t%d\n", active_pages);
     printf("Number of passive pages:\t%d\n", passive_pages); 
-    printf("Bump pointer:\t\t\t%p\n", heap_p->bump_p);
     printf("End pointer:\t\t\t%p\n", heap_p->end_p); 
     printf("Total size:\t\t\t%zu\n", heap_p->total_size);
     printf("User size:\t\t\t%zu\n", heap_p->user_size);
