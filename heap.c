@@ -96,30 +96,6 @@ typedef struct metadata {
   bool copied_flag;
 } metadata_t;
 
-void *h_alloc_data(heap_t* h, size_t bytes) {
-  size_t total_bytes = bytes + sizeof(metadata_t);
-
-  if(h->bump_p + total_bytes <= h->end_p) {// if there is space, allocate
-    // save bump pointer for returning. This pointer skips the metadata
-    void* new_pointer = h->bump_p + sizeof(metadata_t);
-    // update bump pointer and avail space
-    h->bump_p += total_bytes;
-    h->used_space += total_bytes;
-    h->avail_space -= total_bytes;
-    
-    // update metadata
-    md_set_format_string(new_pointer, "none");
-    md_set_bit_vector(new_pointer, '\0');
-    md_set_forwarding_address(new_pointer, NULL);
-    md_set_copied_flag(new_pointer, false);
-    
-    // return pointer
-    return new_pointer;    
-  } else { // if there is no space, return null
-    return NULL;
-  }
-}
-
 size_t fs_calculate_size(char* format_string) {
   int fs_length = strlen(format_string);
   int multiplier = 1;
@@ -182,22 +158,17 @@ size_t fs_calculate_size(char* format_string) {
   return size;
 }
 
+void *h_alloc(heap_t* h, size_t bytes, char* format_string) {
+  size_t total_bytes = bytes + sizeof(metadata_t);
 
-void *h_alloc_struct(heap_t* h, char* format_string) {
-  size_t object_bytes = fs_calculate_size(format_string);
-  size_t metadata_bytes = sizeof(metadata_t);
-  size_t total_bytes = object_bytes + metadata_bytes;
-
-  if(object_bytes && h->bump_p + total_bytes <= h->end_p) {
-    // if there is space or if calculation succeeded
-    
+  if(h->bump_p + total_bytes <= h->end_p) {// if there is space, allocate
     // save bump pointer for returning. This pointer skips the metadata
-    void* new_pointer = h->bump_p + metadata_bytes;
+    void* new_pointer = h->bump_p + sizeof(metadata_t);
     // update bump pointer and avail space
     h->bump_p += total_bytes;
     h->used_space += total_bytes;
     h->avail_space -= total_bytes;
-
+    
     // update metadata
     md_set_format_string(new_pointer, format_string);
     md_set_bit_vector(new_pointer, '\0');
@@ -206,8 +177,22 @@ void *h_alloc_struct(heap_t* h, char* format_string) {
     
     // return pointer
     return new_pointer;    
+  } else { // if there is no space, return null
+    return NULL;
+  }
+}
+
+void *h_alloc_data(heap_t* h, size_t bytes) {
+  return h_alloc(h, bytes, "none"); 
+}
+
+void *h_alloc_struct(heap_t* h, char* format_string) {
+  size_t object_bytes = fs_calculate_size(format_string);
+  if(object_bytes) {
+    // if calculation succeeded, allocate
+    return h_alloc(h, object_bytes, format_string);
   } else {
-    // if there is no space or if calculation failed
+    // if calculation failed, return NULL
     return NULL;
   }
 }
