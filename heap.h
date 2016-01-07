@@ -9,7 +9,6 @@
 #define NUMBER_OF_PAGES 1
 #define PAGE_SIZE 2048
 
-
 // TODO: THIS IS TEMPORARY! If you are accessing the heap through this struct then you need to use a get-function (which might need creating)
 struct heap{
   void* meta_p;       // pointer to heap's metadata (maybe unnecessary)
@@ -18,10 +17,11 @@ struct heap{
   void* end_p;        // pointer to end of allocated space
   size_t total_size;  // total size of the heap (with metadata)
   size_t user_size;   // size of user's allocated space (total_size minus metadata)
+  size_t used_space;  // amount of bytes allocated.
   size_t avail_space; // amount of allocatable space left.
   bool unsafe_stack;  // whether or not unsafe stack
   float gc_threshold; // garbage collector threshold (1.0 = full memory)
-}
+};
 
 // TODO: THIS IS TEMPORARY! This is here only for gui.c, nothing outside of heap.c should use this. 
 typedef struct page{

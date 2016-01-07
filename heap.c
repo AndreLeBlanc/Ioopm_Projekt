@@ -22,6 +22,7 @@ heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold) {
   ((heap_t*) new_heap)->end_p = new_heap + bytes;
   ((heap_t*) new_heap)->total_size = bytes;
   ((heap_t*) new_heap)->user_size = bytes - sizeof(heap_t);
+  ((heap_t*) new_heap)->used_space = 0;
   ((heap_t*) new_heap)->avail_space = bytes - sizeof(heap_t);
   ((heap_t*) new_heap)->unsafe_stack = unsafe_stack;
   ((heap_t*) new_heap)->gc_threshold = gc_threshold;
@@ -34,6 +35,13 @@ void h_delete(heap_t *h) {
   } 
 }
 
+size_t h_avail(heap_t *h) {
+  return h->avail_space;
+}
+
+size_t h_used(heap_t *h) {
+  return h->used_space;
+}
 
 void* get_heap_start(heap_t* h) {
   return h->user_start_p;
@@ -66,8 +74,9 @@ void *h_alloc_data(heap_t* h, size_t bytes) {
     void* new_pointer = h->bump_p + sizeof(metadata_t);
     // update bump pointer and avail space
     h->bump_p += total_bytes;
+    h->used_space += total-bytes;
     h->avail_space -= total_bytes;
-
+    
     // update metadata
     md_set_format_string(new_pointer, "none");
     md_set_bit_vector(new_pointer, '\0');
@@ -158,6 +167,7 @@ void *h_alloc_struct(heap_t* h, char* format_string) {
     void* new_pointer = h->bump_p + metadata_bytes;
     // update bump pointer and avail space
     h->bump_p += total_bytes;
+    h->used_space += total-bytes;
     h->avail_space -= total_bytes;
 
     // update metadata
