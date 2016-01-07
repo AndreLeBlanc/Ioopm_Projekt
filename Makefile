@@ -89,7 +89,7 @@ stack_test_run:
 
 #test with gui
 test_gui: $(FILES_MAIN) gui.c
-	$(CC) $(FLAGS_DEBUG) -o $@ $^
+	$(CC) $(FLAGS_DEBUG) -o $@.o $^
 
 #remove crap files.
 clean: gcov_clean
