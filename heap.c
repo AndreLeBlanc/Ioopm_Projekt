@@ -146,8 +146,7 @@ size_t fs_calculate_size(char* format_string) {
       } else {
 	// if an invalid character is in the string, return 0
 	return 0;
-      }
-	    
+      }	    
 	break;
     }
   }

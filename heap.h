@@ -1,3 +1,5 @@
+/// \file
+
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -34,7 +36,7 @@ typedef struct page{
 } page_t;
 
 /**
-   @brief Heap struct
+   @brief Heap struct type used to manipulate the heap. 
 */
 typedef struct heap heap_t;
 
@@ -100,6 +102,7 @@ size_t h_avail(heap_t *h);
 */
 size_t h_used(heap_t *h);
 
+// TODO: Rename to md_get_heap_start
 /**
    get_heap_start
    @brief Returns the pointer to the start of the user-allocation area of the heap.
@@ -108,6 +111,7 @@ size_t h_used(heap_t *h);
  */
 void* get_heap_start(heap_t *h);
 
+// TODO: Rename to md_get_heap_end
 /**
    get_heap_end
    @brief Returns the pointer to the end of the heap.
