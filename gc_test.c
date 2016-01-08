@@ -41,6 +41,11 @@ void testGETPOINTERSWITHINOBJECT() {
 
 }
 
+void testPrint(void *object) {
+  // struct test* pointer = (struct test*)object;
+  printf("[%p]\n", ((struct test*)object)->link);
+}
+
 void testTRAVERSE_LL_HEAP() {
 
     ll_head stack_pointers = LL_initRoot();
@@ -60,6 +65,17 @@ void testTRAVERSE_LL_HEAP() {
     pt_b->link = pt_c;
     pt_a->link = pt_b;
     pt_d->link = NULL;
+
+    puts("");
+    printf("a: %p -> %p : { %p }\n", pt_a, pt_a->link, (pt_a + sizeof(struct test) - 3));
+    LL_map(fs_get_pointers_within_object(pt_a), testPrint);
+
+    printf("b: %p -> %p\n", pt_b, pt_b->link);
+    LL_map(fs_get_pointers_within_object(pt_b), testPrint);
+    printf("c: %p -> %p\n", pt_c, pt_c->link);
+    LL_map(fs_get_pointers_within_object(pt_c), testPrint);
+    printf("d: %p -> %p\n", pt_d, pt_d->link);
+    LL_map(fs_get_pointers_within_object(pt_d), testPrint);
 
     int objectsA = LL_length(fs_get_pointers_within_object(pt_a));
     printf("Objects in A: %d\n", objectsA);

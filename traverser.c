@@ -50,17 +50,38 @@ ll_head traverse_pointers_from_LL_bak(ll_head pointers) {
 
 }
 
+void printAddress(void *object) {
+  printf("[%p]\n", object);
+}
+
 ll_head traverse_pointers_from_LL(ll_head pointers) {
 
     ll_head new_nodes = LL_initRoot();
 
     if(pointers != NULL && !LL_isEmpty(pointers)) {
+        puts("Pointers");
+        LL_map(pointers, printAddress);
         ll_head cursor = *pointers;
         while(cursor != NULL) {
             //avreferera pekaren TODO
             //plockar ut pekare från cursor, skickar med i rekursivt anrop.
             ll_head pointers_in_obj = fs_get_pointers_within_object(cursor);
             ll_head recursive_data = traverse_pointers_from_LL(pointers_in_obj);
+
+
+            if(pointers_in_obj != NULL) {
+              puts("pointers_in_obj");
+              LL_map(pointers_in_obj, printAddress);
+            } else {
+              puts("NULL");
+            }
+
+            if(recursive_data != NULL) {
+              puts("Recursive_data");
+              LL_map(recursive_data, printAddress);
+            } else {
+              puts("NULL");
+            }
 
             if(recursive_data != NULL) {
 

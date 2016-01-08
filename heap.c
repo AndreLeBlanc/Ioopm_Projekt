@@ -254,8 +254,8 @@ ll_head fs_get_pointers_within_object(void* object) {
       // Pointers
     case '*':
       for(int i = 0; i < multiplier; i++) {
-	LL_createAndInsertSequentially(pointer_list, pointer);
-	pointer = ((void*) pointer) + 1;
+      	LL_createAndInsertSequentially(pointer_list, pointer);
+      	pointer = ((void*) pointer) + 1;
       }
       multiplier = 1;
       break;
