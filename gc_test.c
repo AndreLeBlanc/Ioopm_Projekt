@@ -10,6 +10,10 @@
 
 heap_t *heap = NULL;
 
+struct test {
+    void *link;
+};
+
 int init_suite(void)
 {
     //create a new stack
@@ -22,9 +26,20 @@ int clean_suite(void) {
   return 0;
 }
 
-struct test {
-    void *link;
-};
+void testGETPOINTERSWITHINOBJECT() {
+
+  struct test *object = NULL;
+  int number = 10;
+  //allokera minne för object i vår heap.
+  object = h_alloc_struct(heap, "*");
+  //allokerar minne för int.
+  int *persistent_number = h_alloc_data(heap, sizeof(int));
+  *persistent_number = number;
+  //slänger in int i vårt test-objekt.
+  object->link = persistent_number;
+  CU_ASSERT_EQUAL(LL_length(fs_get_pointers_within_object(object)), 1);
+
+}
 
 void testTRAVERSE_LL_HEAP() {
 
@@ -104,7 +119,8 @@ int main(int argc, char const *argv[]) {
     if ((NULL == CU_add_test(pSuite, "testing CUnit", testCUNITWORKS)) ||
          NULL == CU_add_test(pSuite, "testing printStack", testPRINTSTACK) ||
          NULL == CU_add_test(pSuite, "testing traverseHeap", testTRAVERSE) ||
-         NULL == CU_add_test(pSuite, "testing traverseLLHeap", testTRAVERSE_LL_HEAP) ||
+         NULL == CU_add_test(pSuite, "testing get_pointers_within_object", testGETPOINTERSWITHINOBJECT) ||
+        //  NULL == CU_add_test(pSuite, "testing traverseLLHeap", testTRAVERSE_LL_HEAP) ||
          NULL == CU_add_test(pSuite, "testing printHeap", testPRINTHEAP)) {
         CU_cleanup_registry();
         return CU_get_error();
