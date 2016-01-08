@@ -10,7 +10,7 @@
   Denna lista med pekare kommer vara i samma format som den i linked_list-modulen.
   /H
 */
-ll_head traverse_pointers_from_LL(ll_head pointers) {
+ll_head traverse_pointers_from_LL_bak(ll_head pointers) {
 
     if(!LL_isEmpty(pointers)) {
 
@@ -46,6 +46,49 @@ ll_head traverse_pointers_from_LL(ll_head pointers) {
 
     } else {
         return NULL;
+    }
+
+}
+
+ll_head traverse_pointers_from_LL(ll_head pointers) {
+
+    ll_head new_nodes = LL_initRoot();
+
+    if(pointers != NULL && !LL_isEmpty(pointers)) {
+        ll_head cursor = *pointers;
+        while(cursor != NULL) {
+            //avreferera pekaren TODO
+            //plockar ut pekare från cursor, skickar med i rekursivt anrop.
+            ll_head pointers_in_obj = fs_get_pointers_within_object(cursor);
+            ll_head recursive_data = traverse_pointers_from_LL(pointers_in_obj);
+
+            if(recursive_data != NULL) {
+
+                ll_head recursive_cursor = *recursive_data;
+                while(recursive_cursor != NULL) {
+                    LL_createAndInsertSequentially(new_nodes, recursive_cursor);
+                    //WARNING, may fuck shit up.
+                    recursive_cursor = LL_getNext(recursive_cursor);
+                }
+
+            }
+
+            cursor = LL_getNext(cursor);
+        }
+
+        ll_head nn_cursor = *new_nodes;
+        while(nn_cursor != NULL) {
+            //insertandCreateblabla
+            LL_createAndInsertSequentially(pointers, nn_cursor);
+            nn_cursor = LL_getNext(nn_cursor);
+        }
+
+        return pointers;
+
+    } else {
+
+        return NULL;
+
     }
 
 }

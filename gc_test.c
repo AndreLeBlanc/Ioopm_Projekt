@@ -120,7 +120,7 @@ int main(int argc, char const *argv[]) {
          NULL == CU_add_test(pSuite, "testing printStack", testPRINTSTACK) ||
          NULL == CU_add_test(pSuite, "testing traverseHeap", testTRAVERSE) ||
          NULL == CU_add_test(pSuite, "testing get_pointers_within_object", testGETPOINTERSWITHINOBJECT) ||
-        //  NULL == CU_add_test(pSuite, "testing traverseLLHeap", testTRAVERSE_LL_HEAP) ||
+         NULL == CU_add_test(pSuite, "testing traverseLLHeap", testTRAVERSE_LL_HEAP) ||
          NULL == CU_add_test(pSuite, "testing printHeap", testPRINTHEAP)) {
         CU_cleanup_registry();
         return CU_get_error();
