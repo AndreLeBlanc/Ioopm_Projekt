@@ -98,12 +98,23 @@ void testPRINTHEAP() {
 }
 
 void testTRAVERSE() {
+
   ll_head stack_pointers = LL_initRoot();
-  int a,b,c,d;
-  LL_createAndInsertSequentially(stack_pointers, &a);
-  LL_createAndInsertSequentially(stack_pointers, &b);
-  LL_createAndInsertSequentially(stack_pointers, &c);
-  LL_createAndInsertSequentially(stack_pointers, &d);
+
+  int *pt_a = h_alloc_data(heap, sizeof(int));
+  int *pt_b = h_alloc_data(heap, sizeof(int));
+  int *pt_c = h_alloc_data(heap, sizeof(int));
+  int *pt_d = h_alloc_data(heap, sizeof(int));
+
+  *pt_a = 1;
+  *pt_b = 2;
+  *pt_c = 3;
+  *pt_d = 4;
+
+  LL_createAndInsertSequentially(stack_pointers, pt_a);
+  LL_createAndInsertSequentially(stack_pointers, pt_b);
+  LL_createAndInsertSequentially(stack_pointers, pt_c);
+  LL_createAndInsertSequentially(stack_pointers, pt_d);
 
   CU_ASSERT_EQUAL(LL_length(traverse_pointers_from_LL(stack_pointers)),4);
 }
@@ -135,9 +146,9 @@ int main(int argc, char const *argv[]) {
 
     if ((NULL == CU_add_test(pSuite, "testing CUnit", testCUNITWORKS)) ||
          NULL == CU_add_test(pSuite, "testing printStack", testPRINTSTACK) ||
+         NULL == CU_add_test(pSuite, "testing traverseLLHeap", testTRAVERSE_LL_HEAP) ||
          NULL == CU_add_test(pSuite, "testing traverseHeap", testTRAVERSE) ||
          NULL == CU_add_test(pSuite, "testing get_pointers_within_object", testGETPOINTERSWITHINOBJECT) ||
-         NULL == CU_add_test(pSuite, "testing traverseLLHeap", testTRAVERSE_LL_HEAP) ||
          NULL == CU_add_test(pSuite, "testing printHeap", testPRINTHEAP)) {
         CU_cleanup_registry();
         return CU_get_error();

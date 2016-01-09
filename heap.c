@@ -69,7 +69,7 @@ void *h_alloc_data(heap_t* h, size_t bytes) {
     h->avail_space -= total_bytes;
 
     // update metadata
-    md_set_format_string(new_pointer, "none");
+    md_set_format_string(new_pointer, NO_MD);
     md_set_bit_vector(new_pointer, '\0');
     md_set_forwarding_address(new_pointer, NULL);
     md_set_copied_flag(new_pointer, false);

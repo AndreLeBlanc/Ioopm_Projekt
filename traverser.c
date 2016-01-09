@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "heap.h"
 #include "traverser.h"
 #include "linked_list.h"
@@ -71,14 +72,27 @@ ll_head traverse_pointers_from_LL(ll_head pointers) {
 
             printf("%p -> %p\n", cursor, LL_getContent(cursor));
 
+            // puts("casting ints");
+            // void *content = (void *)LL_getContent(cursor);
+
             puts("casting");
             void **content = (void **)LL_getContent(cursor);
+            printf("metadata: %s\n", md_get_format_string(LL_getContent(cursor)));
+            char *metadata = md_get_format_string(LL_getContent(cursor));
+
+            if(strcmp(metadata, NO_MD) == 0) {
+              cursor = LL_getNext(cursor);
+              continue;
+            }
+
             ll_head pointers_in_obj = NULL;
 
             if(*content != NULL) {
               puts("pointers");
               pointers_in_obj = fs_get_pointers_within_object(*content);
             }
+
+            puts("recursive");
             ll_head recursive_data = traverse_pointers_from_LL(pointers_in_obj);
 
             if(pointers_in_obj != NULL) {

@@ -8,9 +8,10 @@
 
 #define NUMBER_OF_PAGES 1
 #define PAGE_SIZE 2048
+#define NO_MD "none" //no meta_data flag
 
 // Heap struct
-// An opaque struct which holds all the necessary information we need. 
+// An opaque struct which holds all the necessary information we need.
 
 typedef struct heap{
   void* meta_p;       // pointer to heap's metadata (maybe unnecessary)
@@ -29,11 +30,11 @@ typedef struct page{
   void* bump_p;       // pointer to next free spot in user's space
   void* end_p;        // pointer to end of allocated space
   bool active;        // boolean keeping track if the page is active (true) or passive (false)
-  bool unsure;        // boolean keeping track of whether a page is unsure or not 
+  bool unsure;        // boolean keeping track of whether a page is unsure or not
   struct page* next_page;    // a pointer to the next page
 } page_t;
 
-// mallocates space for heap, places metadata in the front. 
+// mallocates space for heap, places metadata in the front.
 heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold);
 
 void h_delete(heap_t* h);
@@ -91,7 +92,7 @@ void md_set_copied_flag(void* object, bool copied_flag);
 // Uses the format string to find all pointers in an object and puts
 // them in a list.
 // @param object A pointer to the allocated object
-// @return A list with all pointers within an object. 
+// @return A list with all pointers within an object.
 ll_head fs_get_pointers_within_object(void* object);
 
 size_t fs_get_object_size(void* object);
