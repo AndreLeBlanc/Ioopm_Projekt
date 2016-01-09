@@ -41,9 +41,10 @@ void testGETPOINTERSWITHINOBJECT() {
 
 }
 
-void testPrint(void *object) {
+void testPrint(void **object) {
   // struct test* pointer = (struct test*)object;
-  printf("[%p]\n", ((struct test*)object)->link);
+  // printf("[%p]\n", ((struct test*)object)->link);
+  printf("[%p]\n", *(object));
 }
 
 void testTRAVERSE_LL_HEAP() {
@@ -69,7 +70,6 @@ void testTRAVERSE_LL_HEAP() {
     puts("");
     printf("a: %p -> %p : { %p }\n", pt_a, pt_a->link, (pt_a + sizeof(struct test) - 3));
     LL_map(fs_get_pointers_within_object(pt_a), testPrint);
-
     printf("b: %p -> %p\n", pt_b, pt_b->link);
     LL_map(fs_get_pointers_within_object(pt_b), testPrint);
     printf("c: %p -> %p\n", pt_c, pt_c->link);
