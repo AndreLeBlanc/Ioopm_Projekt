@@ -6,28 +6,6 @@
 
 extern void **environ; // bottom of the stack
 
-void fuckOff(){}
-void endiannessTestAux(){}
-
-void endiannessTest() { // Haubir trollar
-  int stack;
-  void *heap = malloc(1);
-  void *heap2 = malloc(1);
-  Dump_registers();
-  puts("");
-  printf("printf:             %15p\n", printf);
-  printf("puts:               %15p\n", puts);
-  printf("fuckOff:            %15p\n", fuckOff);
-  printf("endiannessTestAux:  %15p\n", endiannessTestAux);
-  printf("endiannessTest:     %15p\n", endiannessTest);
-  printf("heap:     %15p\n", heap);
-  printf("heap2:    %15p\n", heap2);
-  printf("stack:    %15p\n", &stack);
-  int stack2;
-  printf("stack2:   %15p\n", &stack2);
-  stack_grows_from_top();
-}
-
 bool is_pointing_at_heap(void *ptr, heap_t *h/* , size_t bytes */) {
   long *content = (long *)ptr;
   puts("\nis_pointing_at_heap är startad.\n\n");
@@ -46,20 +24,6 @@ void *get_stack_top() {
   int top_of_stack;
 
   return &top_of_stack;
-}
-
-bool stack_grows_from_top() {
-  int stack1;
-  int stack2;
-
-  if (&stack1 < &stack2) {
-    printf("stack_grows_from_top == true\n");
-    return true;
-  }
-  else {
-    printf("stack_grows_from_top == false\n");  
-    return false;
-  }
 }
 
 ll_node **get_alive_stack_pointers(heap_t *h) {
