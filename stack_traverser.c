@@ -34,7 +34,7 @@ ll_node **get_alive_stack_pointers(heap_t *h) {
   // puts("Welcome to build_stack_list");
   int total = 0;
   int counter = 0;
-  void *bottom = (void *)environ;
+  //  void *bottom = (void *)environ;
 
   if ((uintptr_t)top > (uintptr_t)environ) {
     puts("Stack grows upwards.");
@@ -48,7 +48,7 @@ ll_node **get_alive_stack_pointers(heap_t *h) {
 	  total++;
 	}
       }
-      top -= sizeof(void *);
+      --top;// -= sizeof(void *);
       counter++;
     }
   }
@@ -65,7 +65,7 @@ ll_node **get_alive_stack_pointers(heap_t *h) {
 	  total++;
 	}
       }
-      top += sizeof(void *);
+      ++top;// += sizeof(void *);
       counter++;
     }
   }
@@ -102,17 +102,18 @@ struct haubir {
   int amazing;  
 };
 
+
 int main() {
   // create a new heap
   heap_t *new_heap = h_init(1024, true, 100.0);
   
   // allocate on this heap. For testing purposes
-  haubir_ *ptr = h_alloc_struct(new_heap, "cccc");
-  
-  printf("Allocated pointer: %ld\n", (uintptr_t)ptr);
-  printf("Address on stack:  %p\n", ptr);
+    haubir_ *ptr = h_alloc_struct(new_heap, "cccc");
+    haubir_ *malin = h_alloc_struct(new_heap, "*i");
+  /* printf("Allocated pointer: %ld\n", (uintptr_t)ptr); */
+  /* printf("Address on stack:  %p\n", ptr); */
 
-  is_pointing_at_heap(ptr, new_heap);
+  //  is_pointing_at_heap(ptr, new_heap);
 
   // Dump pointers from the registers to the stack, if any.
   Dump_registers();
@@ -130,3 +131,4 @@ int main() {
   
   return 0;
 }
+
