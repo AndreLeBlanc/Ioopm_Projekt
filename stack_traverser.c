@@ -62,13 +62,17 @@ bool stack_grows_from_top() {
   }
 }
 
-void create_stack_list(void *top, heap_t *h, ll_node **root) {
-  puts("Welcome to build_stack_list");
+ll_node **get_alive_stack_pointers(heap_t *h) {
+  printf("du är i get_alive_stack_pointers\n");
+  void *top = get_stack_top();
+  ll_node **root = LL_initRoot();
+
+  // puts("Welcome to build_stack_list");
   int total = 0;
   int counter = 0;
   void *bottom = (void *)environ;
 
-  if (!stack_grows_from_top()) {
+  if ((uintptr_t)top > (uintptr_t)environ) {
     puts("Stack grows upwards.\n");
     while ((uintptr_t)top > (uintptr_t)environ) {
       printf("Count %d: \ntop: %p\n", counter, top);
@@ -104,14 +108,7 @@ void create_stack_list(void *top, heap_t *h, ll_node **root) {
   puts("\n--------------------------------\n");
   printf("Total pointers added to the list: %d\n", total);
   puts("\n--------------------------------\n");
-}
-
-ll_node **get_alive_stack_pointers(heap_t *h) {
-  printf("du är i traverse stack list\n");
-  void *top = get_stack_top();
-  ll_node **root = LL_initRoot();
-
-  create_stack_list(top, h, root);
+  //  create_stack_list(top, h, root);
 
   return root;  
 }
