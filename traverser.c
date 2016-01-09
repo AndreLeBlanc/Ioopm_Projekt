@@ -60,18 +60,24 @@ void printAddress(void *object) {
 
 ll_head traverse_pointers_from_LL(ll_head pointers) {
 
-    printf("\nPOINTERS AQUIRED\n");
-    LL_map(pointers, printAddress);
-
     ll_head new_nodes = LL_initRoot();
     if(pointers != NULL && !LL_isEmpty(pointers)) {
 
-        LL_map(pointers, printAddress);
+      printf("\nPOINTERS AQUIRED\n");
+      LL_map(pointers, printAddress);
+
         ll_node *cursor = *pointers;
         while(cursor != NULL) {
 
             printf("%p -> %p\n", cursor, LL_getContent(cursor));
-            ll_head pointers_in_obj = fs_get_pointers_within_object(LL_getContent(cursor));
+            void **content = NULL;
+            if(LL_getContent(cursor) != NULL) {
+              content = (void **)LL_getContent(cursor);
+            }
+            ll_head pointers_in_obj = NULL;
+            if(content != NULL) {
+              pointers_in_obj = fs_get_pointers_within_object(*content);
+            }
             ll_head recursive_data = traverse_pointers_from_LL(pointers_in_obj);
 
             if(pointers_in_obj != NULL) {
