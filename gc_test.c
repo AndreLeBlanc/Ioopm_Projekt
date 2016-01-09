@@ -41,6 +41,80 @@ void testGETPOINTERSWITHINOBJECT() {
 
 }
 
+struct linked {
+  void *content;
+  int number;
+  void *next;
+};
+
+void testTRAVERSESTRUCT() {
+
+  ll_head stack_pointers = LL_initRoot();
+
+  struct linked *list_a = h_alloc_struct(heap, "*i*");
+  struct linked *list_b = h_alloc_struct(heap, "*i*");
+  struct linked *list_c = h_alloc_struct(heap, "*i*");
+  struct linked *list_d = h_alloc_struct(heap, "*i*");
+
+  struct linked *list_aa = h_alloc_struct(heap, "*i*");
+  struct linked *list_ab = h_alloc_struct(heap, "*i*");
+  struct linked *list_ac = h_alloc_struct(heap, "*i*");
+  struct linked *list_ad = h_alloc_struct(heap, "*i*");
+
+  struct linked a, b, c, d, aa, ab, ac, ad;
+  *list_a = a;
+  *list_b = b;
+  *list_c = c;
+  *list_d = d;
+  *list_aa = aa;
+  *list_ab = ab;
+  *list_ac = ac;
+  *list_ad = ad;
+
+  list_a->content = list_aa;
+  list_a->next = list_b;
+  list_a->number = 22;
+
+  list_b->content = NULL;
+  list_b->next = list_c;
+  list_b->number = 44;
+
+  list_c->content = NULL;
+  list_c->next = list_d;
+  list_c->number = 66;
+
+  list_d->content = NULL;
+  list_d->next = NULL;
+  list_d->number = 88;
+
+  list_aa->content = NULL;
+  list_ab->content = NULL;
+  list_ac->content = NULL;
+  list_ad->content = NULL;
+
+  list_aa->next = list_ab;
+  list_ab->next = list_ac;
+  list_ac->next = list_ad;
+  list_ad->next = NULL;
+
+  list_aa->number = 10;
+  list_ab->number = 20;
+  list_ac->number = 30;
+  list_ad->number = 40;
+
+  LL_createAndInsertSequentially(stack_pointers, list_a);
+  LL_createAndInsertSequentially(stack_pointers, list_b);
+  LL_createAndInsertSequentially(stack_pointers, list_c);
+  LL_createAndInsertSequentially(stack_pointers, list_d);
+  LL_createAndInsertSequentially(stack_pointers, list_aa);
+  LL_createAndInsertSequentially(stack_pointers, list_ab);
+  LL_createAndInsertSequentially(stack_pointers, list_ac);
+  LL_createAndInsertSequentially(stack_pointers, list_ad);
+
+  CU_ASSERT_EQUAL(LL_length(traverse_pointers_from_LL(stack_pointers)), 8);
+
+}
+
 void testPrint(void **object) {
   // struct test* pointer = (struct test*)object;
   // printf("[%p]\n", ((struct test*)object)->link);
@@ -148,6 +222,7 @@ int main(int argc, char const *argv[]) {
          NULL == CU_add_test(pSuite, "testing printStack", testPRINTSTACK) ||
          NULL == CU_add_test(pSuite, "testing traverseLLHeap", testTRAVERSE_LL_HEAP) ||
          NULL == CU_add_test(pSuite, "testing traverseHeap", testTRAVERSE) ||
+         NULL == CU_add_test(pSuite, "testing traverseAdvancedStruct", testTRAVERSESTRUCT) ||
          NULL == CU_add_test(pSuite, "testing get_pointers_within_object", testGETPOINTERSWITHINOBJECT) ||
          NULL == CU_add_test(pSuite, "testing printHeap", testPRINTHEAP)) {
         CU_cleanup_registry();
