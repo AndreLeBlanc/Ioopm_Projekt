@@ -7,7 +7,6 @@ FLAGS_GCOV=$(FLAGS_DEBUG) --coverage
 FILES_GCOV=gc_test.c gc.c
 FILES_MAIN=gc.o collector.o heap.o traverser.o utilities.o linked_list.o
 
-
 DIR_RESOURCES=./resources/
 
 all:
@@ -69,14 +68,24 @@ gc_test:  gc_test.debug.o gc.debug.o
 	$(CC) -o $@.out $^ $(FLAGS_CUNIT)
 .PHONY: gc_test 
 
-linked_list.o: linked_list.c linked_list.h
-	$(CC) $(FLAGS_PROD) linked_list.c -o linked_list.o -c
+stack_c: stack_traverser.c linked_list.o heap.o 
+	$(CC) $(FLAGS_DEBUG) -o stack_traverser stack_traverser.c
+
+stack_traverser.o: stack_traverser.c stack_traverser.h 
+	$(CC) $(FLAGS_DEBUG) stack_traverser.c -o stack_traverser.o -c
 
 heap.o: heap.c heap.h
-	$(CC) $(FLAGS_PROD) heap.c -o heap.o -c
+	$(CC) $(FLAGS_DEBUG) heap.c -o heap.o -c
 
-stack_c: stack_traverser.o linked_list.o heap.o 
-	$(CC) $(FLAGS_DEBUG) -o stack_traverser stack_traverser.c
+##########################################
+
+bajs: bajs.c
+	$(CC) -o bajs bajs.c $(FLAGS_CUNIT)
+
+##########################################
+
+linked_list.o: linked_list.c linked_list.h
+	$(CC) $(FLAGS_DEBUG) linked_list.c -o linked_list.o -c
 
 stack_run:
 	@./stack_traverser 
