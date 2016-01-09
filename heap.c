@@ -1,30 +1,55 @@
 #include "heap.h"
 #include "linked_list.h"
 #include <string.h>
+#include <stdio.h>
 #include <ctype.h>
 
 // mallocates space for heap, places metadata in the front. 
 
 heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold) {
-  if(bytes < sizeof(heap_t)) {
-    // if space allocated is not even enough for metadata, don't allocate
-    return NULL;
+  if(bytes < sizeof(heap_t) + sizeof(page_t)) {
+    // if space allocated is not even enough for heap and page metadata, don't allocate
+    return NULL;    
   }
 
-  void *new_heap = malloc(bytes);
+  heap_t *new_heap = malloc(bytes);
 
   // create metadata struct and place it in the front of the heap
   // the user sees this as a heap_t struct and is therefore not
   // aware that it is the pointer to the whole heap. 
-  ((heap_t*) new_heap)->meta_p = new_heap;
-  ((heap_t*) new_heap)->user_start_p = new_heap + sizeof(heap_t);
-  ((heap_t*) new_heap)->bump_p = new_heap + sizeof(heap_t);
-  ((heap_t*) new_heap)->end_p = new_heap + bytes;
-  ((heap_t*) new_heap)->total_size = bytes;
-  ((heap_t*) new_heap)->user_size = bytes - sizeof(heap_t);
-  ((heap_t*) new_heap)->avail_space = bytes - sizeof(heap_t);
-  ((heap_t*) new_heap)->unsafe_stack = unsafe_stack;
-  ((heap_t*) new_heap)->gc_threshold = gc_threshold;
+  new_heap->meta_p            = new_heap;
+  new_heap->user_start_p      = (void*) new_heap + sizeof(heap_t);
+  new_heap->active_page_list  = NULL;
+  new_heap->passive_page_list = (void*) new_heap + sizeof(heap_t);
+  new_heap->end_p             = (void*) new_heap + bytes - 1;
+  new_heap->total_size        = bytes;
+  new_heap->user_size         = bytes - sizeof(heap_t);
+  new_heap->used_space        = 0;
+  new_heap->avail_space       = bytes - sizeof(heap_t);
+  new_heap->unsafe_stack      = unsafe_stack;
+  new_heap->gc_threshold      = gc_threshold;
+
+  // set up pages
+  size_t bytes_left = bytes;
+  page_t* cursor = new_heap->passive_page_list;
+
+  while(cursor) {    
+    // set defaults for page
+    cursor->user_start_p = (void*) cursor + sizeof(page_t);
+    cursor->bump_p       = (void*) cursor + sizeof(page_t);
+    cursor->end_p        = (void*) cursor + (bytes_left > PAGE_SIZE ? PAGE_SIZE : bytes_left);
+    cursor->active       = false;
+    cursor->unsure       = false;
+    cursor->next_page    = (bytes_left > PAGE_SIZE ? (void*) cursor->end_p + 1 : NULL);
+    // go to next page and update bytes_left as well as user_size and avail_space in heap
+    cursor = cursor->next_page;
+    bytes_left -= PAGE_SIZE;
+    new_heap->total_size -= sizeof(page_t);
+    new_heap->avail_space -= sizeof(page_t);
+  }
+
+
+  // return pointer to heap
   return new_heap;
 }
 
@@ -34,6 +59,13 @@ void h_delete(heap_t *h) {
   } 
 }
 
+size_t h_avail(heap_t *h) {
+  return h->avail_space;
+}
+
+size_t h_used(heap_t *h) {
+  return h->used_space;
+}
 
 void* get_heap_start(heap_t* h) {
   return h->user_start_p;
@@ -56,36 +88,10 @@ typedef struct metadata {
   bool copied_flag;
 } metadata_t;
 
-void *h_alloc_data(heap_t* h, size_t bytes) {
-  size_t total_bytes = bytes + sizeof(metadata_t);
-
-  if(h->bump_p + total_bytes <= h->end_p) {
-    // if there is space
-    
-    // save bump pointer for returning. This pointer skips the metadata
-    void* new_pointer = h->bump_p + sizeof(metadata_t);
-    // update bump pointer and avail space
-    h->bump_p += total_bytes;
-    h->avail_space -= total_bytes;
-
-    // update metadata
-    md_set_format_string(new_pointer, "none");
-    md_set_bit_vector(new_pointer, '\0');
-    md_set_forwarding_address(new_pointer, NULL);
-    md_set_copied_flag(new_pointer, false);
-    
-    // return pointer
-    return new_pointer;    
-  } else {
-    // if there is no space
-    return NULL;
-  }
-}
-
 size_t fs_calculate_size(char* format_string) {
   int fs_length = strlen(format_string);
-  int multiplier = 1;
-
+  int multiplier = 0;
+  
   size_t size = 0;
   
   for(int i = 0; i < fs_length; i++) {
@@ -96,70 +102,119 @@ size_t fs_calculate_size(char* format_string) {
       // if any of the following characters: multiply size with multiplier and add to size. 
       // Pointers
     case '*':
-      size += sizeof(void*) * multiplier;
-      multiplier = 1;
+      size += sizeof(void*) * (multiplier ? multiplier : 1);
+      multiplier = 0;
       break;
       // Integers
     case 'i':
-      size += sizeof(int) * multiplier;
-      multiplier = 1;
+      size += sizeof(int) * (multiplier ? multiplier : 1);
+      multiplier = 0;
       break;
       // Floats
     case 'f':
-      size += sizeof(float) * multiplier;
-      multiplier = 1;
+      size += sizeof(float) * (multiplier ? multiplier : 1);
+      multiplier = 0;
       break;
       // Characters
     case 'c':
-      size += sizeof(char) * multiplier;
-      multiplier = 1;
+      size += sizeof(char) * (multiplier ? multiplier : 1);
+      multiplier = 0;
       break;
       // Longs
     case 'l':
-      size += sizeof(long) * multiplier;
-      multiplier = 1;
+      size += sizeof(long) * (multiplier ? multiplier : 1);
+      multiplier = 0;
       break;
       // Doubles
     case 'd':
-      size += sizeof(double) * multiplier;
-      multiplier = 1;
+      size += sizeof(double) * (multiplier ? multiplier : 1);
+      multiplier = 0;
       break;
       // if none of these characters, then check if it is a multiplier
     default:  
       if(format_string[i] >= '0' && format_string[i] <= '9') { 
 	// if the char is an integer, convert and save to multiplier.
 	int digit = format_string[i] -  '0'; 
-	if(multiplier == 1) {
-	  multiplier = digit;
-	} else {
-	  multiplier = multiplier * 10 + digit;
-	} 
+        multiplier = multiplier * 10 + digit;
       } else {
 	// if an invalid character is in the string, return 0
 	return 0;
-      }
-	    
+      }	    
 	break;
     }
   }
   return size;
 }
 
+page_t *get_allocation_page(heap_t* h, size_t bytes) {
+  page_t *active_page_cursor = h->active_page_list;
+  page_t *previous_active_page_cursor = NULL;
+  
+  while(active_page_cursor) {
 
-void *h_alloc_struct(heap_t* h, char* format_string) {
-  size_t object_bytes = fs_calculate_size(format_string);
-  size_t metadata_bytes = sizeof(metadata_t);
-  size_t total_bytes = object_bytes + metadata_bytes;
+    // go through all active pages
+    if(active_page_cursor->bump_p + bytes < active_page_cursor->end_p) {
+      // if object fits in page return that page
+      return active_page_cursor;
+    }
 
-  if(object_bytes && h->bump_p + total_bytes <= h->end_p) {
-    // if there is space or if calculation succeeded
-    
+    // go to next active page
+    previous_active_page_cursor = active_page_cursor;
+    active_page_cursor = active_page_cursor->next_page;
+  }
+
+  // if this point is reached, then no active pages are suitable
+  page_t *passive_page_cursor = h->passive_page_list;
+  page_t *previous_passive_page_cursor = NULL;
+  while(passive_page_cursor) {
+    // go through all passive pages
+
+    if(passive_page_cursor->bump_p + bytes < passive_page_cursor->end_p) {
+      // if object fits in page make active and return that page
+      passive_page_cursor->active = true;
+
+      // TODO: make this a comparative insertion so pages are always in order.   
+      // add passive page to active page list 
+      if(previous_active_page_cursor == NULL) {
+        // if active page list is empty
+        h->active_page_list = passive_page_cursor;
+      } else {
+        // if active page list is not empty
+        previous_active_page_cursor->next_page = passive_page_cursor;
+      }
+      
+      // remove passive page from passive page list
+      if(previous_passive_page_cursor == NULL) {
+        // if it is the first page in list, change heaps list pointer
+        h->passive_page_list = passive_page_cursor->next_page;
+      } else {
+        // if it is not the first page in list, change previous page's next pointer
+        previous_passive_page_cursor->next_page = passive_page_cursor->next_page;
+      }
+      passive_page_cursor->next_page = NULL;
+      return passive_page_cursor;
+    }
+
+    // go to next passive page
+    previous_passive_page_cursor = passive_page_cursor;
+    passive_page_cursor = passive_page_cursor->next_page;
+  }
+  // if no page was found, return NULL
+  return NULL;
+}
+
+void *h_alloc(heap_t* h, size_t bytes, char* format_string) {
+  size_t total_bytes = bytes + sizeof(metadata_t);
+  page_t *p = get_allocation_page(h, total_bytes);
+  
+  if(p && p->bump_p + total_bytes <= p->end_p) {// if there is a page and it has space, allocate
     // save bump pointer for returning. This pointer skips the metadata
-    void* new_pointer = h->bump_p + metadata_bytes;
+    void* new_pointer = p->bump_p + sizeof(metadata_t);
     // update bump pointer and avail space
-    h->bump_p += total_bytes;
+    p->bump_p += total_bytes;
+    h->used_space += total_bytes;
     h->avail_space -= total_bytes;
-
+    
     // update metadata
     md_set_format_string(new_pointer, format_string);
     md_set_bit_vector(new_pointer, '\0');
@@ -168,8 +223,22 @@ void *h_alloc_struct(heap_t* h, char* format_string) {
     
     // return pointer
     return new_pointer;    
+  } else { // if there is no page or space, return null
+    return NULL;
+  }
+}
+
+void *h_alloc_data(heap_t* h, size_t bytes) {
+  return h_alloc(h, bytes, "none"); 
+}
+
+void *h_alloc_struct(heap_t* h, char* format_string) {
+  size_t object_bytes = fs_calculate_size(format_string);
+  if(object_bytes) {
+    // if calculation succeeded, allocate
+    return h_alloc(h, object_bytes, format_string);
   } else {
-    // if there is no space or if calculation failed
+    // if calculation failed, return NULL
     return NULL;
   }
 }
