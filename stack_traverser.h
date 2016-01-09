@@ -10,9 +10,6 @@
 #ifndef __stack_traverser__
 #define __stack_traverser__
 
-void fuckOff();
-void endiannessTestAux();
-void endiannessTest();
 void print_stack_list(ll_node **root);
 
 /// Checks if the heap grows upwards.
@@ -32,20 +29,7 @@ bool is_pointing_at_heap(void *ptr, heap_t *h);
 /// \returns the new stack top
 void *get_stack_top();
 
-/// Checks if the stack grows upwards or downwards.
-///
-/// \returns true if the stack grows upwards
-bool stack_grows_from_top();
-
-/// Creates a list of the pointers that points to the heap h.
-///
-/// \param stack_grows_upwards is a boolean and tells if the stack grows upwards
-/// \param top is the top of the stack
-/// \param h is the heap to be checked
-/// \param root is the root of the list
-void create_stack_list(void *top, heap_t *h, ll_node **root);
-
-/// Calls other functions to traverse the stack and create the stack list.
+/// Traverses the stack and creates a list of the pointers that points to the heap h.
 ///
 /// \param h is the heap to be checked
 /// \returns ll_node, the first node of the list containing all the pointers that point to the heap h

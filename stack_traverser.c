@@ -6,35 +6,13 @@
 
 extern void **environ; // bottom of the stack
 
-void fuckOff(){}
-void endiannessTestAux(){}
-
-void endiannessTest() { // Haubir trollar
-  int stack;
-  void *heap = malloc(1);
-  void *heap2 = malloc(1);
-  Dump_registers();
-  puts("");
-  printf("printf:             %15p\n", printf);
-  printf("puts:               %15p\n", puts);
-  printf("fuckOff:            %15p\n", fuckOff);
-  printf("endiannessTestAux:  %15p\n", endiannessTestAux);
-  printf("endiannessTest:     %15p\n", endiannessTest);
-  printf("heap:     %15p\n", heap);
-  printf("heap2:    %15p\n", heap2);
-  printf("stack:    %15p\n", &stack);
-  int stack2;
-  printf("stack2:   %15p\n", &stack2);
-  stack_grows_from_top();
-}
-
 bool is_pointing_at_heap(void *ptr, heap_t *h/* , size_t bytes */) {
   long *content = (long *)ptr;
-  puts("\nis_pointing_at_heap är startad.\n\n");
-  printf("Pointer contains: %ld\n", (uintptr_t)ptr);
+  puts("is_pointing_at_heap är startad.");
+  printf("Pointer contains: %ld\n", *(uintptr_t *)ptr);
   printf("Address on stack: %p\n", ptr);
  
-  if (*(long *)ptr > (uintptr_t)get_heap_start(h) && *(long *)ptr < (uintptr_t)get_heap_end(h)) {
+  if (*(uintptr_t *)ptr > (uintptr_t)get_heap_start(h) && *(uintptr_t *)ptr < (uintptr_t)get_heap_end(h)) {
     puts("Yes!!!!\n\n\n\n\n\n\n\n\n");
     return true;
   }
@@ -48,28 +26,18 @@ void *get_stack_top() {
   return &top_of_stack;
 }
 
-bool stack_grows_from_top() {
-  int stack1;
-  int stack2;
+ll_node **get_alive_stack_pointers(heap_t *h) {
+  printf("du är i get_alive_stack_pointers\n");
+  void *top = get_stack_top();
+  ll_node **root = LL_initRoot();
 
-  if (&stack1 < &stack2) {
-    printf("stack_grows_from_top == true\n");
-    return true;
-  }
-  else {
-    printf("stack_grows_from_top == false\n");  
-    return false;
-  }
-}
-
-void create_stack_list(void *top, heap_t *h, ll_node **root) {
-  puts("Welcome to build_stack_list");
+  // puts("Welcome to build_stack_list");
   int total = 0;
   int counter = 0;
   void *bottom = (void *)environ;
 
-  if (!stack_grows_from_top()) {
-    puts("Stack grows upwards.\n");
+  if ((uintptr_t)top > (uintptr_t)environ) {
+    puts("Stack grows upwards.");
     while ((uintptr_t)top > (uintptr_t)environ) {
       printf("Count %d: \ntop: %p\n", counter, top);
       if (is_pointing_at_heap(top, h)) {
@@ -87,10 +55,10 @@ void create_stack_list(void *top, heap_t *h, ll_node **root) {
   else {
     printf("hej igen, stacken borde växa neråt nu va\n");
     while ((uintptr_t)top < (uintptr_t)environ) { 
-      puts("Stack grows downwards.\n");
+      puts("Stack grows downwards.");
       printf("Count %d: \ntop: %p\n", counter, top);
       if (is_pointing_at_heap(top, h)) {
-	if (validate_object(top)) { // checks the pointers metadata to check whether it's valid or not
+	if (validate_object(top)) { // checks the pointers metadata to check whether it's pointing at an object or not
 	  ll_node *stackTop = LL_createAndInsertSequentially(root, top);
 	  //printf("stackTop: %p\n", stackTop);,
 	  printf("Stackpointer %p has valid metadata and was added to the list.\n", LL_getContent(stackTop));
@@ -104,14 +72,7 @@ void create_stack_list(void *top, heap_t *h, ll_node **root) {
   puts("\n--------------------------------\n");
   printf("Total pointers added to the list: %d\n", total);
   puts("\n--------------------------------\n");
-}
-
-ll_node **get_alive_stack_pointers(heap_t *h) {
-  printf("du är i traverse stack list\n");
-  void *top = get_stack_top();
-  ll_node **root = LL_initRoot();
-
-  create_stack_list(top, h, root);
+  //  create_stack_list(top, h, root);
 
   return root;  
 }
@@ -134,13 +95,19 @@ void print_stack_list(ll_node **root) {
   }
 }
 
+typedef struct haubir haubir_;
+
+struct haubir {
+  char *LeBron;
+  int amazing;  
+};
 
 int main() {
   // create a new heap
   heap_t *new_heap = h_init(1024, true, 100.0);
   
   // allocate on this heap. For testing purposes
-  void *ptr = h_alloc_struct(new_heap, "cccc");
+  haubir_ *ptr = h_alloc_struct(new_heap, "cccc");
   
   printf("Allocated pointer: %ld\n", (uintptr_t)ptr);
   printf("Address on stack:  %p\n", ptr);
@@ -157,9 +124,6 @@ int main() {
 
   // print the list for debugging purposes
   print_stack_list(root); 
-
-  // Just a test to see how the stack and the heap grow on the platform we're on
-  endiannessTest();
 
   // deletes the heap we created
   h_delete(new_heap);
