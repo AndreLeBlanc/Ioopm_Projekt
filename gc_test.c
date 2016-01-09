@@ -68,7 +68,8 @@ void testTRAVERSE_LL_HEAP() {
     pt_d->link = NULL;
 
     puts("");
-    printf("a: %p -> %p : { %p }\n", pt_a, pt_a->link, (pt_a + sizeof(struct test) - 3));
+    // printf("a: %p -> %p : { %p }\n", pt_a, pt_a->link, (pt_a + sizeof(struct test) - 3));
+    printf("a: %p -> %p\n", pt_a, pt_a->link);
     LL_map(fs_get_pointers_within_object(pt_a), testPrint);
     printf("b: %p -> %p\n", pt_b, pt_b->link);
     LL_map(fs_get_pointers_within_object(pt_b), testPrint);
@@ -134,7 +135,7 @@ int main(int argc, char const *argv[]) {
 
     if ((NULL == CU_add_test(pSuite, "testing CUnit", testCUNITWORKS)) ||
          NULL == CU_add_test(pSuite, "testing printStack", testPRINTSTACK) ||
-         NULL == CU_add_test(pSuite, "testing traverseHeap", testTRAVERSE) ||
+        //  NULL == CU_add_test(pSuite, "testing traverseHeap", testTRAVERSE) ||
          NULL == CU_add_test(pSuite, "testing get_pointers_within_object", testGETPOINTERSWITHINOBJECT) ||
          NULL == CU_add_test(pSuite, "testing traverseLLHeap", testTRAVERSE_LL_HEAP) ||
          NULL == CU_add_test(pSuite, "testing printHeap", testPRINTHEAP)) {

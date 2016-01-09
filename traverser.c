@@ -50,44 +50,46 @@ ll_head traverse_pointers_from_LL_bak(ll_head pointers) {
 
 }
 
+void printAddress_bak(void **object) {
+  printf("[%p]\n", *object);
+}
 void printAddress(void *object) {
   printf("[%p]\n", object);
 }
 
 ll_head traverse_pointers_from_LL(ll_head pointers) {
 
+    printf("\nPOINTERS AQUIRED\n");
+    LL_map(pointers, printAddress);
+
     ll_head new_nodes = LL_initRoot();
-
     if(pointers != NULL && !LL_isEmpty(pointers)) {
-        puts("Pointers");
-        LL_map(pointers, printAddress);
-        ll_head cursor = *pointers;
-        while(cursor != NULL) {
-            //avreferera pekaren TODO
-            //plockar ut pekare från cursor, skickar med i rekursivt anrop.
-            ll_head pointers_in_obj = fs_get_pointers_within_object(cursor);
-            ll_head recursive_data = traverse_pointers_from_LL(pointers_in_obj);
 
+        LL_map(pointers, printAddress);
+        ll_node *cursor = *pointers;
+        while(cursor != NULL) {
+
+            printf("%p -> %p\n", cursor, LL_getContent(cursor));
+            ll_head pointers_in_obj = fs_get_pointers_within_object(LL_getContent(cursor));
+            ll_head recursive_data = traverse_pointers_from_LL(pointers_in_obj);
 
             if(pointers_in_obj != NULL) {
               puts("pointers_in_obj");
               LL_map(pointers_in_obj, printAddress);
-            } else {
-              puts("NULL");
             }
 
             if(recursive_data != NULL) {
               puts("Recursive_data");
               LL_map(recursive_data, printAddress);
             } else {
-              puts("NULL");
+              puts("recdata: NULL");
             }
 
             if(recursive_data != NULL) {
 
                 ll_head recursive_cursor = *recursive_data;
                 while(recursive_cursor != NULL) {
-                    LL_createAndInsertSequentially(new_nodes, recursive_cursor);
+                    LL_createAndInsertSequentially(new_nodes, LL_getContent(recursive_cursor));
                     //WARNING, may fuck shit up.
                     recursive_cursor = LL_getNext(recursive_cursor);
                 }
@@ -97,12 +99,18 @@ ll_head traverse_pointers_from_LL(ll_head pointers) {
             cursor = LL_getNext(cursor);
         }
 
+        puts("[POINTERS BEFORE]");
+        LL_map(pointers, printAddress);
+
         ll_head nn_cursor = *new_nodes;
         while(nn_cursor != NULL) {
             //insertandCreateblabla
             LL_createAndInsertSequentially(pointers, nn_cursor);
             nn_cursor = LL_getNext(nn_cursor);
         }
+
+        puts("[POINTERS]");
+        LL_map(pointers, printAddress);
 
         return pointers;
 
