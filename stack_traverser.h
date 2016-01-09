@@ -6,6 +6,7 @@
 #include "linked_list.h"
 #include "heap.h"
 
+
 #ifndef __stack_traverser__
 #define __stack_traverser__
 
@@ -42,12 +43,12 @@ bool stack_grows_from_top();
 /// \param top is the top of the stack
 /// \param h is the heap to be checked
 /// \param root is the root of the list
-void create_stack_list(bool stack_grows_upwards, char *top, heap_t *h, ll_node **root);
+void create_stack_list(void *top, heap_t *h, ll_node **root);
 
 /// Calls other functions to traverse the stack and create the stack list.
 ///
 /// \param h is the heap to be checked
 /// \returns ll_node, the first node of the list containing all the pointers that point to the heap h
-ll_node **function_does_not_have_a_good_name(heap_t *h);
+ll_node **get_alive_stack_pointers(heap_t *h);
 
 #endif

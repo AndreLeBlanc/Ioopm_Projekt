@@ -20,7 +20,6 @@
 #include <CUnit/Console.h>
 
 #include <assert.h>
-
 #include "stack_traverser.h"
 
 void test_function() {
@@ -61,7 +60,7 @@ void test_traverse_stack_list() {
   char *ptr = h_alloc_struct(new_heap, "cccc");
   ptr = "heej";
   
-  ll_node **test_root = traverse_stack_list(new_heap);
+  ll_node **test_root = get_alive_stack_pointers(new_heap);
   CU_ASSERT_PTR_NOT_NULL(test_root);
   CU_ASSERT_PTR_NOT_NULL(ptr);
   CU_ASSERT_EQUAL(LL_getContent(*test_root), ptr);
@@ -69,7 +68,7 @@ void test_traverse_stack_list() {
 
   int *number = h_alloc_struct(new_heap, "*i");
   *number = 666;
-  test_root = traverse_stack_list(new_heap);
+  test_root = get_alive_stack_pointers(new_heap);
   CU_ASSERT_PTR_NOT_NULL(number);
   CU_ASSERT_EQUAL(LL_getContent(LL_getNext(*test_root)), *number);
 
