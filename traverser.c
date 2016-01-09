@@ -70,12 +70,13 @@ ll_head traverse_pointers_from_LL(ll_head pointers) {
         while(cursor != NULL) {
 
             printf("%p -> %p\n", cursor, LL_getContent(cursor));
-            void **content = NULL;
-            if(LL_getContent(cursor) != NULL) {
-              content = (void **)LL_getContent(cursor);
-            }
+
+            puts("casting");
+            void **content = (void **)LL_getContent(cursor);
             ll_head pointers_in_obj = NULL;
-            if(content != NULL) {
+
+            if(*content != NULL) {
+              puts("pointers");
               pointers_in_obj = fs_get_pointers_within_object(*content);
             }
             ll_head recursive_data = traverse_pointers_from_LL(pointers_in_obj);
