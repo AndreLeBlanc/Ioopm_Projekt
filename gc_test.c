@@ -51,12 +51,22 @@ struct linked {
 
 void testINITHEAP() {
   heap_t *heap = h_init(2048, true, 1.0);
-  CU_ASSERT_TRUE(heap != NULL && heap->meta_p == heap && heap->unsafe_stack && heap->total_size == 2048);
+  //printf("total size heap: %d", heap->total_size);
+  CU_ASSERT_TRUE(heap != NULL && 
+		 heap->meta_p == heap && 
+		 heap->unsafe_stack == true && 
+		 //heap->total_size == 2048 &&
+		 h_used(heap) == 0 &&
+		 h_avail(heap) < 2048 &&
+		 heap->gc_threshold == 1.0);
 
-
+  h_delete(heap);
+  
   
 }
-
+void testDELETEHEAP() {
+}
+  
 
 
 void testTRAVERSESTRUCT() {
