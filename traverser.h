@@ -1,4 +1,4 @@
-
+#include "linked_list.h"
 /*
 * PRE: The pointers has to be allocated inside a heap of our own design.
 */

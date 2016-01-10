@@ -21,6 +21,7 @@ heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold) {
   new_heap->user_start_p      = (void*) new_heap + sizeof(heap_t);
   new_heap->active_page_list  = NULL;
   new_heap->passive_page_list = (void*) new_heap + sizeof(heap_t);
+  new_heap->compact_page_list = NULL;
   new_heap->end_p             = (void*) new_heap + bytes - 1;
   new_heap->total_size        = bytes;
   new_heap->user_size         = bytes - sizeof(heap_t);
@@ -47,7 +48,6 @@ heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold) {
     new_heap->total_size -= sizeof(page_t);
     new_heap->avail_space -= sizeof(page_t);
   }
-
 
   // return pointer to heap
   return new_heap;
@@ -146,8 +146,43 @@ size_t fs_calculate_size(char* format_string) {
   return size;
 }
 
-page_t *get_allocation_page(heap_t* h, size_t bytes) {
-  page_t *active_page_cursor = h->active_page_list;
+void post_compact_page_reset(heap_t *h) {
+  page_t *cursor = h->active_page_list;
+
+  while(cursor) {
+    // reset bump_p
+    cursor->bump_p = (void*) cursor;
+    // set page to apssive
+    cursor->active = false;    
+    // next page
+    cursor = cursor->next_page;
+  }
+
+  cursor = h->passive_page_list;
+  if(cursor) {
+    // if list is not empty
+    while(cursor->next_page) {
+      cursor=cursor->next_page;
+    }
+    cursor->next_page = h->active_page_list;
+  } else {
+    // if list is empty
+    h->passive_page_list = h->active_page_list;
+  }
+
+  // set compact_page_list becomes the active list
+  h->active_page_list = h->compact_page_list;
+  // reset compact_page_list
+  h->compact_page_list = NULL;
+}
+
+page_t *get_allocation_page(heap_t* h, size_t bytes,  bool compact) {
+  page_t *active_page_cursor;
+  if(compact) {
+    active_page_cursor = h->compact_page_list;
+  } else {
+    active_page_cursor = h->active_page_list;
+  }
   page_t *previous_active_page_cursor = NULL;
 
   while(active_page_cursor) {
@@ -176,7 +211,11 @@ page_t *get_allocation_page(heap_t* h, size_t bytes) {
       // add passive page to active page list
       if(previous_active_page_cursor == NULL) {
         // if active page list is empty
-        h->active_page_list = passive_page_cursor;
+	if(compact) {
+	  h->compact_page_list = passive_page_cursor;
+	} else {
+	  h->active_page_list = passive_page_cursor;
+	}
       } else {
         // if active page list is not empty
         previous_active_page_cursor->next_page = passive_page_cursor;
@@ -202,10 +241,10 @@ page_t *get_allocation_page(heap_t* h, size_t bytes) {
   return NULL;
 }
 
-void *h_alloc(heap_t* h, size_t bytes, char* format_string) {
+void *h_alloc(heap_t* h, size_t bytes, char* format_string, bool compact) {
   size_t total_bytes = bytes + sizeof(metadata_t);
-  page_t *p = get_allocation_page(h, total_bytes);
-
+  page_t *p = get_allocation_page(h, total_bytes, compact);
+  
   if(p && p->bump_p + total_bytes <= p->end_p) {// if there is a page and it has space, allocate
     // save bump pointer for returning. This pointer skips the metadata
     void* new_pointer = p->bump_p + sizeof(metadata_t);
@@ -228,14 +267,26 @@ void *h_alloc(heap_t* h, size_t bytes, char* format_string) {
 }
 
 void *h_alloc_data(heap_t* h, size_t bytes) {
-  return h_alloc(h, bytes, "none");
+  return h_alloc(h, bytes, "none", false); 
 }
 
 void *h_alloc_struct(heap_t* h, char* format_string) {
   size_t object_bytes = fs_calculate_size(format_string);
   if(object_bytes) {
     // if calculation succeeded, allocate
-    return h_alloc(h, object_bytes, format_string);
+    return h_alloc(h, object_bytes, format_string, false);
+  } else {
+    // if calculation failed, return NULL
+    return NULL;
+  }
+}
+
+void *h_alloc_compact(heap_t* h, void* object) {
+  char* format_string = md_get_format_string(object);
+  size_t object_bytes = fs_calculate_size(format_string);
+  if(object_bytes) {
+    // if calculation succeeded, allocate
+    return h_alloc(h, object_bytes, format_string, true);
   } else {
     // if calculation failed, return NULL
     return NULL;
@@ -267,7 +318,7 @@ void md_set_format_string(void* object, char* format_string) {
 }
 
 // Bit vector
-
+// TODO: I think this is wrong. Don't this this should be here. 
 #define BIT_VECTOR_PTR(object) (char*)(object - sizeof(metadata_t) + sizeof(char*))
 
 char md_get_bit_vector(void* object) {
@@ -369,4 +420,66 @@ ll_head fs_get_pointers_within_object(void* object) {
     }
   }
   return pointer_list;
+}
+
+void update_objects_pointers(void* object) {
+  char* format_string = md_get_format_string(object);
+
+  int multiplier = 1;
+
+  void *pointer = object;
+  
+  for(int i = 0; i < strlen(format_string); i++) { 
+    switch(format_string[i]) {
+      // if a pointer, add to list and increment pointer appropriately
+      // if any of the other characters, increment pointer appropriately
+      // Pointers
+    case '*':
+      for(int i = 0; i < multiplier; i++) {
+	// follow pointer, get metadata and update.
+	if(md_get_forwarding_address(*((void**) pointer))) {
+	  *((void**) pointer) = md_get_forwarding_address(*((void**) pointer));
+	}	
+	pointer = ((void*) pointer) + 1;
+      }
+      multiplier = 1;
+      break;
+      // Integers
+    case 'i':
+      pointer = ((int*) pointer) + 1;
+      multiplier = 1;
+      break;
+      // Floats
+    case 'f':
+      pointer = ((float*) pointer) + 1;
+      multiplier = 1;
+      break;
+      // Characters
+    case 'c':
+      pointer = ((char*) pointer) + 1;
+      multiplier = 1;
+      break;
+      // Longs
+    case 'l':
+      pointer = ((long*) pointer) + 1;
+      multiplier = 1;
+      break;
+      // Doubles
+    case 'd':
+      pointer = ((double*) pointer) + 1;
+      multiplier = 1;
+      break;
+      // if none of these characters, then check if it is a multiplier
+    default:  
+      if(format_string[i] >= '0' && format_string[i] <= '9') { 
+	// if the char is an integer, convert and save to multiplier.
+	int digit = format_string[i] -  '0'; 
+	if(multiplier == 1) {
+	  multiplier = digit;
+	} else {
+	  multiplier = multiplier * 10 + digit;
+	}
+      }
+    }
+  }
 }
