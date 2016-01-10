@@ -19,6 +19,7 @@ int init_suite(void)
 {
     //create a new stack
     heap = h_init(2048, 1, 1.0);
+    get_allocation_page(heap);
     return 0;
 }
 
@@ -95,21 +96,21 @@ struct linked {
 void testINITHEAP() {
   heap_t *heap = h_init(2048, true, 1.0);
   //printf("total size heap: %d", heap->total_size);
-  CU_ASSERT_TRUE(heap != NULL && 
-		 heap->meta_p == heap && 
-		 heap->unsafe_stack == true && 
+  CU_ASSERT_TRUE(heap != NULL &&
+		 heap->meta_p == heap &&
+		 heap->unsafe_stack == true &&
 		 //heap->total_size == 2048 &&
 		 h_used(heap) == 0 &&
 		 h_avail(heap) < 2048 &&
 		 heap->gc_threshold == 1.0);
 
   h_delete(heap);
-  
-  
+
+
 }
 void testDELETEHEAP() {
 }
-  
+
 
 
 void testTRAVERSESTRUCT() {
@@ -310,10 +311,10 @@ void test_get_stack_top(){
 
 int main(int argc, char const *argv[]) {
 
-  CU_pSuite initHeapSuite = NULL;  
+  CU_pSuite initHeapSuite = NULL;
   CU_pSuite heapSuite = NULL;
   CU_pSuite stackSuite = NULL;
-    
+
     //initialize the CUnit test registry
     if (CUE_SUCCESS != CU_initialize_registry()) {
         return CU_get_error();

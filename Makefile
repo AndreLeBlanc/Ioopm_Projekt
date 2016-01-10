@@ -39,6 +39,14 @@ gcov: gcov_clean $(FILES_GCOV)
 	@gcov $(FILES_GCOV)
 .PHONY: gcov
 
+#check the unit-test coverage of every source file
+lcov: gcov_clean $(FILES_GCOV)
+	@$(CC) $(FLAGS_GCOV) -o lcov.run $(FILES_GCOV) -lcunit #compile source files with gcov data
+	@./lcov.run >> /dev/null #create profile data, silence the output
+	@lcov --capture --directory . --output-file coverage.info
+	@genhtml coverage.info --output-directory cov
+.PHONY: lcov
+
 # this part is executed when testing on multiple machines. change dependency to your needs (ex: os_dump, valgrind, gcov)
 # DEFAULT: run_test
 # test: stack_c stack_test_c stack_run stack_test_run
