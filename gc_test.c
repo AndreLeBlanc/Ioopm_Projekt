@@ -42,6 +42,49 @@ void testGETPOINTERSWITHINOBJECT() {
 
 }
 
+void test_object_metadata() {
+  void *test = h_alloc_data(heap, sizeof(int));
+  md_set_bit_vector(test, 'a');
+  md_set_forwarding_address(test, 0x1);
+  md_set_copied_flag(test, true);
+  md_set_format_string(test, "3*");
+
+  CU_ASSERT_TRUE(
+    md_get_bit_vector(test) == 'a' &&
+    strcmp(md_get_format_string(test), "3*") == 0 &&
+    md_get_copied_flag(test) == true  &&
+    md_get_forwarding_address(test) == 0x1
+  );
+}
+
+void test_metadata_check() {
+  void *test = h_alloc_struct(heap, "3*");
+  CU_ASSERT_STRING_EQUAL("3*", md_get_format_string(test));
+}
+
+void test_pointers_inside_multiple_pointers_struct() {
+  void *test = h_alloc_struct(heap, "3*4i2*");
+  CU_ASSERT_EQUAL(LL_length(fs_get_pointers_within_object(test)), 5);
+}
+
+void test_set_metadata_check() {
+  void *test = h_alloc_struct(heap, "3*");
+  md_set_format_string(test, "4*");
+  CU_ASSERT_STRING_EQUAL("4*", md_get_format_string(test));
+}
+
+void test_is_valid_object_false() {
+  char *invalid = "Hello World";
+  CU_ASSERT_FALSE(validate_object(invalid));
+}
+
+void test_is_valid_object_true() {
+  char *valid = h_alloc_data(heap, sizeof(char) * 2 + 1);
+  strcpy(valid, "ab");
+  *valid = "ab";
+  CU_ASSERT_TRUE(validate_object(valid));
+}
+
 struct linked {
   void *content;
   int number;
@@ -157,56 +200,54 @@ void testEMPTYLISTRTRAVERSE() {
 }
 
 void testPrint(void **object) {
-  // struct test* pointer = (struct test*)object;
-  // printf("[%p]\n", ((struct test*)object)->link);
   printf("[%p]\n", *(object));
+}
+
+//TODO, it fails.
+void test_fs_get_object_size() {
+
+  struct test *pt_a = h_alloc_struct(heap, "****iii****");
+  size_t total = sizeof(void *) * 8 + 3 * sizeof(int);
+  size_t object_size = fs_get_object_size(pt_a);
+  printf("object: %d\ntotal: %d\n", object_size, total);
+  CU_ASSERT_EQUAL(total, object_size);
+
+}
+
+void test_pointers_within_object() {
+
+  struct test *pt_a = h_alloc_struct(heap, "*");
+  void *pt_b = LL_getContent(LL_getNodeAtIndex(fs_get_pointers_within_object(pt_a), 0));
+  CU_ASSERT_EQUAL(pt_a, pt_b);
+
 }
 
 void testTRAVERSE_LL_HEAP() {
 
-    ll_head stack_pointers = LL_initRoot();
+  ll_head stack_pointers = LL_initRoot();
 
-    struct test *pt_a = h_alloc_struct(heap, "*");
-    struct test *pt_b = h_alloc_struct(heap, "*");
-    struct test *pt_c = h_alloc_struct(heap, "*");
-    struct test *pt_d = h_alloc_struct(heap, "*");
+  struct test *pt_a = h_alloc_struct(heap, "*");
+  struct test *pt_b = h_alloc_struct(heap, "*");
+  struct test *pt_c = h_alloc_struct(heap, "*");
+  struct test *pt_d = h_alloc_struct(heap, "*");
 
-    struct test a, b, c, d;
-    *pt_b = b;
-    *pt_c = c;
-    *pt_a = a;
-    *pt_d = d;
+  struct test a, b, c, d;
+  *pt_b = b;
+  *pt_c = c;
+  *pt_a = a;
+  *pt_d = d;
 
-    pt_c->link = NULL;
-    pt_b->link = pt_c;
-    pt_a->link = pt_b;
-    pt_d->link = NULL;
+  pt_c->link = NULL;
+  pt_b->link = pt_c;
+  pt_a->link = pt_b;
+  pt_d->link = NULL;
 
-    // puts("");
-    // printf("a: %p -> %p : { %p }\n", pt_a, pt_a->link, (pt_a + sizeof(struct test) - 3));
-    // printf("a: %p -> %p\n", pt_a, pt_a->link);
-    // LL_map(fs_get_pointers_within_object(pt_a), testPrint);
-    // printf("b: %p -> %p\n", pt_b, pt_b->link);
-    // LL_map(fs_get_pointers_within_object(pt_b), testPrint);
-    // printf("c: %p -> %p\n", pt_c, pt_c->link);
-    // LL_map(fs_get_pointers_within_object(pt_c), testPrint);
-    // printf("d: %p -> %p\n", pt_d, pt_d->link);
-    // LL_map(fs_get_pointers_within_object(pt_d), testPrint);
+  LL_createAndInsertSequentially(stack_pointers, pt_a);
+  LL_createAndInsertSequentially(stack_pointers, pt_d);
 
-    LL_createAndInsertSequentially(stack_pointers, pt_a);
-    LL_createAndInsertSequentially(stack_pointers, pt_d);
+  int length = LL_length(traverse_pointers_from_LL(stack_pointers));
+  CU_ASSERT_EQUAL(length, 4);
 
-    int length = LL_length(traverse_pointers_from_LL(stack_pointers));
-    printf("length: %d\n", length);
-    CU_ASSERT_EQUAL(length, 4);
-
-}
-
-void testPRINTHEAP() {
-  // void *pointer = h_alloc_data(heap, 16);
-  // void *pointer2 = h_alloc_struct(heap, "***iii");
-  // print_traversed_heap(heap);
-  CU_ASSERT_EQUAL(true ,true);
 }
 
 void testTRAVERSE() {
@@ -294,8 +335,15 @@ int main(int argc, char const *argv[]) {
          NULL == CU_add_test(heapSuite, "testing traverseEmptyList", testEMPTYLISTRTRAVERSE) ||
          NULL == CU_add_test(heapSuite, "testing traverseEmptyPointerList", testEMPTYPOINTERLIST) ||
          NULL == CU_add_test(heapSuite, "testing traverseAdvancedStruct", testTRAVERSESTRUCT) ||
+         NULL == CU_add_test(heapSuite, "testing test_object_metadata", test_object_metadata) ||
+         NULL == CU_add_test(heapSuite, "testing test_is_valid_object_false", test_is_valid_object_false) ||
+         NULL == CU_add_test(heapSuite, "testing test_pointers_inside_multiple_pointers_struct", test_pointers_inside_multiple_pointers_struct) ||
+         NULL == CU_add_test(heapSuite, "testing test_set_metadata_check", test_set_metadata_check) ||
+         NULL == CU_add_test(heapSuite, "testing test_is_valid_object_true", test_is_valid_object_true) ||
+         NULL == CU_add_test(heapSuite, "testing test_fs_get_object_size", test_fs_get_object_size) ||
+         NULL == CU_add_test(heapSuite, "testing test_metadata_check", test_metadata_check) ||
          NULL == CU_add_test(heapSuite, "testing get_pointers_within_object", testGETPOINTERSWITHINOBJECT) ||
-         NULL == CU_add_test(heapSuite, "testing printHeap", testPRINTHEAP) ||
+         NULL == CU_add_test(heapSuite, "test_pointers_within_object", test_pointers_within_object) ||
          NULL == CU_add_test(stackSuite, "testing get_alive_stack_pointers", test_get_alive_stack_pointers) ||
          NULL == CU_add_test(stackSuite, "testing is_pointing_at_heap", test_is_pointing_at_heap) ||
          NULL == CU_add_test(stackSuite, "testing get_stack_top", test_get_stack_top)) {
@@ -309,6 +357,7 @@ int main(int argc, char const *argv[]) {
     int failures = CU_get_number_of_failures();
     CU_cleanup_registry();
 
+    //removed because of gcov, if there's errors gcov won't run correctly. /V
     // assert(failures == 0);
     return EXIT_SUCCESS;
 
