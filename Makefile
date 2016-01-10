@@ -15,7 +15,7 @@ all:
 	@echo "Not implemented yet."
 
 #compile object files
-%.o: %.c %.h
+%.o: %.c
 	$(CC) $(FLAGS_PROD) -o $@ -c $^
 
 # compile object files with debugging information

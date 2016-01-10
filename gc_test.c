@@ -42,6 +42,21 @@ void testGETPOINTERSWITHINOBJECT() {
 
 }
 
+void test_object_metadata() {
+  void *test = h_alloc_data(heap, sizeof(int));
+  md_set_bit_vector(test, 'a');
+  md_set_forwarding_address(test, 0x1);
+  md_set_copied_flag(test, true);
+  md_set_format_string(test, "3*");
+
+  CU_ASSERT_TRUE(
+    md_get_bit_vector(test) == 'a' &&
+    strcmp(md_get_format_string(test), "3*") == 0 &&
+    md_get_copied_flag(test) == true  &&
+    md_get_forwarding_address(test) == 0x1
+  );
+}
+
 void test_metadata_check() {
   void *test = h_alloc_struct(heap, "3*");
   CU_ASSERT_STRING_EQUAL("3*", md_get_format_string(test));
@@ -296,6 +311,7 @@ int main(int argc, char const *argv[]) {
          NULL == CU_add_test(heapSuite, "testing traverseEmptyList", testEMPTYLISTRTRAVERSE) ||
          NULL == CU_add_test(heapSuite, "testing traverseEmptyPointerList", testEMPTYPOINTERLIST) ||
          NULL == CU_add_test(heapSuite, "testing traverseAdvancedStruct", testTRAVERSESTRUCT) ||
+         NULL == CU_add_test(heapSuite, "testing test_object_metadata", test_object_metadata) ||
          NULL == CU_add_test(heapSuite, "testing test_is_valid_object_false", test_is_valid_object_false) ||
          NULL == CU_add_test(heapSuite, "testing test_pointers_inside_multiple_pointers_struct", test_pointers_inside_multiple_pointers_struct) ||
          NULL == CU_add_test(heapSuite, "testing test_set_metadata_check", test_set_metadata_check) ||
