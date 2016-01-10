@@ -17,6 +17,7 @@ struct heap{
   void* user_start_p; // pointer to start of user's allocated space
   void* active_page_list;
   void* passive_page_list;
+  void* compact_page_list;
   void* end_p;        // pointer to end of allocated space
   size_t total_size;  // total size of the heap (with metadata)
   size_t user_size;   // size of user's allocated space (total_size minus metadata)

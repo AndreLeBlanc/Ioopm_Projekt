@@ -48,7 +48,6 @@ heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold) {
     new_heap->avail_space -= sizeof(page_t);
   }
 
-
   // return pointer to heap
   return new_heap;
 }
@@ -243,6 +242,10 @@ void *h_alloc_struct(heap_t* h, char* format_string) {
   }
 }
 
+void *h_alloc_compact(heap_t* h) {
+
+}
+
 bool validate_object(void* object) {
   // TODO: Doesn't validate anything yet. 
   return true; 
@@ -268,7 +271,7 @@ void md_set_format_string(void* object, char* format_string) {
 }
 
 // Bit vector
-
+// TODO: I think this is wrong. Don't this this should be here. 
 #define BIT_VECTOR_PTR(object) (char*)(object - sizeof(metadata_t) + sizeof(char*))
 
 char md_get_bit_vector(void* object) {
