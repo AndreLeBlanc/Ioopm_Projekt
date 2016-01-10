@@ -42,6 +42,22 @@ void testGETPOINTERSWITHINOBJECT() {
 
 }
 
+void test_metadata_check() {
+  void *test = h_alloc_struct(heap, "3*");
+  CU_ASSERT_STRING_EQUAL("3*", md_get_format_string(test));
+}
+
+void test_pointers_inside_multiple_pointers_struct() {
+  void *test = h_alloc_struct(heap, "3*4i2*");
+  CU_ASSERT_EQUAL(LL_length(fs_get_pointers_within_object(test)), 5);
+}
+
+void test_set_metadata_check() {
+  void *test = h_alloc_struct(heap, "3*");
+  md_set_format_string(test, "4*");
+  CU_ASSERT_STRING_EQUAL("4*", md_get_format_string(test));
+}
+
 void test_is_valid_object_false() {
   char *invalid = "Hello World";
   CU_ASSERT_FALSE(validate_object(invalid));
@@ -281,8 +297,11 @@ int main(int argc, char const *argv[]) {
          NULL == CU_add_test(heapSuite, "testing traverseEmptyPointerList", testEMPTYPOINTERLIST) ||
          NULL == CU_add_test(heapSuite, "testing traverseAdvancedStruct", testTRAVERSESTRUCT) ||
          NULL == CU_add_test(heapSuite, "testing test_is_valid_object_false", test_is_valid_object_false) ||
+         NULL == CU_add_test(heapSuite, "testing test_pointers_inside_multiple_pointers_struct", test_pointers_inside_multiple_pointers_struct) ||
+         NULL == CU_add_test(heapSuite, "testing test_set_metadata_check", test_set_metadata_check) ||
          NULL == CU_add_test(heapSuite, "testing test_is_valid_object_true", test_is_valid_object_true) ||
          NULL == CU_add_test(heapSuite, "testing test_fs_get_object_size", test_fs_get_object_size) ||
+         NULL == CU_add_test(heapSuite, "testing test_metadata_check", test_metadata_check) ||
          NULL == CU_add_test(heapSuite, "testing get_pointers_within_object", testGETPOINTERSWITHINOBJECT) ||
          NULL == CU_add_test(heapSuite, "test_pointers_within_object", test_pointers_within_object) ||
          NULL == CU_add_test(stackSuite, "testing get_alive_stack_pointers", test_get_alive_stack_pointers) ||

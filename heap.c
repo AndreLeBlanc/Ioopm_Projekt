@@ -153,7 +153,7 @@ void post_compact_page_reset(heap_t *h) {
     // reset bump_p
     cursor->bump_p = (void*) cursor;
     // set page to apssive
-    cursor->active = false;    
+    cursor->active = false;
     // next page
     cursor = cursor->next_page;
   }
@@ -244,7 +244,7 @@ page_t *get_allocation_page(heap_t* h, size_t bytes,  bool compact) {
 void *h_alloc(heap_t* h, size_t bytes, char* format_string, bool compact) {
   size_t total_bytes = bytes + sizeof(metadata_t);
   page_t *p = get_allocation_page(h, total_bytes, compact);
-  
+
   if(p && p->bump_p + total_bytes <= p->end_p) {// if there is a page and it has space, allocate
     // save bump pointer for returning. This pointer skips the metadata
     void* new_pointer = p->bump_p + sizeof(metadata_t);
@@ -267,7 +267,7 @@ void *h_alloc(heap_t* h, size_t bytes, char* format_string, bool compact) {
 }
 
 void *h_alloc_data(heap_t* h, size_t bytes) {
-  return h_alloc(h, bytes, "none", false); 
+  return h_alloc(h, bytes, NO_MD, false); 
 }
 
 void *h_alloc_struct(heap_t* h, char* format_string) {
@@ -318,7 +318,7 @@ void md_set_format_string(void* object, char* format_string) {
 }
 
 // Bit vector
-// TODO: I think this is wrong. Don't this this should be here. 
+// TODO: I think this is wrong. Don't this this should be here.
 #define BIT_VECTOR_PTR(object) (char*)(object - sizeof(metadata_t) + sizeof(char*))
 
 char md_get_bit_vector(void* object) {
@@ -428,8 +428,8 @@ void update_objects_pointers(void* object) {
   int multiplier = 1;
 
   void *pointer = object;
-  
-  for(int i = 0; i < strlen(format_string); i++) { 
+
+  for(int i = 0; i < strlen(format_string); i++) {
     switch(format_string[i]) {
       // if a pointer, add to list and increment pointer appropriately
       // if any of the other characters, increment pointer appropriately
@@ -439,7 +439,7 @@ void update_objects_pointers(void* object) {
 	// follow pointer, get metadata and update.
 	if(md_get_forwarding_address(*((void**) pointer))) {
 	  *((void**) pointer) = md_get_forwarding_address(*((void**) pointer));
-	}	
+	}
 	pointer = ((void*) pointer) + 1;
       }
       multiplier = 1;
@@ -470,10 +470,10 @@ void update_objects_pointers(void* object) {
       multiplier = 1;
       break;
       // if none of these characters, then check if it is a multiplier
-    default:  
-      if(format_string[i] >= '0' && format_string[i] <= '9') { 
+    default:
+      if(format_string[i] >= '0' && format_string[i] <= '9') {
 	// if the char is an integer, convert and save to multiplier.
-	int digit = format_string[i] -  '0'; 
+	int digit = format_string[i] -  '0';
 	if(multiplier == 1) {
 	  multiplier = digit;
 	} else {
