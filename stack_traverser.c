@@ -78,14 +78,13 @@ ll_node **get_alive_stack_pointers(heap_t *h) {
   return root;
 }
 
-
-void print_address(void *listobject){ 
+void print_address(void *listobject){
   printf("\n%d\n", listobject);
 }
 
 void print_stack_list(ll_node **list) {
   puts("Printing list of alive stackpointers:");
-  LL_map(list, print_address); 
+  LL_map(list, print_address);
 }
 
 /*
@@ -107,6 +106,7 @@ void print_stack_list(ll_node **root) {
   }
 }
 */
+ 
 typedef struct haubir haubir_;
 
 struct haubir {

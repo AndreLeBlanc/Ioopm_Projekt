@@ -66,6 +66,8 @@ ll_head traverse_pointers_from_LL(ll_head pointers) {
             nn_cursor = LL_getNext(nn_cursor);
         }
 
+        LL_deleteList(new_nodes);
+
         return pointers;
 
     } else {
