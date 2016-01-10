@@ -47,7 +47,7 @@ go: zip
 		for host in $(HOSTS); do \
 			echo "------------------------------------------------------------"; \
 			echo "$(CYAN)Testing GC at $$host...$(NC)"; \
-			ssh $$username@$$host "cd $(DIR_REMOTE); make test > $$host.result.txt;"; \
+			ssh $$username@$$host "cd $(DIR_REMOTE); make clean; make test > $$host.result.txt;"; \
 			echo "Downloading results from $$host..."; \
 			scp $$username@$$host:$(DIR_REMOTE)$$host.result.txt ./$$host.result.txt; \
 		done; \
