@@ -15,9 +15,9 @@
 struct heap{
   void* meta_p;       // pointer to heap's metadata (maybe unnecessary)
   void* user_start_p; // pointer to start of user's allocated space
-  void* active_page_list;
-  void* passive_page_list;
-  void* compact_page_list;
+  struct page* active_page_list;
+  struct page* passive_page_list;
+  struct page* compact_page_list;
   void* end_p;        // pointer to end of allocated space
   size_t total_size;  // total size of the heap (with metadata)
   size_t user_size;   // size of user's allocated space (total_size minus metadata)
@@ -81,6 +81,15 @@ void *h_alloc_data(heap_t *h, size_t bytes);
 void* h_alloc_struct(heap_t *h, char *format_string);
 
 /**
+   h_alloc_compact
+   @brief Moves object to the compact pages.
+   @param h The pointer to the heap.
+   @param object The pointer to the object.
+   @return The pointer to the newly allocated space in the heap.
+*/
+void* h_alloc_compact(heap_t *h, void* object);
+
+/**
    h_gc
    @brief Manually trigger garbage collection.
    @param h The pointer to the heap.
@@ -121,6 +130,20 @@ void* get_heap_start(heap_t *h);
    @return The pointer to the end of the heap.
  */
 void* get_heap_end(heap_t *h);
+
+/**
+   update_objects_pointers
+   @brief Goes through an object's pointers and updates their forwarding addresses.
+   @param object The pointer to the object. 
+ */
+void update_objects_pointers(void* object);
+
+/**
+   post_compact_page_reset
+   @brief Sets the collection pages as the active ones and makes all other pages passive.
+   @param h The pointer to the heap.
+*/
+void post_compact_page_reset(heap_t *h);
 
 /************************************/
 /*                                  */
