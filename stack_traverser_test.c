@@ -1,56 +1,79 @@
-// ASSERT macros for use in test cases, and includes other framework headers.
 #include <CUnit/CUnit.h>
-
-// Error handing functions and data types. Included automatically by CUnit.h.
-#include <CUnit/CUError.h>	
-
-// Data type definitions and manipulation functions for the test registry, suites, and tests. Included automatically by CUnit.h.
+#include <CUnit/CUError.h>    
 #include <CUnit/TestDB.h>
-
-// Data type definitions and functions for running tests and retrieving results. Included automatically by CUnit.h.
-#include <CUnit/TestRun.h>	
-
-// Automated interface with xml output.
+#include <CUnit/TestRun.h>      
 #include <CUnit/Automated.h>
-
-// Basic interface with non-interactive output to stdout.
 #include <CUnit/Basic.h>
-
-// Interactive console interface.
 #include <CUnit/Console.h>
-
 #include <assert.h>
 #include "stack_traverser.h"
 
+#define Dump_registers()			\
+  jmp_buf env;					\
+  if (setjmp(env)) abort();			\
+
 void test_is_pointing_at_heap() {
-  heap_t *new_heap = h_init(1024, true, 100.0);
-  void *ptr = h_alloc_struct(new_heap, "***i");
+  heap_t *new_heap1 = h_init(1024, true, 100.0);
+  void *ptr = h_alloc_struct(new_heap1, "***i");
+  void *data = h_alloc_data(new_heap1, sizeof(void));
+  void *data1 = h_alloc_data(new_heap1, sizeof(int));
+  int stackish;
 
   CU_ASSERT_PTR_NOT_NULL(ptr);
-  CU_ASSERT_EQUAL(is_pointing_at_heap(ptr, new_heap), true);
+  CU_ASSERT_TRUE(is_pointing_at_heap(&ptr, new_heap1));
+  CU_ASSERT_TRUE(is_pointing_at_heap(&data, new_heap1));
+  CU_ASSERT_TRUE(is_pointing_at_heap(&data1, new_heap1));
+  CU_ASSERT_FALSE(is_pointing_at_heap(&stackish, new_heap1));
 
-  h_delete(new_heap);
+  h_delete(new_heap1);
 }
 
-void test_get_alive_stack_pointers() {
-  heap_t *new_heap = h_init(1024, true, 100.0);
-  char *ptr = h_alloc_struct(new_heap, "cccc");
-  ptr = "heej";
-  
-  ll_node **test_root = get_alive_stack_pointers(new_heap);
-  CU_ASSERT_PTR_NOT_NULL(test_root);
-  CU_ASSERT_PTR_NOT_NULL(ptr);
-  CU_ASSERT_EQUAL(LL_getContent(*test_root), ptr);
-  CU_ASSERT_EQUAL(LL_getContent(*test_root), "heej");
+void test_get_alive_stack_pointers_with_int() {
+  heap_t *new_heap = h_init(1024, true, 70);
 
-  int *number = h_alloc_struct(new_heap, "*i");
+  int *number = h_alloc_data(new_heap, sizeof(int)); 
   *number = 666;
-  test_root = get_alive_stack_pointers(new_heap);
-  CU_ASSERT_PTR_NOT_NULL(number);
-  CU_ASSERT_EQUAL(LL_getContent(LL_getNext(*test_root)), *number);
+  Dump_registers();
 
+  ll_node **list = get_alive_stack_pointers(new_heap);
+
+  CU_ASSERT_EQUAL(LL_length(list),1);
+
+  free(list);
   h_delete(new_heap);
 } 
+
+void test_get_alive_stack_pointers_with_char() {
+  heap_t *new_heap2 = h_init(1024, true, 70);
+
+  char *c = h_alloc_data(new_heap2, sizeof(char)); 
+  c = "h";
+
+  Dump_registers();
+
+  ll_node **list = get_alive_stack_pointers(new_heap2);
+
+  CU_ASSERT_EQUAL(LL_length(list),1);
+  
+  free(list);
+  h_delete(new_heap2);
+} 
+
+void test_get_alive_stack_pointers_with_struct(){ 
+  heap_t *heap = h_init(2048, true, 60);
+  
+  void *structish = h_alloc_struct(heap,"**ii");
+
+  Dump_registers(); 
+
+  ll_node **list = get_alive_stack_pointers(heap);
+
+  CU_ASSERT_EQUAL(LL_length(list),1); 
+  
+  free(list); 
+  h_delete(heap);
+}
+
 
 void test_get_stack_top(){ 
   void* top = get_stack_top(); 
@@ -87,17 +110,28 @@ int main() {
     CU_cleanup_registry();
     return CU_get_error();
   }
+    
+  if (NULL == CU_add_test(pSuite, "Testing get_alive_stack_pointers_with_int", test_get_alive_stack_pointers_with_int)) {
+    CU_cleanup_registry();
+    return CU_get_error();
+  }
+
+  if (NULL == CU_add_test(pSuite, "Testing get_alive_stack_pointers_with_char", test_get_alive_stack_pointers_with_char)) {
+    CU_cleanup_registry();
+    return CU_get_error();
+  }   
+
+  if (NULL == CU_add_test(pSuite, "Testing get_alive_stack_pointers_with_struct", test_get_alive_stack_pointers_with_struct)) {
+    CU_cleanup_registry();
+    return CU_get_error();
+  }
 
   if (NULL == CU_add_test(pSuite, "Testing is_pointing_at_heap", test_is_pointing_at_heap)) {
     CU_cleanup_registry();
     return CU_get_error();
   }
-
-  if (NULL == CU_add_test(pSuite, "Testing get_alive_stack_pointers", test_get_alive_stack_pointers)) {
-    CU_cleanup_registry();
-    return CU_get_error();
-  }
-
+  
+  
   //Run all tests using the CUnit Basic interface
   CU_basic_set_mode(CU_BRM_VERBOSE);
   CU_basic_run_tests();
