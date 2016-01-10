@@ -4,7 +4,7 @@ FLAGS_DEBUG=$(FLAGS_PROD) -ggdb
 FLAGS_CUNIT=$(FLAGS_DEBUG) -lcunit
 FLAGS_GCOV=$(FLAGS_DEBUG) --coverage
 
-FILES_GCOV=gc_test.c gc.c
+FILES_GCOV=gc_test.c gc.c heap.c linked_list.c traverser.c
 FILES_MAIN=gc.o collector.o heap.o traverser.o utilities.o linked_list.o
 FILES_H=linked_list.h stack_traverser.h heap.h
 
@@ -23,6 +23,10 @@ all:
 #%.debug.o: %.c
 #	$(CC) $(FLAGS_DEBUG) -o $@ -c $^
 
+traverser.run: traverser.c heap.o linked_list.o
+	$(CC) $(FLAGS_DEBUG) -o $@ $^
+	./$@
+
 #generate documentation with doxygen
 doc: $(DIR_RESOURCES)gc.doxy
 	@doxygen $^
@@ -35,19 +39,20 @@ valgrind: gc_test
 
 #check the unit-test coverage of every source file
 gcov: gcov_clean $(FILES_GCOV)
-	@$(CC) $(FLAGS_GCOV) -lcunit -o gcov.out $(FILES_GCOV) #compile source files with gcov data
+	@$(CC) $(FLAGS_GCOV) -o gcov.out $(FILES_GCOV) -lcunit #compile source files with gcov data
 	@./gcov.out >> /dev/null #create profile data, silence the output
 	@gcov $(FILES_GCOV)
 .PHONY: gcov
 
 # this part is executed when testing on multiple machines. change dependency to your needs (ex: os_dump, valgrind, gcov)
 # DEFAULT: run_test
+# test: stack_c stack_test_c stack_run stack_test_run
 test: stack_test
 .PHONY: test
 
 # Flymake mode (Live syntax and error check)
 # Insert the following lines in your .emacs file:
-#	(require 'flymake) 
+#	(require 'flymake)
 #	(add-hook 'find-file-hook 'flymake-find-file-hook)
 # To put in practical use: M-x flymake-mode RET
 check-syntax:
@@ -66,12 +71,23 @@ os_dump:
 	echo "-p : $(shell uname -p)"; \
 	echo "-v : $(shell uname -v)"; \
 
+#compile test
+gc_test: traverser.debug.o linked_list.debug.o heap.debug.o gc.debug.o gc_test.c
+	$(CC) -o $@.out $^ $(FLAGS_CUNIT)
+.PHONY: gc_test
 
 #compile test
 linked_list.o: linked_list.c linked_list.h
 	$(CC) $(FLAGS_PROD) linked_list.c -c
 
 heap.o: heap.c heap.h
+	$(CC) $(FLAGS_PROD) heap.c -o heap.o -c
+
+stack_c: stack_traverser.o linked_list.o heap.o
+	$(CC) $(FLAGS_DEBUG) -o stack_traverser stack_traverser.c
+
+stack_run:
+	@./stack_traverser
 	$(CC) $(FLAGS_PROD) heap.c -c
 
 stack_traverser.o: stack_traverser.c stack_traverser.h
@@ -80,12 +96,15 @@ stack_traverser.o: stack_traverser.c stack_traverser.h
 stack: stack_traverser.h heap.o linked_list.o stack_traverser.c
 	$(CC) $^ $(FLAGS_DEBUG) -o stack.out
 
-stack_test: linked_list.o heap.o stack_traverser.o stack_traverser_test.c 
+stack_test_run:
+	@./stack_test.out
+
+stack_test: linked_list.o heap.o stack_traverser.o stack_traverser_test.c
 	$(CC)  $^ $(FLAGS_CUNIT)  -o stack_test.out
 
 #test with gui
 test_gui: $(FILES_MAIN) gui.c
-	$(CC) $(FLAGS_PROD) -o $@ $^
+	$(CC) $(FLAGS_PROD) -o $@.run $^
 
 #remove crap files.
 clean: gcov_clean

@@ -11,18 +11,17 @@ bool is_pointing_at_heap(void *ptr, heap_t *h/* , size_t bytes */) {
   puts("is_pointing_at_heap är startad.");
   printf("Pointer contains: %ld\n", *(uintptr_t *)ptr);
   printf("Address on stack: %p\n", ptr);
- 
+
   if (*(uintptr_t *)ptr > (uintptr_t)get_heap_start(h) && *(uintptr_t *)ptr < (uintptr_t)get_heap_end(h)) {
     puts("Yes!!!!\n\n\n\n\n\n\n\n\n");
     return true;
   }
-  else 
+  else
     return false;
 }
 
 void *get_stack_top() {
   int top_of_stack;
-
   return &top_of_stack;
 }
 
@@ -54,7 +53,7 @@ ll_node **get_alive_stack_pointers(heap_t *h) {
   }
   else {
     printf("hej igen, stacken borde växa neråt nu va\n");
-    while ((uintptr_t)top < (uintptr_t)environ) { 
+    while ((uintptr_t)top < (uintptr_t)environ) {
       puts("Stack grows downwards.");
       printf("Count %d: \ntop: %p\n", counter, top);
       if (is_pointing_at_heap(top, h)) {
@@ -73,15 +72,14 @@ ll_node **get_alive_stack_pointers(heap_t *h) {
   printf("Total pointers added to the list: %d\n", total);
   puts("\n--------------------------------\n");
   //  create_stack_list(top, h, root);
-
-  return root;  
+  return root;
 }
 
 void print_stack_list(ll_node **root) {
   puts("Printing list of alive stackpointers:");
   ll_node *iterator = *root;
   int counter = 0;
-  
+
   while (iterator) {
     printf("\nCounter: %d\n%p\n", counter, LL_getContent(iterator));
     counter++;
@@ -99,36 +97,35 @@ typedef struct haubir haubir_;
 
 struct haubir {
   char *LeBron;
-  int amazing;  
+  int amazing;
 };
 
 
-int main() {
-  // create a new heap
-  heap_t *new_heap = h_init(1024, true, 100.0);
-  
-  // allocate on this heap. For testing purposes
-    haubir_ *ptr = h_alloc_struct(new_heap, "cccc");
-    haubir_ *malin = h_alloc_struct(new_heap, "*i");
-  /* printf("Allocated pointer: %ld\n", (uintptr_t)ptr); */
-  /* printf("Address on stack:  %p\n", ptr); */
-
-  //  is_pointing_at_heap(ptr, new_heap);
-
-  // Dump pointers from the registers to the stack, if any.
-  Dump_registers();
-  
-  printf("hej där\n");
-
-  // the list contains all alive pointers
-  ll_node **root = get_alive_stack_pointers(new_heap); 
-
-  // print the list for debugging purposes
-  print_stack_list(root); 
-
-  // deletes the heap we created
-  h_delete(new_heap);
-  
-  return 0;
-}
-
+// int main() {
+//   // create a new heap
+//   heap_t *new_heap = h_init(1024, true, 100.0);
+//
+//   // allocate on this heap. For testing purposes
+//     haubir_ *ptr = h_alloc_struct(new_heap, "cccc");
+//     haubir_ *malin = h_alloc_struct(new_heap, "*i");
+//   /* printf("Allocated pointer: %ld\n", (uintptr_t)ptr); */
+//   /* printf("Address on stack:  %p\n", ptr); */
+//
+//   //  is_pointing_at_heap(ptr, new_heap);
+//
+//   // Dump pointers from the registers to the stack, if any.
+//   Dump_registers();
+//
+//   printf("hej där\n");
+//
+//   // the list contains all alive pointers
+//   ll_node **root = get_alive_stack_pointers(new_heap);
+//
+//   // print the list for debugging purposes
+//   print_stack_list(root);
+//
+//   // deletes the heap we created
+//   h_delete(new_heap);
+//
+//   return 0;
+// }
