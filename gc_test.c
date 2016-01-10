@@ -48,6 +48,17 @@ struct linked {
   void *next;
 };
 
+
+void testINITHEAP() {
+  heap_t *heap = h_init(2048, true, 1.0);
+  CU_ASSERT_TRUE(heap != NULL && heap->meta_p == heap && heap->unsafe_stack && heap->total_size == 2048);
+
+
+  
+}
+
+
+
 void testTRAVERSESTRUCT() {
 
   ll_head stack_pointers = LL_initRoot();
@@ -248,25 +259,28 @@ void test_get_stack_top(){
 
 int main(int argc, char const *argv[]) {
 
-    CU_pSuite heapSuite = NULL;
-    CU_pSuite stackSuite = NULL;
-
+  CU_pSuite initHeapSuite = NULL;  
+  CU_pSuite heapSuite = NULL;
+  CU_pSuite stackSuite = NULL;
+    
     //initialize the CUnit test registry
     if (CUE_SUCCESS != CU_initialize_registry()) {
         return CU_get_error();
     }
 
     //add a suite to the registry
+    initHeapSuite = CU_add_suite("Init Heap Suite", init_suite, clean_suite);
     heapSuite = CU_add_suite("Heap Suite", init_suite, clean_suite);
     stackSuite = CU_add_suite("Stack Suite", init_suite, clean_suite);
 
-    if (NULL == heapSuite || NULL == stackSuite) {
+    if (NULL == initHeapSuite || NULL == heapSuite || NULL == stackSuite) {
         CU_cleanup_registry();
         return CU_get_error();
     }
 
-    if (NULL == CU_add_test(heapSuite, "testing traverseLLHeap", testTRAVERSE_LL_HEAP) ||
-         NULL == CU_add_test(heapSuite, "testing traverseHeap", testTRAVERSE) ||
+    if (NULL == CU_add_test(initHeapSuite, "testing init_h", testINITHEAP) ||
+	NULL == CU_add_test(heapSuite, "testing traverseLLHeap", testTRAVERSE_LL_HEAP) ||
+	NULL == CU_add_test(heapSuite, "testing traverseHeap", testTRAVERSE) ||
          NULL == CU_add_test(heapSuite, "testing traverseEmptyList", testEMPTYLISTRTRAVERSE) ||
          NULL == CU_add_test(heapSuite, "testing traverseEmptyPointerList", testEMPTYPOINTERLIST) ||
          NULL == CU_add_test(heapSuite, "testing traverseAdvancedStruct", testTRAVERSESTRUCT) ||
