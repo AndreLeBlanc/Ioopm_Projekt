@@ -115,6 +115,25 @@ void testTRAVERSESTRUCT() {
 
 }
 
+void testEMPTYPOINTERLIST() {
+
+  ll_head stack_pointers = LL_initRoot();
+  LL_createAndInsertSequentially(stack_pointers, NULL);
+
+  CU_ASSERT_EQUAL(LL_length(traverse_pointers_from_LL(stack_pointers)), 1);
+
+}
+
+void testEMPTYLISTRTRAVERSE() {
+
+  ll_head stack_pointers = LL_initRoot();
+  struct linked *list_a = h_alloc_struct(heap, "*i*");
+  LL_createAndInsertSequentially(stack_pointers, list_a);
+
+  CU_ASSERT_EQUAL(LL_length(traverse_pointers_from_LL(stack_pointers)), 1);
+
+}
+
 void testPrint(void **object) {
   // struct test* pointer = (struct test*)object;
   // printf("[%p]\n", ((struct test*)object)->link);
@@ -141,19 +160,16 @@ void testTRAVERSE_LL_HEAP() {
     pt_a->link = pt_b;
     pt_d->link = NULL;
 
-    puts("");
+    // puts("");
     // printf("a: %p -> %p : { %p }\n", pt_a, pt_a->link, (pt_a + sizeof(struct test) - 3));
-    printf("a: %p -> %p\n", pt_a, pt_a->link);
-    LL_map(fs_get_pointers_within_object(pt_a), testPrint);
-    printf("b: %p -> %p\n", pt_b, pt_b->link);
-    LL_map(fs_get_pointers_within_object(pt_b), testPrint);
-    printf("c: %p -> %p\n", pt_c, pt_c->link);
-    LL_map(fs_get_pointers_within_object(pt_c), testPrint);
-    printf("d: %p -> %p\n", pt_d, pt_d->link);
-    LL_map(fs_get_pointers_within_object(pt_d), testPrint);
-
-    int objectsA = LL_length(fs_get_pointers_within_object(pt_a));
-    printf("Objects in A: %d\n", objectsA);
+    // printf("a: %p -> %p\n", pt_a, pt_a->link);
+    // LL_map(fs_get_pointers_within_object(pt_a), testPrint);
+    // printf("b: %p -> %p\n", pt_b, pt_b->link);
+    // LL_map(fs_get_pointers_within_object(pt_b), testPrint);
+    // printf("c: %p -> %p\n", pt_c, pt_c->link);
+    // LL_map(fs_get_pointers_within_object(pt_c), testPrint);
+    // printf("d: %p -> %p\n", pt_d, pt_d->link);
+    // LL_map(fs_get_pointers_within_object(pt_d), testPrint);
 
     LL_createAndInsertSequentially(stack_pointers, pt_a);
     LL_createAndInsertSequentially(stack_pointers, pt_d);
@@ -222,6 +238,8 @@ int main(int argc, char const *argv[]) {
          NULL == CU_add_test(pSuite, "testing printStack", testPRINTSTACK) ||
          NULL == CU_add_test(pSuite, "testing traverseLLHeap", testTRAVERSE_LL_HEAP) ||
          NULL == CU_add_test(pSuite, "testing traverseHeap", testTRAVERSE) ||
+         NULL == CU_add_test(pSuite, "testing traverseEmptyList", testEMPTYLISTRTRAVERSE) ||
+         NULL == CU_add_test(pSuite, "testing traverseEmptyPointerList", testEMPTYPOINTERLIST) ||
          NULL == CU_add_test(pSuite, "testing traverseAdvancedStruct", testTRAVERSESTRUCT) ||
          NULL == CU_add_test(pSuite, "testing get_pointers_within_object", testGETPOINTERSWITHINOBJECT) ||
          NULL == CU_add_test(pSuite, "testing printHeap", testPRINTHEAP)) {

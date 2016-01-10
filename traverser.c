@@ -70,11 +70,19 @@ ll_head traverse_pointers_from_LL(ll_head pointers) {
         ll_node *cursor = *pointers;
         while(cursor != NULL) {
 
+            if(LL_getContent(cursor) == NULL) {
+              cursor = LL_getNext(cursor);
+              continue;
+            }
+
             printf("%p -> %p\n", cursor, LL_getContent(cursor));
 
             // puts("casting ints");
             // void *content = (void *)LL_getContent(cursor);
 
+            if(LL_getContent(cursor) == NULL) {
+              puts("fuck.");
+            }
             puts("casting");
             void **content = (void **)LL_getContent(cursor);
             printf("metadata: %s\n", md_get_format_string(LL_getContent(cursor)));

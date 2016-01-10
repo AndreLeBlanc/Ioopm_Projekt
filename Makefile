@@ -45,7 +45,9 @@ gcov: gcov_clean $(FILES_GCOV)
 
 # this part is executed when testing on multiple machines. change dependency to your needs (ex: os_dump, valgrind, gcov)
 # DEFAULT: run_test
-test: stack_c stack_test_c stack_run stack_test_run
+# test: stack_c stack_test_c stack_run stack_test_run
+test: gc_test
+	./gc_test.out
 .PHONY: test
 
 # Flymake mode (Live syntax and error check)
