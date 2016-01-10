@@ -77,13 +77,23 @@ ll_node **get_alive_stack_pointers(heap_t *h) {
   return root;
 }
 
+void print_address(void *listobject){ 
+  printf("\n%d\n", listobject);
+}
+
+void print_stack_list(ll_node **list) {
+  puts("Printing list of alive stackpointers:");
+  LL_map(list, print_address); 
+}
+
+/*
 void print_stack_list(ll_node **root) {
   puts("Printing list of alive stackpointers:");
   ll_node *iterator = *root;
   int counter = 0;
 
   while (iterator) {
-    printf("\nCounter: %d\n%ld\n", counter, (uintptr_t *)LL_getContent(iterator));
+    printf("\nCounter: %d\n%016\n", counter, (uintptr_t *)LL_getContent(iterator));
     counter++;
     if (LL_getPrevious(root, iterator)) {
       printf("%ld has previous pointer at %ld\n", *(uintptr_t *)LL_getContent(iterator), *(uintptr_t *)LL_getContent(LL_getPrevious(root, iterator)));
@@ -94,7 +104,7 @@ void print_stack_list(ll_node **root) {
     iterator = LL_getNext(iterator);
   }
 }
- 
+*/ 
 typedef struct haubir haubir_;
 
 struct haubir {
