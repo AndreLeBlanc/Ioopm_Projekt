@@ -285,6 +285,7 @@ int main(int argc, char const *argv[]) {
     int failures = CU_get_number_of_failures();
     CU_cleanup_registry();
 
+    //removed because of gcov, if there's errors gcov won't run correctly. /V
     // assert(failures == 0);
     return EXIT_SUCCESS;
 

@@ -9,24 +9,18 @@ FILES_GCOV=gc_test.c gc.c heap.c linked_list.c traverser.c stack_traverser.c
 FILES_MAIN=gc.o collector.o heap.o traverser.o utilities.o linked_list.o
 FILES_H=linked_list.h stack_traverser.h heap.h
 
-
 DIR_RESOURCES=./resources/
 
 all:
 	@echo "Not implemented yet."
 
-
 #compile object files
-# %.o: %.c
-# 	$(CC) $(FLAGS_PROD) -o $@ -c $^
+%.o: %.c %.h
+	$(CC) $(FLAGS_PROD) -o $@ -c $^
 
 # compile object files with debugging information
 %.debug.o: %.c
 	$(CC) $(FLAGS_DEBUG) -o $@ -c $^
-
-traverser.run: traverser.c heap.o linked_list.o
-	$(CC) $(FLAGS_DEBUG) -o $@ $^
-	./$@
 
 #generate documentation with doxygen
 doc: $(DIR_RESOURCES)gc.doxy
@@ -35,13 +29,13 @@ doc: $(DIR_RESOURCES)gc.doxy
 
 #check if there are memory leaks
 valgrind: gc_test
-	@valgrind --leak-check=full ./gc_test.out
+	@valgrind --leak-check=full ./gc_test.run
 .PHONY: valgrind
 
 #check the unit-test coverage of every source file
 gcov: gcov_clean $(FILES_GCOV)
-	@$(CC) $(FLAGS_GCOV) -o gcov.out $(FILES_GCOV) -lcunit #compile source files with gcov data
-	@./gcov.out >> /dev/null #create profile data, silence the output
+	@$(CC) $(FLAGS_GCOV) -o gcov.run $(FILES_GCOV) -lcunit #compile source files with gcov data
+	@./gcov.run >> /dev/null #create profile data, silence the output
 	@gcov $(FILES_GCOV)
 .PHONY: gcov
 
@@ -61,7 +55,7 @@ check-syntax:
 
 # run tests
 run_test: gc_test
-	@./gc_test.out
+	@./gc_test.run
 .PHONY: run_test
 
 os_dump:
@@ -74,7 +68,7 @@ os_dump:
 
 #compile test
 gc_test: $(FILES_TEST) gc_test.c
-	$(CC) -o $@.out $^ $(FLAGS_CUNIT)
+	$(CC) -o $@.run $^ $(FLAGS_CUNIT)
 .PHONY: gc_test
 
 #compile test
@@ -95,13 +89,7 @@ stack_traverser.o: stack_traverser.c stack_traverser.h
 	$(CC) $(FLAGS_PROD) stack_traverser.c -c
 
 stack: stack_traverser.h heap.o linked_list.o stack_traverser.c
-	$(CC) $^ $(FLAGS_DEBUG) -o stack.out
-
-stack_test_run:
-	@./stack_test.out
-
-stack_test: linked_list.o heap.o stack_traverser.o stack_traverser_test.c
-	$(CC)  $^ $(FLAGS_CUNIT)  -o stack_test.out
+	$(CC) $^ $(FLAGS_DEBUG) -o stack.run
 
 #test with gui
 test_gui: $(FILES_MAIN) gui.c
@@ -109,15 +97,17 @@ test_gui: $(FILES_MAIN) gui.c
 
 #remove crap files.
 clean: gcov_clean
-	@rm -rf *.out
+	@rm -rf *.run
 	@rm -rf *.o
 	@rm -rf ./doc/*
 	@rm -rf ./*.dSYM
 	@rm -rf .DS_Store
 	@rm -rf *.zip
+	@rm -rf ./*~
+	@rm -rf *.run
 	@rm -rf *.result.txt
 	@echo "All cleaned up!"
 
 gcov_clean:
 	@rm -rf *.gc*
-	@rm -rf gcov.out
+	@rm -rf gcov.run
