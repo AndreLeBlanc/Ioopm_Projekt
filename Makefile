@@ -4,8 +4,8 @@ FLAGS_DEBUG=$(FLAGS_PROD) -ggdb
 FLAGS_CUNIT=$(FLAGS_DEBUG) -lcunit
 FLAGS_GCOV=$(FLAGS_DEBUG) --coverage
 
-FILES_TEST=traverser.debug.o linked_list.debug.o heap.debug.o gc.debug.o stack_traverser.debug.o
-FILES_GCOV=gc_test.c gc.c heap.c linked_list.c traverser.c stack_traverser.c
+FILES_TEST=traverser.debug.o linked_list.debug.o heap.debug.o gc.debug.o stack_traverser.debug.o utilities.debug.o order32.debug.o collector.debug.o
+FILES_GCOV=gc_test.c gc.c heap.c linked_list.c traverser.c stack_traverser.c utilities.c collector.c
 FILES_MAIN=gc.o collector.o heap.o traverser.o utilities.o linked_list.o
 FILES_H=linked_list.h stack_traverser.h heap.h
 
@@ -115,6 +115,7 @@ clean: gcov_clean
 	@rm -rf ./*~
 	@rm -rf *.run
 	@rm -rf *.out
+	@rm -rf *.info
 	@rm -rf ./resources/*.result.txt
 	@echo "All cleaned up!"
 
