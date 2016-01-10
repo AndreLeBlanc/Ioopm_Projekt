@@ -103,9 +103,11 @@ clean: gcov_clean
 	@rm -rf ./*.dSYM
 	@rm -rf .DS_Store
 	@rm -rf *.zip
+	@rm -rf ./resources/*.zip
 	@rm -rf ./*~
 	@rm -rf *.run
-	@rm -rf *.result.txt
+	@rm -rf *.out
+	@rm -rf ./resources/*.result.txt
 	@echo "All cleaned up!"
 
 gcov_clean:
