@@ -4,19 +4,19 @@
 #include <stdio.h>
 #include <ctype.h>
 
-// mallocates space for heap, places metadata in the front. 
+// mallocates space for heap, places metadata in the front.
 
 heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold) {
   if(bytes < sizeof(heap_t) + sizeof(page_t)) {
     // if space allocated is not even enough for heap and page metadata, don't allocate
-    return NULL;    
+    return NULL;
   }
 
   heap_t *new_heap = malloc(bytes);
 
   // create metadata struct and place it in the front of the heap
   // the user sees this as a heap_t struct and is therefore not
-  // aware that it is the pointer to the whole heap. 
+  // aware that it is the pointer to the whole heap.
   new_heap->meta_p            = new_heap;
   new_heap->user_start_p      = (void*) new_heap + sizeof(heap_t);
   new_heap->active_page_list  = NULL;
@@ -34,7 +34,7 @@ heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold) {
   size_t bytes_left = bytes;
   page_t* cursor = new_heap->passive_page_list;
 
-  while(cursor) {    
+  while(cursor) {
     // set defaults for page
     cursor->user_start_p = (void*) cursor + sizeof(page_t);
     cursor->bump_p       = (void*) cursor + sizeof(page_t);
@@ -56,7 +56,7 @@ heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold) {
 void h_delete(heap_t *h) {
   if(h != NULL) {
     free(h);
-  } 
+  }
 }
 
 size_t h_avail(heap_t *h) {
@@ -91,15 +91,15 @@ typedef struct metadata {
 size_t fs_calculate_size(char* format_string) {
   int fs_length = strlen(format_string);
   int multiplier = 0;
-  
+
   size_t size = 0;
-  
+
   for(int i = 0; i < fs_length; i++) {
     if(format_string[i] >= 'A' && format_string[i] <= 'Z') {
       format_string[i] = tolower(format_string[i]);
     }
     switch(format_string[i]) {
-      // if any of the following characters: multiply size with multiplier and add to size. 
+      // if any of the following characters: multiply size with multiplier and add to size.
       // Pointers
     case '*':
       size += sizeof(void*) * (multiplier ? multiplier : 1);
@@ -131,15 +131,15 @@ size_t fs_calculate_size(char* format_string) {
       multiplier = 0;
       break;
       // if none of these characters, then check if it is a multiplier
-    default:  
-      if(format_string[i] >= '0' && format_string[i] <= '9') { 
+    default:
+      if(format_string[i] >= '0' && format_string[i] <= '9') {
 	// if the char is an integer, convert and save to multiplier.
-	int digit = format_string[i] -  '0'; 
+	int digit = format_string[i] -  '0';
         multiplier = multiplier * 10 + digit;
       } else {
 	// if an invalid character is in the string, return 0
 	return 0;
-      }	    
+      }
 	break;
     }
   }
@@ -173,7 +173,7 @@ void post_compact_page_reset(heap_t *h) {
   // set compact_page_list becomes the active list
   h->active_page_list = h->compact_page_list;
   // reset compact_page_list
-  h->NULL;
+  h->compact_page_list = NULL;
 }
 
 page_t *get_allocation_page(heap_t* h, size_t bytes,  bool compact) {
@@ -184,7 +184,7 @@ page_t *get_allocation_page(heap_t* h, size_t bytes,  bool compact) {
     active_page_cursor = h->active_page_list;
   }
   page_t *previous_active_page_cursor = NULL;
-  
+
   while(active_page_cursor) {
 
     // go through all active pages
@@ -192,7 +192,6 @@ page_t *get_allocation_page(heap_t* h, size_t bytes,  bool compact) {
       // if object fits in page return that page
       return active_page_cursor;
     }
-
     // go to next active page
     previous_active_page_cursor = active_page_cursor;
     active_page_cursor = active_page_cursor->next_page;
@@ -208,8 +207,8 @@ page_t *get_allocation_page(heap_t* h, size_t bytes,  bool compact) {
       // if object fits in page make active and return that page
       passive_page_cursor->active = true;
 
-      // TODO: make this a comparative insertion so pages are always in order.   
-      // add passive page to active page list 
+      // TODO: make this a comparative insertion so pages are always in order.
+      // add passive page to active page list
       if(previous_active_page_cursor == NULL) {
         // if active page list is empty
 	if(compact) {
@@ -221,7 +220,7 @@ page_t *get_allocation_page(heap_t* h, size_t bytes,  bool compact) {
         // if active page list is not empty
         previous_active_page_cursor->next_page = passive_page_cursor;
       }
-      
+
       // remove passive page from passive page list
       if(previous_passive_page_cursor == NULL) {
         // if it is the first page in list, change heaps list pointer
@@ -253,15 +252,15 @@ void *h_alloc(heap_t* h, size_t bytes, char* format_string, bool compact) {
     p->bump_p += total_bytes;
     h->used_space += total_bytes;
     h->avail_space -= total_bytes;
-    
+
     // update metadata
     md_set_format_string(new_pointer, format_string);
     md_set_bit_vector(new_pointer, '\0');
     md_set_forwarding_address(new_pointer, NULL);
     md_set_copied_flag(new_pointer, false);
-    
+
     // return pointer
-    return new_pointer;    
+    return new_pointer;
   } else { // if there is no page or space, return null
     return NULL;
   }
@@ -295,8 +294,8 @@ void *h_alloc_compact(heap_t* h, void* object) {
 }
 
 bool validate_object(void* object) {
-  // TODO: Doesn't validate anything yet. 
-  return true; 
+  // TODO: Doesn't validate anything yet.
+  return true;
 }
 
 
@@ -366,16 +365,16 @@ ll_head fs_get_pointers_within_object(void* object) {
   void *pointer = object;
 
   ll_head pointer_list = LL_initRoot();
-  
-  for(int i = 0; i < strlen(format_string); i++) { 
+
+  for(int i = 0; i < strlen(format_string); i++) {
     switch(format_string[i]) {
       // if a pointer, add to list and increment pointer appropriately
       // if any of the other characters, increment pointer appropriately
       // Pointers
     case '*':
       for(int i = 0; i < multiplier; i++) {
-	LL_createAndInsertSequentially(pointer_list, pointer);
-	pointer = ((void*) pointer) + 1;
+      	LL_createAndInsertSequentially(pointer_list, pointer);
+      	pointer = ((void*) pointer) + 1;
       }
       multiplier = 1;
       break;
@@ -405,15 +404,15 @@ ll_head fs_get_pointers_within_object(void* object) {
       multiplier = 1;
       break;
       // if none of these characters, then check if it is a multiplier
-    default:  
-      if(format_string[i] >= '0' && format_string[i] <= '9') { 
+    default:
+      if(format_string[i] >= '0' && format_string[i] <= '9') {
 	// if the char is an integer, convert and save to multiplier.
-	int digit = format_string[i] -  '0'; 
+	int digit = format_string[i] -  '0';
 	if(multiplier == 1) {
 	  multiplier = digit;
 	} else {
 	  multiplier = multiplier * 10 + digit;
-	} 
+	}
       } else {
 	// if an invalid character is in the string, return null
 	return NULL;

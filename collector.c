@@ -52,3 +52,13 @@ void bartlettCompact(heap_t *h, ll_head marked_list) { // performs the bartlett 
   // set pages
   post_compact_page_reset;
 }
+
+/*
+  Removed because of confusion. /V
+*/
+// int main(int argc, const char** argv, const char** envp) { // just testing
+//   register void* stack asm("esp");
+//   // put stack somewhere
+//   return do_main(argc, argv, envp);
+// }
+
