@@ -39,7 +39,7 @@ gcov: gcov_clean $(FILES_GCOV)
 	@gcov $(FILES_GCOV)
 .PHONY: gcov
 
-#check the unit-test coverage of every source file
+#check the unit-test coverage of every source file with visual represenation created in cov/
 lcov: gcov_clean $(FILES_GCOV)
 	@$(CC) $(FLAGS_GCOV) -o lcov.run $(FILES_GCOV) -lcunit #compile source files with gcov data
 	@./lcov.run >> /dev/null #create profile data, silence the output
