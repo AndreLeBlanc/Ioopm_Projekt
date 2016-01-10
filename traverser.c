@@ -92,7 +92,7 @@ ll_head traverse_pointers_from_LL(ll_head pointers) {
               cursor = LL_getNext(cursor);
               continue;
             }
-
+            
             ll_head pointers_in_obj = NULL;
 
             if(*content != NULL) {
