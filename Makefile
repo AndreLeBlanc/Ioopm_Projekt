@@ -4,7 +4,8 @@ FLAGS_DEBUG=$(FLAGS_PROD) -ggdb
 FLAGS_CUNIT=$(FLAGS_DEBUG) -lcunit
 FLAGS_GCOV=$(FLAGS_DEBUG) --coverage
 
-FILES_GCOV=gc_test.c gc.c heap.c linked_list.c traverser.c
+FILES_TEST=traverser.debug.o linked_list.debug.o heap.debug.o gc.debug.o stack_traverser.debug.o
+FILES_GCOV=gc_test.c gc.c heap.c linked_list.c traverser.c stack_traverser.c
 FILES_MAIN=gc.o collector.o heap.o traverser.o utilities.o linked_list.o
 FILES_H=linked_list.h stack_traverser.h heap.h
 
@@ -16,12 +17,12 @@ all:
 
 
 #compile object files
-#%.o: %.c
-#	$(CC) $(FLAGS_PROD) -o $@ -c $^
+# %.o: %.c
+# 	$(CC) $(FLAGS_PROD) -o $@ -c $^
 
 # compile object files with debugging information
-#%.debug.o: %.c
-#	$(CC) $(FLAGS_DEBUG) -o $@ -c $^
+%.debug.o: %.c
+	$(CC) $(FLAGS_DEBUG) -o $@ -c $^
 
 traverser.run: traverser.c heap.o linked_list.o
 	$(CC) $(FLAGS_DEBUG) -o $@ $^
@@ -72,7 +73,7 @@ os_dump:
 	echo "-v : $(shell uname -v)"; \
 
 #compile test
-gc_test: traverser.debug.o linked_list.debug.o heap.debug.o gc.debug.o gc_test.c
+gc_test: $(FILES_TEST) gc_test.c
 	$(CC) -o $@.out $^ $(FLAGS_CUNIT)
 .PHONY: gc_test
 
