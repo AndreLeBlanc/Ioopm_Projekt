@@ -6,7 +6,7 @@
 typedef struct node{
   struct node* next;
   struct node* previous;
-  void* nodeContent; 
+  void* nodeContent;
 }ll_node;
 
 // CREATE FUNCTIONS
@@ -79,7 +79,7 @@ void LL_insertSequentially(ll_node** root, ll_node* toInsert){
   }
 }
 
- 
+
 ll_node* LL_createAndInsertSequentially(ll_node** root, void* content){
   ll_node* newNode = LL_createNode(content);
   LL_insertSequentially(root, newNode);
@@ -87,7 +87,7 @@ ll_node* LL_createAndInsertSequentially(ll_node** root, void* content){
 }
 
 /* insertComparatively
-   Inserts a node into the linked list and uses a pointer to a function which accepts two void pointers and compares the values at these pointers. This function will insert the node whenever the function returns 0 or more. 
+   Inserts a node into the linked list and uses a pointer to a function which accepts two void pointers and compares the values at these pointers. This function will insert the node whenever the function returns 0 or more.
  */
 
 void LL_insertComparatively(ll_node** root, ll_node* toInsert,
@@ -105,7 +105,7 @@ void LL_insertComparatively(ll_node** root, ll_node* toInsert,
       }
     } else {
       ll_node* cursor = *root;
-      while(cursor->next != NULL && 
+      while(cursor->next != NULL &&
 	    compareFunction(toInsert->nodeContent, cursor->next->nodeContent) >= 0) {
 	cursor = cursor->next;
       }
@@ -142,7 +142,7 @@ ll_node* LL_removePointer(ll_node** root, ll_node* toRemove){
     // if toRemove is in other part of the list, search for it and
     // make previous node point to the one after toRemove.
     ll_node* cursor = *root;
-  
+
     while(cursor->next != NULL && cursor->next != toRemove){
       cursor = cursor->next;
     }
@@ -174,7 +174,7 @@ ll_node* LL_removeIndex(ll_node** root, int index){
   } else {
     // if index is higher than 0, search for node and make previous
     // node point to the one after the one at index.
-    
+
     ll_node* cursor = *root;
 
     int i = 0;
@@ -225,7 +225,7 @@ void LL_deleteList(ll_node** root){
   free(root);
 }
 
-void LL_purgeList(ll_node** root){ 
+void LL_purgeList(ll_node** root){
   for(int i = LL_length(root); i > 0; i--) {
     LL_purgePointer(root, *root);
   }
@@ -283,9 +283,9 @@ int LL_isValidAux(ll_node* cursor, int(validationFunction)(void*, void*), void* 
     // if validation function returns 0, return invalid
     return 0;
   } else {
-    // recursively continue 
+    // recursively continue
     return LL_isValidAux(LL_getNext(cursor), validationFunction, validationData);
-  }     
+  }
 }
 
 void LL_map(ll_node** root, void(*mapFunction)(void*)) {
@@ -313,5 +313,5 @@ ll_node* LL_search(ll_node** root, void* content, int(*compareFunction)(void*, v
     cursor = LL_getNext(cursor);
   }
   // if nothing was found, return NULL
-  return NULL; 
+  return NULL;
 }

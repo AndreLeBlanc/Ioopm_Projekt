@@ -58,6 +58,11 @@ void test_object_metadata() {
   );
 }
 
+void test_small_heap_init() {
+  heap_t *small_heap = h_init(0, true, 0.0);
+  CU_ASSERT_PTR_NULL(small_heap);
+}
+
 void test_metadata_check() {
   void *test = h_alloc_struct(heap, "3*");
   CU_ASSERT_STRING_EQUAL("3*", md_get_format_string(test));
@@ -178,6 +183,7 @@ void testTRAVERSESTRUCT() {
   LL_createAndInsertSequentially(stack_pointers, list_ad);
 
   CU_ASSERT_EQUAL(LL_length(traverse_pointers_from_LL(stack_pointers)), 8);
+  LL_deleteList(stack_pointers);
 
 }
 
@@ -187,6 +193,7 @@ void testEMPTYPOINTERLIST() {
   LL_createAndInsertSequentially(stack_pointers, NULL);
 
   CU_ASSERT_EQUAL(LL_length(traverse_pointers_from_LL(stack_pointers)), 1);
+  LL_deleteList(stack_pointers);
 
 }
 
@@ -197,6 +204,7 @@ void testEMPTYLISTRTRAVERSE() {
   LL_createAndInsertSequentially(stack_pointers, list_a);
 
   CU_ASSERT_EQUAL(LL_length(traverse_pointers_from_LL(stack_pointers)), 1);
+  LL_deleteList(stack_pointers);
 
 }
 
@@ -247,7 +255,10 @@ void testTRAVERSE_LL_HEAP() {
   LL_createAndInsertSequentially(stack_pointers, pt_d);
 
   int length = LL_length(traverse_pointers_from_LL(stack_pointers));
+
   CU_ASSERT_EQUAL(length, 4);
+  puts("KAJLSKLFJKASLJFKAJSLKFJKLASJFLKASJKLF");
+  LL_deleteList(stack_pointers);
 
 }
 
@@ -271,6 +282,8 @@ void testTRAVERSE() {
   LL_createAndInsertSequentially(stack_pointers, pt_d);
 
   CU_ASSERT_EQUAL(LL_length(traverse_pointers_from_LL(stack_pointers)),4);
+  LL_deleteList(stack_pointers);
+
 }
 
 void test_is_pointing_at_heap() {
@@ -337,6 +350,7 @@ int main(int argc, char const *argv[]) {
          NULL == CU_add_test(heapSuite, "testing traverseEmptyPointerList", testEMPTYPOINTERLIST) ||
          NULL == CU_add_test(heapSuite, "testing traverseAdvancedStruct", testTRAVERSESTRUCT) ||
          NULL == CU_add_test(heapSuite, "testing test_object_metadata", test_object_metadata) ||
+         NULL == CU_add_test(heapSuite, "testing test_small_heap_init", test_small_heap_init) ||
          NULL == CU_add_test(heapSuite, "testing test_is_valid_object_false", test_is_valid_object_false) ||
          NULL == CU_add_test(heapSuite, "testing test_pointers_inside_multiple_pointers_struct", test_pointers_inside_multiple_pointers_struct) ||
          NULL == CU_add_test(heapSuite, "testing test_set_metadata_check", test_set_metadata_check) ||
