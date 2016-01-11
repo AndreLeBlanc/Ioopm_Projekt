@@ -18,7 +18,7 @@ struct test {
 int init_suite(void)
 {
     //create a new stack
-    heap = h_init(2048, 1, 1.0);
+    heap = h_init(20000, 1, 1.0);
     get_allocation_page(heap);
     return 0;
 }
@@ -118,6 +118,19 @@ void testINITHEAP() {
 
 }
 void testDELETEHEAP() {
+}
+
+
+void testALLOCCOMPACT() {
+  int *object = NULL;
+  object = h_alloc_data(heap, sizeof(int));
+  CU_ASSERT_TRUE(validate_object(object, heap)); 
+}
+
+void testALLOC() {
+  int *object = NULL;
+  object = h_alloc_data(heap, sizeof(int));
+  CU_ASSERT_TRUE(validate_object(object, heap)); 
 }
 
 
@@ -257,7 +270,7 @@ void testTRAVERSE_LL_HEAP() {
 
   LL_createAndInsertSequentially(stack_pointers, pt_a);
   LL_createAndInsertSequentially(stack_pointers, pt_d);
-
+  
   int length = LL_length(traverse_pointers_from_LL(stack_pointers));
 
   CU_ASSERT_EQUAL(length, 4);
