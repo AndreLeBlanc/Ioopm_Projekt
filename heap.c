@@ -34,7 +34,8 @@ heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold) {
   new_heap->avail_space       = bytes - sizeof(heap_t);
   new_heap->unsafe_stack      = unsafe_stack;
   new_heap->gc_threshold      = gc_threshold;
-  new_heap->val_list          = (void*);
+  // new_heap->val_list          = (void*);
+  new_heap->val_list          = LL_initRoot();
 
   // set up pages
   size_t bytes_left = bytes;
@@ -495,82 +496,116 @@ void update_objects_pointers(void* object) {
 /*                                  */
 /************************************/
 
-void enqueue(void* to_be_added, heap_t *h) {
-    if(add_to_this_list == NULL || validate_object(to_be_added, h->val_list)) {
-        return;
+void *enqueue(void* to_be_added, heap_t *h) {
+
+    if(h->val_list == NULL || validate_object(to_be_added, h)) {
+      return NULL;
     }
 
-    val_node_t  * node_space = malloc(sizeof(val_node_t));
-    node_space->allocated = to_be_added;
-    node_space->next = NULL;
+    return LL_createAndInsertSequentially(h->val_list, to_be_added);
 
-    if ( h->val_list->first == NULL) {
-         h->val_list->first = to_be_added;
-    }
+    // if(to_be_added == NULL || validate_object(to_be_added, h->val_list)) {
+    //     return;
+    // }
 
-    else {
-        val_node_t* itter = NULL;
-        itter = malloc(sizeof(val_node_t));
-
-        itter =  h->val_list->first;
-
-        while(itter->next !=NULL) {
-            itter = itter->next;
-        }
-        itter->next = to_be_added;
-    }
+    // val_node_t  * node_space = malloc(sizeof(val_node_t));
+    // node_space->allocated = to_be_added;
+    // node_space->next = NULL;
+    //
+    // if ( h->val_list->first == NULL) {
+    //      h->val_list->first = to_be_added;
+    // }
+    //
+    // else {
+    //     val_node_t* itter = NULL;
+    //     itter = malloc(sizeof(val_node_t));
+    //
+    //     itter =  h->val_list->first;
+    //
+    //     while(itter->next !=NULL) {
+    //         itter = itter->next;
+    //     }
+    //     itter->next = to_be_added;
+    // }
 }
 
 bool validate_object(void* object, heap_t *h) {
-    if( h->val_list == NULL ||  h->val_list->first == NULL) {
-        return false;
+
+    // if( h->val_list == NULL ||  h->val_list->first == NULL) {
+    //     return false;
+    // }
+
+    if(h->val_list == NULL || LL_isEmpty(h->val_list)) {
+      return false;
     }
 
-    if (object ==  h->val_list) {
+    ll_node *cursor = *h->val_list;
+    while(cursor != NULL) {
+      if(LL_getContent(cursor) == object) {
         return true;
-    }
-    if(object ==  h->val_list->first) {
-        return true;
+      }
+      cursor = LL_getNext(cursor);
     }
 
-    val_node_t* node_space = malloc(sizeof(val_node_t));
-    node_space =  h->val_list->first;
-    while(node_space->next != NULL ){
-        if(node_space == object){
-            return true;
-        }
-        node_space = node_space->next;
-    }
-    if(node_space == object){
-        return true;
-    }
     return false;
+    // if (object ==  h->val_list) {
+    //     return true;
+    // }
+    // if(object ==  h->val_list->first) {
+    //     return true;
+    // }
+    //
+    // val_node_t* node_space = malloc(sizeof(val_node_t));
+    // node_space =  h->val_list->first;
+    // while(node_space->next != NULL ){
+    //     if(node_space == object){
+    //         return true;
+    //     }
+    //     node_space = node_space->next;
+    // }
+    // if(node_space == object){
+    //     return true;
+    // }
+    // return false;
 }
 
-void devalidate(void* to_be_devalidated, heap_t *h) {
-  if ( h->val_list == NULL ||  h->val_list->first == NULL) {
-        return;
+void devalidate(void* object, heap_t *h) {
+
+  if(h->val_list == NULL || LL_isEmpty(h->val_list)) {
+    return;
+  }
+
+  ll_node *cursor = *h->val_list;
+  while(cursor != NULL) {
+    if(LL_getContent(cursor) == object) {
+      LL_removePointer(h->val_list, cursor);
+      break;
     }
-
-    if ( h->val_list->first == to_be_devalidated) {
-         h->val_list->first =  h->val_list->first->next;
-    }
-
-    else {
-        val_node_t * itter =  h->val_list->first;
-
-        while(itter->next->next != NULL) {
-            if (itter->next == to_be_devalidated) {
-                itter->next = itter->next->next;
-                return;
-            }
-            itter = itter->next;
-        }
-
-        if (itter->next == to_be_devalidated) {
-            itter->next = NULL;
-        }
-
-    }
+    cursor = LL_getNext(cursor);
+  }
+  // if ( h->val_list == NULL ||  h->val_list->first == NULL) {
+  //       return;
+  //   }
+  //
+  //   if ( h->val_list->first == to_be_devalidated) {
+  //        h->val_list->first =  h->val_list->first->next;
+  //   }
+  //
+  //   else {
+  //       val_node_t * itter =  h->val_list->first;
+  //
+  //       while(itter->next->next != NULL) {
+  //           if (itter->next == to_be_devalidated) {
+  //               itter->next = itter->next->next;
+  //               return;
+  //           }
+  //           itter = itter->next;
+  //       }
+  //
+  //       if (itter->next == to_be_devalidated) {
+  //           itter->next = NULL;
+  //       }
+  //
+  //   }
 
 }

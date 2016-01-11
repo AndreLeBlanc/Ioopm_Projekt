@@ -19,7 +19,8 @@ struct heap{
   void* active_page_list;
   void* passive_page_list;
   struct page* compact_page_list;
-  void* val_list;
+  // void* val_list;
+  ll_head val_list;
   void* end_p;        // pointer to end of allocated space
   size_t total_size;  // total size of the heap (with metadata)
   size_t user_size;   // size of user's allocated space (total_size minus metadata)
@@ -152,7 +153,7 @@ void post_compact_page_reset(heap_t *h);
 /*                                  */
 /************************************/
 
-void enqueue(void* to_be_added, heap_t *h);
+void *enqueue(void* to_be_added, heap_t *h);
 
 /**
    @brief Checks if an object is a valid allocated object.
@@ -160,7 +161,7 @@ void enqueue(void* to_be_added, heap_t *h);
    @param h a pointer to the Heap
    @return Whether or not the pointer points to a valid object.
 */
-bool validate_object(void* objectt, heap_t *h);
+bool validate_object(void* object, heap_t *h);
 
 /**
    @brief Rmoves object from valid list

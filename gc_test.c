@@ -81,14 +81,18 @@ void test_set_metadata_check() {
 
 void test_is_valid_object_false() {
   char *invalid = "Hello World";
-  CU_ASSERT_FALSE(validate_object(invalid));
+  CU_ASSERT_FALSE(validate_object(invalid, heap));
 }
 
 void test_is_valid_object_true() {
   char *valid = h_alloc_data(heap, sizeof(char) * 2 + 1);
-  strcpy(valid, "ab");
-  *valid = "ab";
-  CU_ASSERT_TRUE(validate_object(valid));
+  CU_ASSERT_TRUE(validate_object(valid, heap));
+}
+
+void test_is_devalidate_object_false() {
+  char *valid = h_alloc_data(heap, sizeof(char) * 2 + 1);
+  devalidate(valid, heap);
+  CU_ASSERT_FALSE(validate_object(valid, heap));
 }
 
 struct linked {
@@ -351,6 +355,7 @@ int main(int argc, char const *argv[]) {
          NULL == CU_add_test(heapSuite, "testing traverseAdvancedStruct", testTRAVERSESTRUCT) ||
          NULL == CU_add_test(heapSuite, "testing test_object_metadata", test_object_metadata) ||
          NULL == CU_add_test(heapSuite, "testing test_small_heap_init", test_small_heap_init) ||
+         NULL == CU_add_test(heapSuite, "testing test_is_devalidate_object_false", test_is_devalidate_object_false) ||
          NULL == CU_add_test(heapSuite, "testing test_is_valid_object_false", test_is_valid_object_false) ||
          NULL == CU_add_test(heapSuite, "testing test_pointers_inside_multiple_pointers_struct", test_pointers_inside_multiple_pointers_struct) ||
          NULL == CU_add_test(heapSuite, "testing test_set_metadata_check", test_set_metadata_check) ||
