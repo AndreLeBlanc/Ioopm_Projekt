@@ -6,27 +6,28 @@
 #include "heap.h"
 #include "traverser.h"
 #include "stack_traverser.h"
-
 #include "gc.h"
 
 heap_t *heap = NULL;
-
 extern char **environ; // bottom of stack
 
 struct test {
     void *link;
 };
 
-int init_suite(void)
-{
-    //create a new stack
+struct linked {
+  void *content;
+  int number;
+  void *next;
+};
+
+int init_suite(void) {
     heap = h_init(100000, 1, 1.0);
-    get_allocation_page(heap);
     return 0;
 }
 
 int clean_suite(void) {
-  //free memory and shit.
+  h_delete(heap);
   return 0;
 }
 
@@ -41,31 +42,41 @@ void testGETPOINTERSWITHINOBJECT() {
   *persistent_number = number;
   //slänger in int i vårt test-objekt.
   object->link = persistent_number;
-  CU_ASSERT_EQUAL(LL_length(fs_get_pointers_within_object(object)), 1);
+  ll_head pointers = fs_get_pointers_within_object(object);
+  CU_ASSERT_EQUAL(LL_length(pointers), 1);
+  LL_deleteList(pointers);
 
 }
 
 //HACK, not sure what this function is actually doing except offsetting addresses? /V
 void test_update_object_pointers() {
   void *pt_a = h_alloc_struct(heap, "***");
-  int n_pts_a = LL_length(fs_get_pointers_within_object(pt_a));
+  ll_head pts_a = fs_get_pointers_within_object(pt_a);
+  int n_pts_a = LL_length(pts_a);
   void *pt_ac = h_alloc_compact(heap, pt_a);
   //TODO, doesn't work atm, seg fault.
   // update_objects_pointers(pt_ac);
-  int n_pts_ac = LL_length(fs_get_pointers_within_object(pt_ac));
+  ll_head pts_ac = fs_get_pointers_within_object(pt_ac);
+  int n_pts_ac = LL_length(pts_ac);
 
   CU_FAIL();
   // CU_ASSERT_EQUAL(n_pts_a, n_pts_ac);
+  LL_deleteList(pts_a);
+  LL_deleteList(pts_ac);
 }
 
 void test_alloc_struct_all_types_lower() {
   void *test = h_alloc_struct(heap, "*ifcld3d3f4c4lfi3*");
-  CU_ASSERT_EQUAL(LL_length(fs_get_pointers_within_object(test)), 4);
+  ll_head pointers = fs_get_pointers_within_object(test);
+  CU_ASSERT_EQUAL(LL_length(pointers), 4);
+  LL_deleteList(pointers);
 }
 
 void test_alloc_struct_all_types_upper() {
   void *test = h_alloc_struct(heap, "IIIIDDD");
-  CU_ASSERT_TRUE(LL_isEmpty(fs_get_pointers_within_object(test)));
+  ll_head pointers = fs_get_pointers_within_object(test);
+  CU_ASSERT_TRUE(LL_isEmpty(pointers));
+  LL_deleteList(pointers);
 }
 
 void test_object_metadata() {
@@ -95,7 +106,9 @@ void test_metadata_check() {
 
 void test_pointers_inside_multiple_pointers_struct() {
   void *test = h_alloc_struct(heap, "3*4i2*");
-  CU_ASSERT_EQUAL(LL_length(fs_get_pointers_within_object(test)), 5);
+  ll_head pointers = fs_get_pointers_within_object(test);
+  CU_ASSERT_EQUAL(LL_length(pointers), 5);
+  LL_deleteList(pointers);
 }
 
 void test_set_metadata_check() {
@@ -120,13 +133,6 @@ void test_is_devalidate_object_false() {
   CU_ASSERT_FALSE(validate_object(valid, heap));
 }
 
-struct linked {
-  void *content;
-  int number;
-  void *next;
-};
-
-
 void testINITHEAP() {
   heap_t *heap = h_init(2048, true, 1.0);
   //printf("total size heap: %d", heap->total_size);
@@ -150,11 +156,8 @@ void testALLOCDATA() {
 }
 
 void testALLOCCOMPACT() {
-  //MÅSTE HA FORMAT-STRING ANNARS BALLAR ALLOC_COMPACT UR
-  // int *object = h_alloc_data(heap, sizeof(int));
   void *object = h_alloc_struct(heap, "i*");
   void *compact = h_alloc_compact(heap, object);
-  printf("%p : %p\n", compact, object);
   CU_ASSERT_TRUE(validate_object(compact, heap));
 }
 
@@ -223,8 +226,14 @@ void testTRAVERSESTRUCT() {
   LL_createAndInsertSequentially(stack_pointers, list_ac);
   LL_createAndInsertSequentially(stack_pointers, list_ad);
 
-  CU_ASSERT_EQUAL(LL_length(traverse_pointers_from_LL(stack_pointers)), 8);
+  ll_head pointers = traverse_pointers_from_LL(stack_pointers);
+
+  CU_ASSERT_EQUAL(LL_length(pointers), 8);
+
   LL_deleteList(stack_pointers);
+  if(!LL_isEmpty(pointers)) {
+    LL_deleteList(pointers);
+  }
 
 }
 
@@ -233,8 +242,13 @@ void testEMPTYPOINTERLIST() {
   ll_head stack_pointers = LL_initRoot();
   LL_createAndInsertSequentially(stack_pointers, NULL);
 
-  CU_ASSERT_EQUAL(LL_length(traverse_pointers_from_LL(stack_pointers)), 1);
+  ll_head pointers = traverse_pointers_from_LL(stack_pointers);
+  CU_ASSERT_EQUAL(LL_length(pointers), 1);
+
   LL_deleteList(stack_pointers);
+  if(!LL_isEmpty(pointers)) {
+    LL_deleteList(pointers);
+  }
 
 }
 
@@ -244,8 +258,13 @@ void testEMPTYLISTRTRAVERSE() {
   struct linked *list_a = h_alloc_struct(heap, "*i*");
   LL_createAndInsertSequentially(stack_pointers, list_a);
 
-  CU_ASSERT_EQUAL(LL_length(traverse_pointers_from_LL(stack_pointers)), 1);
+  ll_head pointers = traverse_pointers_from_LL(stack_pointers);
+  CU_ASSERT_EQUAL(LL_length(pointers), 1);
+
   LL_deleteList(stack_pointers);
+  if(!LL_isEmpty(pointers)) {
+    LL_deleteList(pointers);
+  }
 
 }
 
@@ -262,8 +281,10 @@ void test_fs_get_object_size() {
 void test_pointers_within_object() {
 
   struct test *pt_a = h_alloc_struct(heap, "*");
-  void *pt_b = LL_getContent(LL_getNodeAtIndex(fs_get_pointers_within_object(pt_a), 0));
+  ll_head pointers = fs_get_pointers_within_object(pt_a);
+  void *pt_b = LL_getContent(LL_getNodeAtIndex(pointers, 0));
   CU_ASSERT_EQUAL(pt_a, pt_b);
+  LL_deleteList(pointers);
 
 }
 
@@ -275,24 +296,38 @@ void testTRAVERSE_LL_HEAP() {
   struct test *pt_b = h_alloc_struct(heap, "*");
   struct test *pt_c = h_alloc_struct(heap, "*");
   struct test *pt_d = h_alloc_struct(heap, "*");
+  struct test *pt_e = h_alloc_struct(heap, "*");
 
-  struct test a, b, c, d;
+  struct test a, b, c, d, e;
   *pt_b = b;
   *pt_c = c;
   *pt_a = a;
   *pt_d = d;
+  *pt_e = e;
 
-  pt_c->link = NULL;
+  pt_c->link = pt_d;
   pt_b->link = pt_c;
   pt_a->link = pt_b;
   pt_d->link = NULL;
+  pt_e->link = NULL;
 
   LL_createAndInsertSequentially(stack_pointers, pt_a);
-  LL_createAndInsertSequentially(stack_pointers, pt_d);
+  LL_createAndInsertSequentially(stack_pointers, pt_e);
 
-  int length = LL_length(traverse_pointers_from_LL(stack_pointers));
+  traverse_pointers_from_LL(stack_pointers);
+  int length = LL_length(stack_pointers);
 
-  CU_ASSERT_EQUAL(length, 4);
+  puts("\n\n\t[ALLOC]");
+  printf("\tpt_a: %p -> %p\n", pt_a, pt_a->link);
+  printf("\tpt_b: %p -> %p\n", pt_b, pt_b->link);
+  printf("\tpt_c: %p -> %p\n", pt_c, pt_c->link);
+  printf("\tpt_d: %p -> %p\n", pt_d, pt_d->link);
+  printf("\tpt_e: %p -> %p\n\n", pt_e, pt_e->link);
+  puts("\t[RESULT]");
+  LL_map(stack_pointers, printAddress);
+  puts("\n");
+
+  CU_ASSERT_EQUAL(length, 5);
   LL_deleteList(stack_pointers);
 
 }
@@ -326,21 +361,23 @@ void test_get_alive_stack_pointers() {
   void *bottom = (void *)environ;
   heap_t *new_heap = h_init(1024, true, 100.0);
 
-  char *ptr_a = h_alloc_data(new_heap, 32);
-  char *ptr_b = h_alloc_data(new_heap, 32);
-  char *ptr_c = h_alloc_data(new_heap, 32);
+  h_alloc_data(new_heap, 32);
+  h_alloc_data(new_heap, 32);
+  h_alloc_data(new_heap, 32);
 
   ll_head chars = get_alive_stack_pointers(new_heap, top, bottom);
   CU_ASSERT_EQUAL(LL_length(chars), 3);
 
-  int *number_a = h_alloc_struct(new_heap, "*i");
-  int *number_b = h_alloc_struct(new_heap, "*i*i");
-  int *number_c = h_alloc_struct(new_heap, "*i*ii");
+  h_alloc_struct(new_heap, "*i");
+  h_alloc_struct(new_heap, "*i*i");
+  h_alloc_struct(new_heap, "*i*ii");
 
   ll_head nums = get_alive_stack_pointers(new_heap, top, bottom);
   CU_ASSERT_EQUAL(LL_length(nums), 6);
 
   h_delete(new_heap);
+  LL_deleteList(chars);
+  LL_deleteList(nums);
 }
 
 void test_get_stack_top(){
@@ -401,7 +438,7 @@ int main(int argc, char const *argv[]) {
     //Run all tests using the CUnit Basic interface
     CU_basic_set_mode(CU_BRM_VERBOSE);
     CU_basic_run_tests();
-    int failures = CU_get_number_of_failures();
+    // int failures = CU_get_number_of_failures();
     CU_cleanup_registry();
 
     //removed because of gcov, if there's errors gcov won't run correctly. /V

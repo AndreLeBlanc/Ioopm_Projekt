@@ -6,12 +6,15 @@
 #include "linked_list.h"
 
 void printAddress(void *object) {
-  printf("[%p]\n", object);
+  printf("\t[%p]\n", object);
 }
 
 ll_head traverse_pointers_from_LL(ll_head pointers) {
 
     ll_head new_nodes = LL_initRoot();
+    ll_head pointers_in_obj = NULL;
+    ll_head recursive_data = NULL;
+
     if(pointers != NULL && !LL_isEmpty(pointers)) {
 
         ll_node *cursor = *pointers;
@@ -34,20 +37,20 @@ ll_head traverse_pointers_from_LL(ll_head pointers) {
               continue;
             }
 
-            ll_head pointers_in_obj = NULL;
+            pointers_in_obj = NULL;
 
             if(*content != NULL) {
               pointers_in_obj = fs_get_pointers_within_object(*content);
             }
 
-            ll_head recursive_data = traverse_pointers_from_LL(pointers_in_obj);
+            recursive_data = traverse_pointers_from_LL(pointers_in_obj);
 
             if(recursive_data != NULL) {
 
                 ll_node *recursive_cursor = *recursive_data;
                 while(recursive_cursor != NULL) {
-                    LL_createAndInsertSequentially(new_nodes, LL_getContent(recursive_cursor));
-                    //WARNING, may fuck shit up.
+                    void **rec_content = (void **)LL_getContent(recursive_cursor);
+                    LL_createAndInsertSequentially(new_nodes, rec_content);
                     recursive_cursor = LL_getNext(recursive_cursor);
                 }
 
@@ -58,7 +61,7 @@ ll_head traverse_pointers_from_LL(ll_head pointers) {
 
         ll_node *nn_cursor = *new_nodes;
         while(nn_cursor != NULL) {
-            LL_createAndInsertSequentially(pointers, nn_cursor);
+            LL_createAndInsertSequentially(pointers, LL_getContent(nn_cursor));
             nn_cursor = LL_getNext(nn_cursor);
         }
 

@@ -27,10 +27,11 @@ ll_head get_alive_stack_pointers(heap_t *h, void *top, void *bottom) {
     while (top < bottom) {
       void **content = top;
       if (validate_object(*content, h)) { // checks the pointers metadata to check whether it's pointing at an object or not
-        ll_node *stackTop = LL_createAndInsertSequentially(root, *content);
+        LL_createAndInsertSequentially(root, *content);
       }
       ++top;
     }
   }
+
   return root;
 }

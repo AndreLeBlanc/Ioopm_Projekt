@@ -3,12 +3,13 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include "heap.h"
 
 #ifndef __gc__
 #define __gc__
 
-/// The opaque data type holding all the heap data
-typedef struct heap heap_t;
+// /// The opaque data type holding all the heap data
+// typedef struct heap heap_t;
 
 /// The signature of the trace function
 typedef void *(*trace_f)(heap_t *h, void *obj);
@@ -115,11 +116,5 @@ size_t h_avail(heap_t *h);
 /// \param h the heap
 /// \return the bytes currently in use by user structures.
 size_t h_used(heap_t *h);
-
-/// Prints the stack
-/// For debugging purpose only.
-///
-/// \return none
-void print_stack();
 
 #endif

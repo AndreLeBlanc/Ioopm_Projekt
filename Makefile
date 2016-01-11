@@ -1,5 +1,5 @@
 CC=gcc
-FLAGS_PROD=-Wall -std=c11
+FLAGS_PROD=-Wall -std=c99
 FLAGS_DEBUG=$(FLAGS_PROD) -ggdb
 FLAGS_CUNIT=$(FLAGS_DEBUG) -lcunit
 FLAGS_GCOV=$(FLAGS_DEBUG) --coverage
@@ -50,7 +50,7 @@ lcov: gcov_clean gc_test $(FILES_GCOV)
 # this part is executed when testing on multiple machines. change dependency to your needs (ex: os_dump, valgrind, gcov)
 # DEFAULT: run_test
 # test: stack_c stack_test_c stack_run stack_test_run
-test: stack_test
+test: run_test
 .PHONY: test
 
 # Flymake mode (Live syntax and error check)
@@ -79,26 +79,6 @@ gc_test: $(FILES_TEST) gc_test.c
 	$(CC) -o $@.run $^ $(FLAGS_CUNIT)
 .PHONY: gc_test
 
-#compile test
-linked_list.o: linked_list.c linked_list.h
-	$(CC) $(FLAGS_PROD) linked_list.c -c
-
-heap.o: heap.c heap.h
-	$(CC) $(FLAGS_PROD) heap.c -o heap.o -c
-
-stack_c: stack_traverser.o linked_list.o heap.o
-	$(CC) $(FLAGS_DEBUG) -o stack_traverser stack_traverser.c
-
-stack_run:
-	@./stack_traverser
-	$(CC) $(FLAGS_PROD) heap.c -c
-
-stack_traverser.o: stack_traverser.c stack_traverser.h
-	$(CC) $(FLAGS_PROD) stack_traverser.c -c
-
-stack: stack_traverser.h heap.o linked_list.o stack_traverser.c
-	$(CC) $^ $(FLAGS_DEBUG) -o stack.run
-
 #test with gui
 test_gui: $(FILES_MAIN) gui.c
 	$(CC) $(FLAGS_PROD) -o $@.run $^
@@ -109,6 +89,7 @@ clean: gcov_clean
 	@rm -rf *.run
 	@rm -rf *.o
 	@rm -rf ./doc/*
+	@rm -rf ./cov/*
 	@rm -rf ./*.dSYM
 	@rm -rf .DS_Store
 	@rm -rf *.zip

@@ -54,6 +54,7 @@ heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold) {
 }
 
 void h_delete(heap_t *h) {
+  LL_deleteList(h->val_list);
   if(h != NULL) {
     free(h);
   }
@@ -372,6 +373,7 @@ ll_head fs_get_pointers_within_object(void* object) {
       // Pointers
     case '*':
       for(int i = 0; i < multiplier; i++) {
+        printf("\nobject: %p\npointer: %p\n\n", object, pointer);
       	LL_createAndInsertSequentially(pointer_list, pointer);
       	pointer = ((void*) pointer) + 1;
       }
@@ -525,7 +527,8 @@ void devalidate(void* object, heap_t *h) {
   ll_node *cursor = *h->val_list;
   while(cursor != NULL) {
     if(LL_getContent(cursor) == object) {
-      LL_removePointer(h->val_list, cursor);
+      ll_node *removed = LL_removePointer(h->val_list, cursor);
+      LL_deletePointer(h->val_list, removed);
       break;
     }
     cursor = LL_getNext(cursor);
