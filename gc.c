@@ -10,15 +10,15 @@
   jmp_buf env;					\
   if (setjmp(env)) {abort();}			\
 
-void **environ; //bottom of the stack
-  
+extern void **environ; //bottom of the stack
+
 void print_stack() {
 
   Dump_registers();
 
   puts("\n-------------------------------\n");
   void *top;
-  int el_top = 123; 
+  int el_top = 123;
   top = & el_top;
 
   printf("Top of stack: %p\nBottom of stack: %p\n", top, *environ);
@@ -42,10 +42,10 @@ void print_stack() {
 
     printf("Stack size: %d", stacksize);
   */
-  //stack dump 
+  //stack dump
   puts("\nStack dump: \n");
   if(t < b){
-    while(t < b){ 
+    while(t < b){
       int *hola = (int *)top;
       printf("\n%p: %d\n", top, *hola);
       top += sizeof(void *);
