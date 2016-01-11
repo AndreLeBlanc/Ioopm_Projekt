@@ -4,4 +4,3 @@
 */
 ll_head traverse_pointers_from_LL(ll_head pointers);
 void printAddress(void *object);
-void printAddress_bak(void **object);

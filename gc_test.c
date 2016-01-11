@@ -125,9 +125,12 @@ void testALLOCDATA() {
 }
 
 void testALLOCCOMPACT() {
-  int *object = NULL;
-  object = h_alloc_compact(heap, sizeof(int));
-  CU_ASSERT_TRUE(validate_object(object, heap));
+  //MÅSTE HA FORMAT-STRING ANNARS BALLAR ALLOC_COMPACT UR
+  // int *object = h_alloc_data(heap, sizeof(int));
+  void *object = h_alloc_struct(heap, "i*");
+  void *compact = h_alloc_compact(heap, object);
+  printf("%p : %p\n", compact, object);
+  CU_ASSERT_TRUE(validate_object(compact, heap));
 }
 
 

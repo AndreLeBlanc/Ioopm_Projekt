@@ -5,10 +5,6 @@
 #include "traverser.h"
 #include "linked_list.h"
 
-void printAddress_bak(void **object) {
-  printf("[%p]\n", *object);
-}
-
 void printAddress(void *object) {
   printf("[%p]\n", object);
 }
