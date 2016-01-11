@@ -361,25 +361,25 @@ int main(int argc, char const *argv[]) {
     }
 
     if (NULL == CU_add_test(initHeapSuite, "testing init_h", testINITHEAP) ||
-	NULL == CU_add_test(heapSuite, "testing traverseLLHeap", testTRAVERSE_LL_HEAP) ||
-	NULL == CU_add_test(heapSuite, "testing traverseHeap", testTRAVERSE) ||
-         NULL == CU_add_test(heapSuite, "testing traverseEmptyList", testEMPTYLISTRTRAVERSE) ||
-         NULL == CU_add_test(heapSuite, "testing traverseEmptyPointerList", testEMPTYPOINTERLIST) ||
-         NULL == CU_add_test(heapSuite, "testing traverseAdvancedStruct", testTRAVERSESTRUCT) ||
-         NULL == CU_add_test(heapSuite, "testing test_object_metadata", test_object_metadata) ||
-         NULL == CU_add_test(heapSuite, "testing test_small_heap_init", test_small_heap_init) ||
-         NULL == CU_add_test(heapSuite, "testing test_is_devalidate_object_false", test_is_devalidate_object_false) ||
-         NULL == CU_add_test(heapSuite, "testing test_is_valid_object_false", test_is_valid_object_false) ||
-         NULL == CU_add_test(heapSuite, "testing test_pointers_inside_multiple_pointers_struct", test_pointers_inside_multiple_pointers_struct) ||
-         NULL == CU_add_test(heapSuite, "testing test_set_metadata_check", test_set_metadata_check) ||
-         NULL == CU_add_test(heapSuite, "testing test_is_valid_object_true", test_is_valid_object_true) ||
-         NULL == CU_add_test(heapSuite, "testing test_fs_get_object_size", test_fs_get_object_size) ||
-         NULL == CU_add_test(heapSuite, "testing test_metadata_check", test_metadata_check) ||
-         NULL == CU_add_test(heapSuite, "testing get_pointers_within_object", testGETPOINTERSWITHINOBJECT) ||
-         NULL == CU_add_test(heapSuite, "test_pointers_within_object", test_pointers_within_object) ||
-         NULL == CU_add_test(stackSuite, "testing get_alive_stack_pointers", test_get_alive_stack_pointers) ||
-         NULL == CU_add_test(stackSuite, "testing is_pointing_at_heap", test_is_pointing_at_heap) ||
-         NULL == CU_add_test(stackSuite, "testing get_stack_top", test_get_stack_top)) {
+      	NULL == CU_add_test(heapSuite, "testing traverseLLHeap", testTRAVERSE_LL_HEAP) ||
+      	NULL == CU_add_test(heapSuite, "testing traverseHeap", testTRAVERSE) ||
+        NULL == CU_add_test(heapSuite, "testing traverseEmptyList", testEMPTYLISTRTRAVERSE) ||
+        NULL == CU_add_test(heapSuite, "testing traverseEmptyPointerList", testEMPTYPOINTERLIST) ||
+        NULL == CU_add_test(heapSuite, "testing traverseAdvancedStruct", testTRAVERSESTRUCT) ||
+        NULL == CU_add_test(heapSuite, "testing test_object_metadata", test_object_metadata) ||
+        NULL == CU_add_test(heapSuite, "testing test_small_heap_init", test_small_heap_init) ||
+        NULL == CU_add_test(heapSuite, "testing test_is_devalidate_object_false", test_is_devalidate_object_false) ||
+        NULL == CU_add_test(heapSuite, "testing test_is_valid_object_false", test_is_valid_object_false) ||
+        NULL == CU_add_test(heapSuite, "testing test_pointers_inside_multiple_pointers_struct", test_pointers_inside_multiple_pointers_struct) ||
+        NULL == CU_add_test(heapSuite, "testing test_set_metadata_check", test_set_metadata_check) ||
+        NULL == CU_add_test(heapSuite, "testing test_is_valid_object_true", test_is_valid_object_true) ||
+        NULL == CU_add_test(heapSuite, "testing test_fs_get_object_size", test_fs_get_object_size) ||
+        NULL == CU_add_test(heapSuite, "testing test_metadata_check", test_metadata_check) ||
+        NULL == CU_add_test(heapSuite, "testing get_pointers_within_object", testGETPOINTERSWITHINOBJECT) ||
+        NULL == CU_add_test(heapSuite, "test_pointers_within_object", test_pointers_within_object) ||
+        NULL == CU_add_test(stackSuite, "testing get_alive_stack_pointers", test_get_alive_stack_pointers) ||
+        NULL == CU_add_test(stackSuite, "testing is_pointing_at_heap", test_is_pointing_at_heap) ||
+        NULL == CU_add_test(stackSuite, "testing get_stack_top", test_get_stack_top)) {
         CU_cleanup_registry();
         return CU_get_error();
     }
