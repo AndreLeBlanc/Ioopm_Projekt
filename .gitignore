@@ -35,6 +35,7 @@
 # Misc Directories
 labs/
 doc/
+cov/
 
 # Misc Files
 .DS_Store
@@ -42,3 +43,6 @@ thumbs.db
 *.gc*
 *.zip
 *.result.txt
+\#*\#*
+*~*
+*.info
