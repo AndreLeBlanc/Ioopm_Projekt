@@ -1,5 +1,27 @@
 # fladdermusen
 
+##GC related tasks
+
+###Compile and run tests
+Dependencies: CUnit
+`make run_test`
+
+###Documentation
+Dependencies: doxygen, CUnit
+`make doc`
+
+###LCov, visualise code coverage
+Dependencies: lcov, gcov, CUnit
+`make lcov`
+
+###Valgrind, check memory leaks and misc. errors.
+Dependencies: valgrind, CUnit
+`make valgrind`
+
+###Compile and run GUI, toolbox for our Heap and Garbage Collector.
+`make test_gui`
+____
+
 ## Testa kod på flera maskiner
 | **OBSERVERA** Make-kommandon som nämns i denna sektion gäller Makefile i
 `resources`, så glöm inte att `cd resources` innan `make whatever`.
@@ -81,7 +103,7 @@ start with formatsstring then implement bitvector later.
 
 Den filen som hanterar garbage collection.
 
-Denna drar igång när minnet är fullt. 
+Denna drar igång när minnet är fullt.
 
 
 ### traverser.c ###
@@ -95,12 +117,12 @@ heap will be more
 # Current Tasks #
 
 ## Group ##
-Strictly design connections between modules. 
+Strictly design connections between modules.
 
 ## Carl André ##
 Keep working on heap
 CUnit.
-DDD. 
+DDD.
 
 ## Malin Haubir ##
 Traversing the stack
@@ -125,4 +147,4 @@ Sooner or later everything will be collected.
 Move to active pages.
 
 When debuggning, set whole page to 0 when it's passive. But this doesn't need to be implemented in the end.
-Important to zero out metaimnfo. 
+Important to zero out metaimnfo.
