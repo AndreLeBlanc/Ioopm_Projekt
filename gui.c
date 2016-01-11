@@ -30,7 +30,7 @@ void print_heap() {
     printf("-- Heap --\n");
 
     // Print heap percentages
-    page_t* page_cursor = (page_t*) heap_p->user_start_p;  
+    page_t* page_cursor = (page_t*) heap_p->user_start_p;
     int cursor_loc = 0;
     printf("Allocation chart \t[");
     // print meta space
@@ -68,7 +68,7 @@ void print_heap() {
     printf("]\n");
 
     // print pages
-    page_cursor = (page_t*) heap_p->user_start_p;  
+    page_cursor = (page_t*) heap_p->user_start_p;
     cursor_loc = 0;
     char filler = ' ';
     printf("Pages \t\t\t[");
@@ -83,7 +83,7 @@ void print_heap() {
       cursor_loc++;
     }
     printf("]\n");
-    
+
     // calculate number of active pages
     int active_pages = 0;
     page_t* cursor = heap_p->active_page_list;
@@ -91,7 +91,7 @@ void print_heap() {
       active_pages++;
       cursor = cursor->next_page;
     }
-    
+
     // calculate number of passive pages
     int passive_pages = 0;
     cursor = heap_p->passive_page_list;
@@ -104,8 +104,8 @@ void print_heap() {
     printf("Meta pointer:\t\t\t%p\n", heap_p->meta_p);
     printf("User start pointer:\t\t%p\n", heap_p->user_start_p);
     printf("Number of active pages:\t\t%d\n", active_pages);
-    printf("Number of passive pages:\t%d\n", passive_pages); 
-    printf("End pointer:\t\t\t%p\n", heap_p->end_p); 
+    printf("Number of passive pages:\t%d\n", passive_pages);
+    printf("End pointer:\t\t\t%p\n", heap_p->end_p);
     printf("Total size:\t\t\t%zu\n", heap_p->total_size);
     printf("User size:\t\t\t%zu\n", heap_p->user_size);
     printf("Available space:\t\t%zu\n", heap_p->avail_space);
@@ -120,7 +120,7 @@ void print_heap() {
 void print_object(void* object) {
   printf("--------------\n");
   printf("Object pointer:\t\t%p\n", object);
-  if(validate_object(object)) {
+  if(validate_object(object, heap_p)) {
     printf("Format string:\t\t%s\n", md_get_format_string(object));
     printf("Bitvector:\t\t%c\n", md_get_bit_vector(object));
     printf("Forwarding address:\t%p\n", md_get_forwarding_address(object));
@@ -140,7 +140,7 @@ void print_object(void* object) {
 
 typedef struct menu_item{
   // name: Menu item name.
-  char name[50]; 
+  char name[50];
   // key: Character to select this item with. Will default to numer this
   // item has in the list if key is '\0' (empty char).
   char key;
@@ -221,7 +221,7 @@ void menu_exit() {
 // Displays menu.
 // \param item_array An array of menu items which will be listed and chosen by
 // \param item_array_size The amount of elements in item_array
-// \return The menu item chosen. 
+// \return The menu item chosen.
 int menu(menu_item_t item_array[], int item_array_size) {
   int first_item_number = 0;
 
@@ -231,13 +231,13 @@ int menu(menu_item_t item_array[], int item_array_size) {
     printf(": %s\n",  item_array[i].name);
   }
   printf("\n");
-  
+
   char input;
   inputChar("Choose menu item", &input);
   input = toupper(input);
-  
+
   printf("\n");
-  
+
   for(int i = 0; i < item_array_size + first_item_number; i++) {
     if(input == item_array[i].key) {
       (*item_array[i].function)();
@@ -245,11 +245,11 @@ int menu(menu_item_t item_array[], int item_array_size) {
     } else if(item_array[i].key == '\0' && input == i + first_item_number) {
       (*item_array[i].function)();
       return i;
-    } 
+    }
   }
   return -1;
 }
- 
+
 
 /************************************/
 /*                                  */
@@ -258,9 +258,9 @@ int menu(menu_item_t item_array[], int item_array_size) {
 /************************************/
 
 int main(int argc, char *argv[])
-{  
+{
   heap_t my_heap;
-  
+
   menu_item_t item_array[] =
     {{"Initialize heap", 'I', *menu_init_heap},
      {"Allocate (raw)", 'R', *menu_allocate_raw},
@@ -269,14 +269,12 @@ int main(int argc, char *argv[])
      {"Trigger garbage collection [N/A]", 'T', *menu_trigger_gc},
      {"Delete heap", 'D', *menu_delete_heap},
      {"Print pointers", 'P', *menu_print_pointers},
-     {"Exit", 'E', *menu_exit}};  
+     {"Exit", 'E', *menu_exit}};
   int exit_value = 7;
-  
+
   do {
     print_heap(my_heap);
   } while(menu(item_array, ARRAY_SIZE(item_array)) != exit_value);
-  
+
   return 0;
 }
-
-

@@ -102,6 +102,7 @@ stack: stack_traverser.h heap.o linked_list.o stack_traverser.c
 #test with gui
 test_gui: $(FILES_MAIN) gui.c
 	$(CC) $(FLAGS_PROD) -o $@.run $^
+	@./$@.run
 
 #remove crap files.
 clean: gcov_clean
