@@ -79,6 +79,15 @@ gc_test: $(FILES_TEST) gc_test.c
 	$(CC) -o $@.run $^ $(FLAGS_CUNIT)
 .PHONY: gc_test
 
+prestanda_data: $(FILES_MAIN) prestanda_h_alloc_data.c
+	$(CC) -o $@.run $^ $(FLAGS_DEBUG)
+
+prestanda_struct: $(FILES_MAIN) prestanda_h_alloc_struct.c
+	$(CC) -o $@.run $^ $(FLAGS_DEBUG)
+
+prestanda_malloc: $(FILES_MAIN) prestanda_malloc.c
+	$(CC) -o $@.run $^ $(FLAGS_DEBUG)
+
 #test with gui
 test_gui: $(FILES_MAIN) gui.c
 	$(CC) $(FLAGS_PROD) -o $@.run $^
