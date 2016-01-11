@@ -33,6 +33,6 @@ void *get_stack_top();
 ///
 /// \param h is the heap to be checked
 /// \returns ll_node, the first node of the list containing all the pointers that point to the heap h
-ll_node **get_alive_stack_pointers(heap_t *h);
+ll_node **get_alive_stack_pointers(heap_t *h, void *top, void *bottom);
 
 #endif

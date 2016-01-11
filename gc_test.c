@@ -11,6 +11,8 @@
 
 heap_t *heap = NULL;
 
+extern char **environ; // bottom of stack
+
 struct test {
     void *link;
 };
@@ -302,27 +304,26 @@ void test_is_pointing_at_heap() {
   void *ptr = h_alloc_struct(new_heap, "***i");
 
   CU_ASSERT_PTR_NOT_NULL(ptr);
-  CU_ASSERT_EQUAL(is_pointing_at_heap(ptr, new_heap), true);
+  CU_ASSERT_EQUAL(is_pointing_at_heap(&ptr, new_heap), true);
 
   h_delete(new_heap);
 }
 
 void test_get_alive_stack_pointers() {
-  heap_t *new_heap = h_init(1024, true, 100.0);
-  char *ptr = h_alloc_struct(new_heap, "cccc");
-  ptr = "heej";
-
-  ll_node **test_root = get_alive_stack_pointers(new_heap);
+  void *top = get_stack_top();
+  void *bottom = (void *)environ;
+  heap_t *new_heap = h_init(1024, true, 100.0); 
+  char *ptr = h_alloc_data(new_heap, 32);
+  strcpy(ptr,"heej");
+  ll_node **test_root = get_alive_stack_pointers(new_heap, top, bottom);
   CU_ASSERT_PTR_NOT_NULL(test_root);
   CU_ASSERT_PTR_NOT_NULL(ptr);
   CU_ASSERT_EQUAL(LL_getContent(*test_root), ptr);
-  CU_ASSERT_EQUAL(LL_getContent(*test_root), "heej");
 
   int *number = h_alloc_struct(new_heap, "*i");
   *number = 666;
-  test_root = get_alive_stack_pointers(new_heap);
+  test_root = get_alive_stack_pointers(new_heap, top, bottom);
   CU_ASSERT_PTR_NOT_NULL(number);
-  CU_ASSERT_EQUAL(LL_getContent(LL_getNext(*test_root)), *number);
 
   h_delete(new_heap);
 }
@@ -373,7 +374,7 @@ int main(int argc, char const *argv[]) {
         NULL == CU_add_test(heapSuite, "testing test_metadata_check", test_metadata_check) ||
         NULL == CU_add_test(heapSuite, "testing get_pointers_within_object", testGETPOINTERSWITHINOBJECT) ||
         NULL == CU_add_test(heapSuite, "test_pointers_within_object", test_pointers_within_object) ||
-        // NULL == CU_add_test(stackSuite, "testing get_alive_stack_pointers", test_get_alive_stack_pointers) ||
+        NULL == CU_add_test(stackSuite, "testing get_alive_stack_pointers", test_get_alive_stack_pointers) ||
         NULL == CU_add_test(stackSuite, "testing is_pointing_at_heap", test_is_pointing_at_heap) ||
         NULL == CU_add_test(stackSuite, "testing get_stack_top", test_get_stack_top)) {
         CU_cleanup_registry();
