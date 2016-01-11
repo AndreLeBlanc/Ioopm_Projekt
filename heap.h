@@ -16,9 +16,10 @@
 struct heap{
   void* meta_p;       // pointer to heap's metadata (maybe unnecessary)
   void* user_start_p; // pointer to start of user's allocated space
-  struct page* active_page_list;
-  struct page* passive_page_list;
+  void* active_page_list;
+  void* passive_page_list;
   struct page* compact_page_list;
+  void* val_list;
   void* end_p;        // pointer to end of allocated space
   size_t total_size;  // total size of the heap (with metadata)
   size_t user_size;   // size of user's allocated space (total_size minus metadata)
@@ -134,7 +135,7 @@ void* get_heap_end(heap_t *h);
 /**
    update_objects_pointers
    @brief Goes through an object's pointers and updates their forwarding addresses.
-   @param object The pointer to the object. 
+   @param object The pointer to the object.
  */
 void update_objects_pointers(void* object);
 
@@ -151,14 +152,22 @@ void post_compact_page_reset(heap_t *h);
 /*                                  */
 /************************************/
 
+void enqueue(void* to_be_added, heap_t *h);
+
 /**
    @brief Checks if an object is a valid allocated object.
    @param object A pointer to the allocated object.
+   @param h a pointer to the Heap
    @return Whether or not the pointer points to a valid object.
-
-   Currently does not work.
 */
-bool validate_object(void* object);
+bool validate_object(void* objectt, heap_t *h);
+
+/**
+   @brief Rmoves object from valid list
+   @param object A pointer to the allocated object.
+   @param h a pointer to the heap
+*/
+void devalidate(void* to_be_devalidated, heap_t *h);
 
 /**
    @brief Returns a pointer to the format string of the object.

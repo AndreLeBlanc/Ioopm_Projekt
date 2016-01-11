@@ -4,6 +4,11 @@
 #include <stdio.h>
 #include <ctype.h>
 
+typedef struct val_node {
+    void* allocated;
+    struct val_node * next;
+} val_node_t;
+
 // mallocates space for heap, places metadata in the front.
 
 heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold) {
@@ -29,6 +34,7 @@ heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold) {
   new_heap->avail_space       = bytes - sizeof(heap_t);
   new_heap->unsafe_stack      = unsafe_stack;
   new_heap->gc_threshold      = gc_threshold;
+  new_heap->val_list          = (void*);
 
   // set up pages
   size_t bytes_left = bytes;
@@ -260,6 +266,7 @@ void *h_alloc(heap_t* h, size_t bytes, char* format_string, bool compact) {
     md_set_copied_flag(new_pointer, false);
 
     // return pointer
+    enqueue(new_pointer, h);
     return new_pointer;
   } else { // if there is no page or space, return null
     return NULL;
@@ -267,7 +274,9 @@ void *h_alloc(heap_t* h, size_t bytes, char* format_string, bool compact) {
 }
 
 void *h_alloc_data(heap_t* h, size_t bytes) {
-  return h_alloc(h, bytes, NO_MD, false); 
+  void* temp = h_alloc(h, bytes, NO_MD, false);
+  enqueue(temp, h);
+  return temp;
 }
 
 void *h_alloc_struct(heap_t* h, char* format_string) {
@@ -286,16 +295,13 @@ void *h_alloc_compact(heap_t* h, void* object) {
   size_t object_bytes = fs_calculate_size(format_string);
   if(object_bytes) {
     // if calculation succeeded, allocate
-    return h_alloc(h, object_bytes, format_string, true);
+    void *temp = h_alloc(h, object_bytes, format_string, true);
+    enqueue(temp, h);
+    return temp;
   } else {
     // if calculation failed, return NULL
     return NULL;
   }
-}
-
-bool validate_object(void* object) {
-  // TODO: Doesn't validate anything yet.
-  return true;
 }
 
 
@@ -482,4 +488,89 @@ void update_objects_pointers(void* object) {
       }
     }
   }
+}
+/************************************/
+/*                                  */
+/*  Validate                        */
+/*                                  */
+/************************************/
+
+void enqueue(void* to_be_added, heap_t *h) {
+    if(add_to_this_list == NULL || validate_object(to_be_added, h->val_list)) {
+        return;
+    }
+
+    val_node_t  * node_space = malloc(sizeof(val_node_t));
+    node_space->allocated = to_be_added;
+    node_space->next = NULL;
+
+    if ( h->val_list->first == NULL) {
+         h->val_list->first = to_be_added;
+    }
+
+    else {
+        val_node_t* itter = NULL;
+        itter = malloc(sizeof(val_node_t));
+
+        itter =  h->val_list->first;
+
+        while(itter->next !=NULL) {
+            itter = itter->next;
+        }
+        itter->next = to_be_added;
+    }
+}
+
+bool validate_object(void* object, heap_t *h) {
+    if( h->val_list == NULL ||  h->val_list->first == NULL) {
+        return false;
+    }
+
+    if (object ==  h->val_list) {
+        return true;
+    }
+    if(object ==  h->val_list->first) {
+        return true;
+    }
+
+    val_node_t* node_space = malloc(sizeof(val_node_t));
+    node_space =  h->val_list->first;
+    while(node_space->next != NULL ){
+        if(node_space == object){
+            return true;
+        }
+        node_space = node_space->next;
+    }
+    if(node_space == object){
+        return true;
+    }
+    return false;
+}
+
+void devalidate(void* to_be_devalidated, heap_t *h) {
+  if ( h->val_list == NULL ||  h->val_list->first == NULL) {
+        return;
+    }
+
+    if ( h->val_list->first == to_be_devalidated) {
+         h->val_list->first =  h->val_list->first->next;
+    }
+
+    else {
+        val_node_t * itter =  h->val_list->first;
+
+        while(itter->next->next != NULL) {
+            if (itter->next == to_be_devalidated) {
+                itter->next = itter->next->next;
+                return;
+            }
+            itter = itter->next;
+        }
+
+        if (itter->next == to_be_devalidated) {
+            itter->next = NULL;
+        }
+
+    }
+
 }
