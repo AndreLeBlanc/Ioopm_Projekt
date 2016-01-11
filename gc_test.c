@@ -117,10 +117,6 @@ void testINITHEAP() {
 
 
 }
-void testDELETEHEAP() {
-}
-
-
 
 void testTRAVERSESTRUCT() {
 
@@ -212,10 +208,6 @@ void testEMPTYLISTRTRAVERSE() {
 
 }
 
-void testPrint(void **object) {
-  printf("[%p]\n", *(object));
-}
-
 //TODO, it fails.
 void test_fs_get_object_size() {
 
@@ -261,7 +253,6 @@ void testTRAVERSE_LL_HEAP() {
   int length = LL_length(traverse_pointers_from_LL(stack_pointers));
 
   CU_ASSERT_EQUAL(length, 4);
-  puts("KAJLSKLFJKASLJFKAJSLKFJKLASJFLKASJKLF");
   LL_deleteList(stack_pointers);
 
 }
