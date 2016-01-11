@@ -17,6 +17,7 @@ struct heap{
   void* user_start_p; // pointer to start of user's allocated space
   void* active_page_list;
   void* passive_page_list;
+  void* val_list;
   void* end_p;        // pointer to end of allocated space
   size_t total_size;  // total size of the heap (with metadata)
   size_t user_size;   // size of user's allocated space (total_size minus metadata)
@@ -130,11 +131,18 @@ void* get_heap_end(heap_t *h);
 /**
    @brief Checks if an object is a valid allocated object.  
    @param object A pointer to the allocated object.
+   @param h a pointer to the Heap
    @return Whether or not the pointer points to a valid object.
    
-   Currently does not work. 
 */
-bool validate_object(void* object);
+bool validate_object(void* objectt, heap_t *h);
+
+/**
+   @brief Rmoves object from valid list
+   @param object A pointer to the allocated object.
+   @param h a pointer to the heap
+*/
+void devalidate(void* to_be_devalidated, heap_t *h)
 
 /**
    @brief Returns a pointer to the format string of the object.
