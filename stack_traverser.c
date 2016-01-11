@@ -7,18 +7,11 @@
 
 extern void **environ; // bottom of the stack
 
-bool is_pointing_at_heap(void *ptr, heap_t *h/* , size_t bytes */) {
-  long *content = (long *)ptr;
-  puts("is_pointing_at_heap är startad.");
-  printf("Pointer contains: %ld\n", *(uintptr_t *)ptr);
-  printf("Address on stack: %p\n", ptr);
+bool is_pointing_at_heap(void *pt, heap_t *h) {
+  void *start = get_heap_start(h);
+  void *end = get_heap_end(h);
 
-  if (*(uintptr_t *)ptr > (uintptr_t)get_heap_start(h) && *(uintptr_t *)ptr < (uintptr_t)get_heap_end(h)) {
-    puts("Yes!!!!\n\n\n\n\n\n\n\n\n");
-    return true;
-  }
-  else
-    return false;
+  return pt >= start && pt < end;
 }
 
 void *get_stack_top() {
@@ -28,7 +21,7 @@ void *get_stack_top() {
 
 ll_node **get_alive_stack_pointers(heap_t *h) {
   Dump_registers();
-  printf("du är i get_alive_stack_pointers\n");
+  // printf("du är i get_alive_stack_pointers\n");
   void *top = get_stack_top();
   ll_node **root = LL_initRoot();
 
@@ -38,15 +31,15 @@ ll_node **get_alive_stack_pointers(heap_t *h) {
   //  void *bottom = (void *)environ;
 
   if ((uintptr_t)top > (uintptr_t)environ) {
-    puts("Stack grows upwards.");
+    // puts("Stack grows upwards.");
     while ((uintptr_t)top > (uintptr_t)environ) {
-      printf("Count %d: \ntop: %p\n", counter, top);
+      // printf("Count %d: \ntop: %p\n", counter, top);
       if (is_pointing_at_heap(top, h)) {
 	if (validate_object(top, h)) { // checks the pointers metadata to check whether it's pointing at an object or not
 	  void **content = top;
 	  ll_node *stackTop = LL_createAndInsertSequentially(root, *content);
 	  //printf("stackTop: %p\n", stackTop);,
-	  printf("Stackpointer %p has valid metadata and was added to the list.\n", LL_getContent(stackTop));
+	  // printf("Stackpointer %p has valid metadata and was added to the list.\n", LL_getContent(stackTop));
 	  total++;
 	}
       }
@@ -55,16 +48,16 @@ ll_node **get_alive_stack_pointers(heap_t *h) {
     }
   }
   else {
-    printf("hej igen, stacken borde växa neråt nu va\n");
+    // printf("hej igen, stacken borde växa neråt nu va\n");
     while ((uintptr_t)top < (uintptr_t)environ) {
-      puts("Stack grows downwards.");
-      printf("Count %d: \ntop: %p\n", counter, top);
+      // puts("Stack grows downwards.");
+      // printf("Count %d: \ntop: %p\n", counter, top);
       if (is_pointing_at_heap(top, h)) {
 	if (validate_object(top, h)) { // checks the pointers metadata to check whether it's pointing at an object or not
 	  void **content = top;
 	  ll_node *stackTop = LL_createAndInsertSequentially(root, *content);
 	  //printf("stackTop: %p\n", stackTop);,
-	  printf("Stackpointer %p has valid metadata and was added to the list.\n", LL_getContent(stackTop));
+	  // printf("Stackpointer %p has valid metadata and was added to the list.\n", LL_getContent(stackTop));
 	  total++;
 	}
       }
