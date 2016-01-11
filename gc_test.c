@@ -11,6 +11,8 @@
 
 heap_t *heap = NULL;
 
+extern char **environ; // bottom of stack
+
 struct test {
     void *link;
 };
@@ -320,28 +322,25 @@ void testTRAVERSE() {
 }
 
 void test_is_pointing_at_heap() {
-
   void *pt = h_alloc_data(heap, sizeof(int));
   CU_ASSERT_EQUAL(is_pointing_at_heap(pt, heap), true);
-
 }
 
 void test_get_alive_stack_pointers() {
-  heap_t *new_heap = h_init(1024, true, 1.0);
-  char *ptr = h_alloc_struct(new_heap, "cccc");
-  ptr = "heej";
-
-  ll_node **test_root = get_alive_stack_pointers(new_heap);
+  void *top = get_stack_top();
+  void *bottom = (void *)environ;
+  heap_t *new_heap = h_init(1024, true, 100.0);
+  char *ptr = h_alloc_data(new_heap, 32);
+  strcpy(ptr,"heej");
+  ll_node **test_root = get_alive_stack_pointers(new_heap, top, bottom);
   CU_ASSERT_PTR_NOT_NULL(test_root);
   CU_ASSERT_PTR_NOT_NULL(ptr);
   CU_ASSERT_EQUAL(LL_getContent(*test_root), ptr);
-  CU_ASSERT_EQUAL(LL_getContent(*test_root), "heej");
 
   int *number = h_alloc_struct(new_heap, "*i");
   *number = 666;
-  test_root = get_alive_stack_pointers(new_heap);
+  test_root = get_alive_stack_pointers(new_heap, top, bottom);
   CU_ASSERT_PTR_NOT_NULL(number);
-  CU_ASSERT_EQUAL(LL_getContent(LL_getNext(*test_root)), *number);
 
   h_delete(new_heap);
 }
