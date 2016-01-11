@@ -9,42 +9,44 @@
 #define __heap__
 
 #define NUMBER_OF_PAGES 1
+#define NO_MD "none" //no meta_data flag
 #define PAGE_SIZE (size_t) 2048
 
 // TODO: THIS IS TEMPORARY! If you are accessing the heap through this struct then you need to use a get-function (which might need creating)
 struct heap{
-  void* meta_p;       // pointer to heap's metadata (maybe unnecessary)
-  void* user_start_p; // pointer to start of user's allocated space
-  void* active_page_list;
-  void* passive_page_list;
-  void* end_p;        // pointer to end of allocated space
-  size_t total_size;  // total size of the heap (with metadata)
-  size_t user_size;   // size of user's allocated space (total_size minus metadata)
-  size_t used_space;  // amount of bytes allocated.
-  size_t avail_space; // amount of allocatable space left.
-  bool unsafe_stack;  // whether or not unsafe stack
-  float gc_threshold; // garbage collector threshold (1.0 = full memory)
+  void* meta_p;                   // pointer to heap's metadata (maybe unnecessary)
+  void* user_start_p;             // pointer to start of user's allocated space
+  void* val_list;
+  struct page* active_page_list;  // List of active pages
+  struct page* passive_page_list; // list of passive pages
+  struct page* compact_page_list; // list of pages used for compacting
+  void* end_p;                    // pointer to end of allocated space
+  size_t total_size;              // total size of the heap (with metadata)
+  size_t user_size;               // size of user's allocated space (total_size minus metadata)
+  size_t used_space;              // amount of bytes allocated.
+  size_t avail_space;             // amount of allocatable space left.
+  bool unsafe_stack;              // whether or not unsafe stack
+  float gc_threshold;             // garbage collector threshold (1.0 = full memory)
 };
 
-// TODO: THIS IS TEMPORARY! This is here only for gui.c, nothing outside of heap.c should use this. 
+// TODO: THIS IS TEMPORARY! This is here only for gui.c, nothing outside of heap.c should use this.
 typedef struct page{
-  void* user_start_p; // pointer to start of user's allocated space
-  void* bump_p;       // pointer to next free spot in user's space
-  void* end_p;        // pointer to end of allocated space
-  bool active;        // boolean keeping track if the page is active (true) or passive (false)
-  bool unsure;        // boolean keeping track of whether a page is unsure or not 
+  void* user_start_p;        // pointer to start of user's allocated space
+  void* bump_p;              // pointer to next free spot in user's space
+  void* end_p;               // pointer to end of allocated space
+  bool active;               // boolean keeping track if the page is active (true) or passive (false)
+  bool unsure;               // boolean keeping track of whether a page is unsure or not
   struct page* next_page;    // a pointer to the next page
 } page_t;
-
 /**
-   @brief Heap struct type used to manipulate the heap. 
+   @brief Heap struct type used to manipulate the heap.
 */
 typedef struct heap heap_t;
 
 /**
    h_init
-   @brief Initializes the heap. 
-   @param bytes Size of the heap, preferrably a multiple of PAGE_SIZE. 
+   @brief Initializes the heap.
+   @param bytes Size of the heap, preferrably a multiple of PAGE_SIZE.
    @param unsafe_stack A bool indicating whether or not there is an unsafe stack
    @param gc_threshold A value between 0 and 1 indicating the threshold for when garbage collection is triggered. Should be close to, yet lower than 0.5.
    @return A pointer to the heap.
@@ -55,7 +57,7 @@ heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold);
 
 /**
    h_delete
-   @brief Deletes the heap and frees the memory. 
+   @brief Deletes the heap and frees the memory.
    @param h The pointer to the heap.
  */
 void h_delete(heap_t* h);
@@ -66,18 +68,27 @@ void h_delete(heap_t* h);
    @param h The pointer to the heap.
    @param bytes The amount of bytes to allocate, cannot be larger than PAGE_SIZE.
 
-   This will allocate data with an empty format string. It will be ignored when marking garbage. 
+   This will allocate data with an empty format string. It will be ignored when marking garbage.
  */
 void *h_alloc_data(heap_t *h, size_t bytes);
 
 /**
    h_alloc_struct
-   @brief Allocates space in the heap. Allocates the appropriate amount of space based on the format string. 
+   @brief Allocates space in the heap. Allocates the appropriate amount of space based on the format string.
    @param h The pointer to the heap.
-   @param format_string A string which describes the scruct which will be stored in the allocation. 
-   @return The pointer to the allocated space. 
+   @param format_string A string which describes the scruct which will be stored in the allocation.
+   @return The pointer to the allocated space.
  */
 void* h_alloc_struct(heap_t *h, char *format_string);
+
+/**
+   h_alloc_compact
+   @brief Moves object to the compact pages.
+   @param h The pointer to the heap.
+   @param object The pointer to the object.
+   @return The pointer to the newly allocated space in the heap.
+*/
+void* h_alloc_compact(heap_t *h, void* object);
 
 /**
    h_gc
@@ -121,6 +132,20 @@ void* get_heap_start(heap_t *h);
  */
 void* get_heap_end(heap_t *h);
 
+/**
+   update_objects_pointers
+   @brief Goes through an object's pointers and updates their forwarding addresses.
+   @param object The pointer to the object. 
+ */
+void update_objects_pointers(void* object);
+
+/**
+   post_compact_page_reset
+   @brief Sets the collection pages as the active ones and makes all other pages passive.
+   @param h The pointer to the heap.
+*/
+void post_compact_page_reset(heap_t *h);
+
 /************************************/
 /*                                  */
 /*  Metadata wrapper                */
@@ -128,13 +153,19 @@ void* get_heap_end(heap_t *h);
 /************************************/
 
 /**
-   @brief Checks if an object is a valid allocated object.  
+   @brief Checks if an object is a valid allocated object.
    @param object A pointer to the allocated object.
+   @param h a pointer to the Heap
    @return Whether or not the pointer points to a valid object.
-   
-   Currently does not work. 
 */
-bool validate_object(void* object);
+bool validate_object(void* objectt, heap_t *h);
+
+/**
+   @brief Rmoves object from valid list
+   @param object A pointer to the allocated object.
+   @param h a pointer to the heap
+*/
+void devalidate(void* to_be_devalidated, heap_t *h)
 
 /**
    @brief Returns a pointer to the format string of the object.
@@ -173,11 +204,10 @@ void md_set_copied_flag(void* object, bool copied_flag);
 /*  Format string                   */
 /*                                  */
 /************************************/
-
 /**
    @brief Returns a list of all the pointers in an object.
    @param object A pointer to the allocated object.
-   @return A list with all pointers within an object. 
+   @return A list with all pointers within an object.
 
    Uses the format string to find all pointers in an object and puts
    them in a list.
@@ -187,7 +217,7 @@ ll_head fs_get_pointers_within_object(void* object);
 /**
    @brief Gets the size of the object.
    @param object A pointer to the object.
-   @return The size of the object. 
+   @return The size of the object.
  */
 size_t fs_get_object_size(void* object);
 
