@@ -328,6 +328,7 @@ void testTRAVERSE_LL_HEAP() {
   puts("\n");
 
   CU_ASSERT_EQUAL(length, 5);
+  //what about LL_map(stack_pointers, free_method_of_some_sort)
   LL_deleteList(stack_pointers);
 
 }

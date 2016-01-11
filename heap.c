@@ -373,7 +373,6 @@ ll_head fs_get_pointers_within_object(void* object) {
       // Pointers
     case '*':
       for(int i = 0; i < multiplier; i++) {
-        printf("\nobject: %p\npointer: %p\n\n", object, pointer);
       	LL_createAndInsertSequentially(pointer_list, pointer);
       	pointer = ((void*) pointer) + 1;
       }
@@ -527,8 +526,8 @@ void devalidate(void* object, heap_t *h) {
   ll_node *cursor = *h->val_list;
   while(cursor != NULL) {
     if(LL_getContent(cursor) == object) {
-      ll_node *removed = LL_removePointer(h->val_list, cursor);
-      LL_deletePointer(h->val_list, removed);
+      void *content = LL_deletePointer(h->val_list, cursor);
+
       break;
     }
     cursor = LL_getNext(cursor);
