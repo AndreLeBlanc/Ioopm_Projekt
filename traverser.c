@@ -13,7 +13,6 @@ ll_head traverse_pointers_from_LL(ll_head pointers) {
 
     ll_head new_nodes = LL_initRoot();
     ll_head pointers_in_obj = NULL;
-    ll_head recursive_data = NULL;
 
     if(pointers != NULL && !LL_isEmpty(pointers)) {
 
@@ -25,10 +24,6 @@ ll_head traverse_pointers_from_LL(ll_head pointers) {
               continue;
             }
 
-            if(LL_getContent(cursor) == NULL) {
-              continue;
-            }
-
             void **content = (void **)LL_getContent(cursor);
             char *metadata = md_get_format_string(LL_getContent(cursor));
 
@@ -37,22 +32,22 @@ ll_head traverse_pointers_from_LL(ll_head pointers) {
               continue;
             }
 
-            pointers_in_obj = NULL;
-
             if(*content != NULL) {
               pointers_in_obj = fs_get_pointers_within_object(*content);
             }
 
-            recursive_data = traverse_pointers_from_LL(pointers_in_obj);
+            traverse_pointers_from_LL(pointers_in_obj);
 
-            if(recursive_data != NULL) {
+            if(pointers_in_obj != NULL) {
 
-                ll_node *recursive_cursor = *recursive_data;
+                ll_node *recursive_cursor = *pointers_in_obj;
                 while(recursive_cursor != NULL) {
-                    void **rec_content = (void **)LL_getContent(recursive_cursor);
-                    LL_createAndInsertSequentially(new_nodes, rec_content);
-                    recursive_cursor = LL_getNext(recursive_cursor);
+                    void *next = LL_getNext(recursive_cursor);
+                    void *content = LL_deletePointer(pointers_in_obj, recursive_cursor);
+                    LL_createAndInsertSequentially(new_nodes, content);
+                    recursive_cursor = next;
                 }
+
 
             }
 
@@ -61,17 +56,22 @@ ll_head traverse_pointers_from_LL(ll_head pointers) {
 
         ll_node *nn_cursor = *new_nodes;
         while(nn_cursor != NULL) {
-            LL_createAndInsertSequentially(pointers, LL_getContent(nn_cursor));
-            nn_cursor = LL_getNext(nn_cursor);
+            void *next = LL_getNext(nn_cursor);
+            void *content = LL_deletePointer(new_nodes, nn_cursor);
+            LL_createAndInsertSequentially(pointers, content);
+            nn_cursor = next;
         }
 
-        LL_deleteList(new_nodes);
+
+        free(pointers_in_obj);
+        free(new_nodes);
 
         return pointers;
 
     } else {
 
-        return NULL;
+      free(new_nodes);
+      return NULL;
 
     }
 
