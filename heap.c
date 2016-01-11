@@ -4,13 +4,7 @@
 #include <stdio.h>
 #include <ctype.h>
 
-typedef struct val_node {
-    void* allocated;
-    struct val_node * next;
-} val_node_t;
-
 // mallocates space for heap, places metadata in the front.
-
 heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold) {
   if(bytes < sizeof(heap_t) + sizeof(page_t)) {
     // if space allocated is not even enough for heap and page metadata, don't allocate
@@ -284,7 +278,9 @@ void *h_alloc_struct(heap_t* h, char* format_string) {
   size_t object_bytes = fs_calculate_size(format_string);
   if(object_bytes) {
     // if calculation succeeded, allocate
-    return h_alloc(h, object_bytes, format_string, false);
+    void* temp = h_alloc(h, object_bytes, format_string, false);
+    enqueue(temp, h);
+    return temp;
   } else {
     // if calculation failed, return NULL
     return NULL;
@@ -304,7 +300,6 @@ void *h_alloc_compact(heap_t* h, void* object) {
     return NULL;
   }
 }
-
 
 /************************************/
 /*                                  */
@@ -490,6 +485,7 @@ void update_objects_pointers(void* object) {
     }
   }
 }
+
 /************************************/
 /*                                  */
 /*  Validate                        */
@@ -607,5 +603,4 @@ void devalidate(void* object, heap_t *h) {
   //       }
   //
   //   }
-
 }

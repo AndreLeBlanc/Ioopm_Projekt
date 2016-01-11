@@ -32,11 +32,11 @@ struct heap{
 
 // TODO: THIS IS TEMPORARY! This is here only for gui.c, nothing outside of heap.c should use this.
 typedef struct page{
-  void* user_start_p; // pointer to start of user's allocated space
-  void* bump_p;       // pointer to next free spot in user's space
-  void* end_p;        // pointer to end of allocated space
-  bool active;        // boolean keeping track if the page is active (true) or passive (false)
-  bool unsure;        // boolean keeping track of whether a page is unsure or not
+  void* user_start_p;        // pointer to start of user's allocated space
+  void* bump_p;              // pointer to next free spot in user's space
+  void* end_p;               // pointer to end of allocated space
+  bool active;               // boolean keeping track if the page is active (true) or passive (false)
+  bool unsure;               // boolean keeping track of whether a page is unsure or not
   struct page* next_page;    // a pointer to the next page
 } page_t;
 /**

@@ -3,14 +3,14 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <unistd.h>
-#include "heap.h"
 #include <setjmp.h>
+#include "heap.h"
 
-#define Dump_registers() \
-jmp_buf env; \
-if (setjmp(env)) abort(); \
+#define Dump_registers()			\
+  jmp_buf env;					\
+  if (setjmp(env)) {abort();}			\
 
-extern void **environ; //bottom of the stack
+void **environ; //bottom of the stack
   
 void print_stack() {
 
@@ -27,20 +27,20 @@ void print_stack() {
   int *b = (int *)environ;
 
   /*
-  Så för att traversera stacken är tanken att man tar sista variablens adress och använder
+    Så för att traversera stacken är tanken att man tar sista variablens adress och använder
     den som topp i stacken. Eftersom allting som pushas till stacken läggs högst upp så
     måste den här pekaren uppdateras för varje stack-variabel som läggs till.
   */
   printf("Content of top: %d\nContent of bottom: %d\n", *t, *b);
   /*
-  int stacksize;
-  if(b > t) {
+    int stacksize;
+    if(b > t) {
     stacksize = b-t;
-  } else {
+    } else {
     stacksize = t-b;
-  }
+    }
 
-  printf("Stack size: %d", stacksize);
+    printf("Stack size: %d", stacksize);
   */
   //stack dump 
   puts("\nStack dump: \n");
@@ -50,14 +50,12 @@ void print_stack() {
       printf("\n%p: %d\n", top, *hola);
       top += sizeof(void *);
     }
-  }
-  else if(b < t){
-    while(b < t){
+  } else if(b < t) {
+    while(b < t) {
       int *hola2 = (int *)top;
       printf("\n%p: %d\n", top, *hola2);
       top -= sizeof(void *);
     }
   }
   puts("\n-------------------------------\n");
-
 }
