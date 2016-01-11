@@ -28,7 +28,6 @@ heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold) {
   new_heap->avail_space       = bytes - sizeof(heap_t);
   new_heap->unsafe_stack      = unsafe_stack;
   new_heap->gc_threshold      = gc_threshold;
-  // new_heap->val_list          = (void*);
   new_heap->val_list          = LL_initRoot();
 
   // set up pages
@@ -96,10 +95,10 @@ size_t fs_calculate_size(char* format_string) {
   size_t size = 0;
 
   for(int i = 0; i < fs_length; i++) {
-    if(format_string[i] >= 'A' && format_string[i] <= 'Z') {
-      format_string[i] = tolower(format_string[i]);
-    }
-    switch(format_string[i]) {
+    // if(format_string[i] >= 'A' && format_string[i] <= 'Z') {
+    //   format_string[i] = tolower(format_string[i]);
+    // }
+    switch(tolower(format_string[i])) {
       // if any of the following characters: multiply size with multiplier and add to size.
       // Pointers
     case '*':
@@ -134,14 +133,14 @@ size_t fs_calculate_size(char* format_string) {
       // if none of these characters, then check if it is a multiplier
     default:
       if(format_string[i] >= '0' && format_string[i] <= '9') {
-	// if the char is an integer, convert and save to multiplier.
-	int digit = format_string[i] -  '0';
+      	// if the char is an integer, convert and save to multiplier.
+      	int digit = format_string[i] -  '0';
         multiplier = multiplier * 10 + digit;
       } else {
-	// if an invalid character is in the string, return 0
-	return 0;
+      	// if an invalid character is in the string, return 0
+        return 0;
       }
-	break;
+    	break;
     }
   }
   return size;
@@ -261,6 +260,7 @@ void *h_alloc(heap_t* h, size_t bytes, char* format_string, bool compact) {
     md_set_copied_flag(new_pointer, false);
 
     // return pointer
+    //TODO räkna ut storlek och dra av från heap-size.
     enqueue(new_pointer, h);
     return new_pointer;
   } else { // if there is no page or space, return null
@@ -366,7 +366,7 @@ ll_head fs_get_pointers_within_object(void* object) {
   ll_head pointer_list = LL_initRoot();
 
   for(int i = 0; i < strlen(format_string); i++) {
-    switch(format_string[i]) {
+    switch(tolower(format_string[i])) {
       // if a pointer, add to list and increment pointer appropriately
       // if any of the other characters, increment pointer appropriately
       // Pointers
@@ -429,14 +429,14 @@ void update_objects_pointers(void* object) {
   void *pointer = object;
 
   for(int i = 0; i < strlen(format_string); i++) {
-    switch(format_string[i]) {
+    switch(tolower(format_string[i])) {
       // if a pointer, add to list and increment pointer appropriately
       // if any of the other characters, increment pointer appropriately
       // Pointers
     case '*':
       for(int i = 0; i < multiplier; i++) {
 	// follow pointer, get metadata and update.
-	if(md_get_forwarding_address(*((void**) pointer))) {
+	if(md_get_forwarding_address(*((void**) pointer)) != NULL) {
 	  *((void**) pointer) = md_get_forwarding_address(*((void**) pointer));
 	}
 	pointer = ((void*) pointer) + 1;

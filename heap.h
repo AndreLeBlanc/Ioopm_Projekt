@@ -19,8 +19,6 @@ struct heap{
   void* active_page_list;
   void* passive_page_list;
   struct page* compact_page_list;
-  // void* val_list;
-  ll_head val_list;
   void* end_p;        // pointer to end of allocated space
   size_t total_size;  // total size of the heap (with metadata)
   size_t user_size;   // size of user's allocated space (total_size minus metadata)
@@ -28,6 +26,7 @@ struct heap{
   size_t avail_space; // amount of allocatable space left.
   bool unsafe_stack;  // whether or not unsafe stack
   float gc_threshold; // garbage collector threshold (1.0 = full memory)
+  ll_head val_list;
 };
 
 // TODO: THIS IS TEMPORARY! This is here only for gui.c, nothing outside of heap.c should use this.

@@ -11,6 +11,8 @@
 
 heap_t *heap = NULL;
 
+extern char **environ; // bottom of stack
+
 struct test {
     void *link;
 };
@@ -41,6 +43,29 @@ void testGETPOINTERSWITHINOBJECT() {
   object->link = persistent_number;
   CU_ASSERT_EQUAL(LL_length(fs_get_pointers_within_object(object)), 1);
 
+}
+
+//HACK, not sure what this function is actually doing except offsetting addresses? /V
+void test_update_object_pointers() {
+  void *pt_a = h_alloc_struct(heap, "***");
+  int n_pts_a = LL_length(fs_get_pointers_within_object(pt_a));
+  void *pt_ac = h_alloc_compact(heap, pt_a);
+  //TODO, doesn't work atm, seg fault.
+  // update_objects_pointers(pt_ac);
+  int n_pts_ac = LL_length(fs_get_pointers_within_object(pt_ac));
+
+  CU_FAIL();
+  // CU_ASSERT_EQUAL(n_pts_a, n_pts_ac);
+}
+
+void test_alloc_struct_all_types_lower() {
+  void *test = h_alloc_struct(heap, "*ifcld3d3f4c4lfi3*");
+  CU_ASSERT_EQUAL(LL_length(fs_get_pointers_within_object(test)), 4);
+}
+
+void test_alloc_struct_all_types_upper() {
+  void *test = h_alloc_struct(heap, "IIIIDDD");
+  CU_ASSERT_TRUE(LL_isEmpty(fs_get_pointers_within_object(test)));
 }
 
 void test_object_metadata() {
@@ -111,10 +136,10 @@ void testINITHEAP() {
 		 //heap->total_size == 2048 &&
 		 h_used(heap) == 0 &&
 		 h_avail(heap) < 2048 &&
-		 heap->gc_threshold == 1.0);
+		 heap->gc_threshold == 1.0
+   );
 
   h_delete(heap);
-
 
 }
 
@@ -230,7 +255,6 @@ void test_fs_get_object_size() {
   struct test *pt_a = h_alloc_struct(heap, "****iii****");
   size_t total = sizeof(void *) * 8 + 3 * sizeof(int);
   size_t object_size = fs_get_object_size(pt_a);
-  printf("object: %d\ntotal: %d\n", object_size, total);
   CU_ASSERT_EQUAL(total, object_size);
 
 }
@@ -298,31 +322,25 @@ void testTRAVERSE() {
 }
 
 void test_is_pointing_at_heap() {
-  heap_t *new_heap = h_init(1024, true, 100.0);
-  void *ptr = h_alloc_struct(new_heap, "***i");
-
-  CU_ASSERT_PTR_NOT_NULL(ptr);
-  CU_ASSERT_EQUAL(is_pointing_at_heap(ptr, new_heap), true);
-
-  h_delete(new_heap);
+  void *pt = h_alloc_data(heap, sizeof(int));
+  CU_ASSERT_EQUAL(is_pointing_at_heap(pt, heap), true);
 }
 
 void test_get_alive_stack_pointers() {
+  void *top = get_stack_top();
+  void *bottom = (void *)environ;
   heap_t *new_heap = h_init(1024, true, 100.0);
-  char *ptr = h_alloc_struct(new_heap, "cccc");
-  ptr = "heej";
-
-  ll_node **test_root = get_alive_stack_pointers(new_heap);
+  char *ptr = h_alloc_data(new_heap, 32);
+  strcpy(ptr,"heej");
+  ll_node **test_root = get_alive_stack_pointers(new_heap, top, bottom);
   CU_ASSERT_PTR_NOT_NULL(test_root);
   CU_ASSERT_PTR_NOT_NULL(ptr);
   CU_ASSERT_EQUAL(LL_getContent(*test_root), ptr);
-  CU_ASSERT_EQUAL(LL_getContent(*test_root), "heej");
 
   int *number = h_alloc_struct(new_heap, "*i");
   *number = 666;
-  test_root = get_alive_stack_pointers(new_heap);
+  test_root = get_alive_stack_pointers(new_heap, top, bottom);
   CU_ASSERT_PTR_NOT_NULL(number);
-  CU_ASSERT_EQUAL(LL_getContent(LL_getNext(*test_root)), *number);
 
   h_delete(new_heap);
 }
@@ -355,14 +373,17 @@ int main(int argc, char const *argv[]) {
     }
 
     if (NULL == CU_add_test(initHeapSuite, "testing init_h", testALLOCDATA) ||
-	NULL == CU_add_test(initHeapSuite, "testing h_alloc_data", testINITHEAP) ||
-	NULL == CU_add_test(initHeapSuite, "testing h_alloc_compact", testALLOCCOMPACT) ||
+      	NULL == CU_add_test(initHeapSuite, "testing h_alloc_data", testINITHEAP) ||
+      	NULL == CU_add_test(initHeapSuite, "testing h_alloc_compact", testALLOCCOMPACT) ||
       	NULL == CU_add_test(heapSuite, "testing traverseLLHeap", testTRAVERSE_LL_HEAP) ||
       	NULL == CU_add_test(heapSuite, "testing traverseHeap", testTRAVERSE) ||
         NULL == CU_add_test(heapSuite, "testing traverseEmptyList", testEMPTYLISTRTRAVERSE) ||
         NULL == CU_add_test(heapSuite, "testing traverseEmptyPointerList", testEMPTYPOINTERLIST) ||
         NULL == CU_add_test(heapSuite, "testing traverseAdvancedStruct", testTRAVERSESTRUCT) ||
         NULL == CU_add_test(heapSuite, "testing test_object_metadata", test_object_metadata) ||
+        NULL == CU_add_test(heapSuite, "testing test_update_object_pointers", test_update_object_pointers) ||
+        NULL == CU_add_test(heapSuite, "testing test_alloc_struct_all_types_upper", test_alloc_struct_all_types_upper) ||
+        NULL == CU_add_test(heapSuite, "testing test_alloc_struct_all_types_lower", test_alloc_struct_all_types_lower) ||
         NULL == CU_add_test(heapSuite, "testing test_small_heap_init", test_small_heap_init) ||
         NULL == CU_add_test(heapSuite, "testing test_is_devalidate_object_false", test_is_devalidate_object_false) ||
         NULL == CU_add_test(heapSuite, "testing test_is_valid_object_false", test_is_valid_object_false) ||
@@ -373,7 +394,7 @@ int main(int argc, char const *argv[]) {
         NULL == CU_add_test(heapSuite, "testing test_metadata_check", test_metadata_check) ||
         NULL == CU_add_test(heapSuite, "testing get_pointers_within_object", testGETPOINTERSWITHINOBJECT) ||
         NULL == CU_add_test(heapSuite, "test_pointers_within_object", test_pointers_within_object) ||
-        // NULL == CU_add_test(stackSuite, "testing get_alive_stack_pointers", test_get_alive_stack_pointers) ||
+        NULL == CU_add_test(stackSuite, "testing get_alive_stack_pointers", test_get_alive_stack_pointers) ||
         NULL == CU_add_test(stackSuite, "testing is_pointing_at_heap", test_is_pointing_at_heap) ||
         NULL == CU_add_test(stackSuite, "testing get_stack_top", test_get_stack_top)) {
         CU_cleanup_registry();
