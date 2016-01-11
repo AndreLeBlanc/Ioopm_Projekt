@@ -18,7 +18,7 @@ struct test {
 int init_suite(void)
 {
     //create a new stack
-    heap = h_init(20000, 1, 1.0);
+    heap = h_init(100000, 1, 1.0);
     get_allocation_page(heap);
     return 0;
 }
@@ -118,17 +118,18 @@ void testINITHEAP() {
 
 }
 
-void testALLOCCOMPACT() {
+void testALLOCDATA() {
   int *object = NULL;
   object = h_alloc_data(heap, sizeof(int));
   CU_ASSERT_TRUE(validate_object(object, heap));
 }
 
-void testALLOC() {
+void testALLOCCOMPACT() {
   int *object = NULL;
-  object = h_alloc_data(heap, sizeof(int));
+  object = h_alloc_compact(heap, sizeof(int));
   CU_ASSERT_TRUE(validate_object(object, heap));
 }
+
 
 void testTRAVERSESTRUCT() {
 
@@ -350,7 +351,9 @@ int main(int argc, char const *argv[]) {
         return CU_get_error();
     }
 
-    if (NULL == CU_add_test(initHeapSuite, "testing init_h", testINITHEAP) ||
+    if (NULL == CU_add_test(initHeapSuite, "testing init_h", testALLOCDATA) ||
+	NULL == CU_add_test(initHeapSuite, "testing h_alloc_data", testINITHEAP) ||
+	NULL == CU_add_test(initHeapSuite, "testing h_alloc_compact", testALLOCCOMPACT) ||
       	NULL == CU_add_test(heapSuite, "testing traverseLLHeap", testTRAVERSE_LL_HEAP) ||
       	NULL == CU_add_test(heapSuite, "testing traverseHeap", testTRAVERSE) ||
         NULL == CU_add_test(heapSuite, "testing traverseEmptyList", testEMPTYLISTRTRAVERSE) ||
