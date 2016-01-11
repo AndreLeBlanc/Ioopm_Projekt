@@ -330,17 +330,20 @@ void test_get_alive_stack_pointers() {
   void *top = get_stack_top();
   void *bottom = (void *)environ;
   heap_t *new_heap = h_init(1024, true, 100.0);
-  char *ptr = h_alloc_data(new_heap, 32);
-  strcpy(ptr,"heej");
-  ll_node **test_root = get_alive_stack_pointers(new_heap, top, bottom);
-  CU_ASSERT_PTR_NOT_NULL(test_root);
-  CU_ASSERT_PTR_NOT_NULL(ptr);
-  CU_ASSERT_EQUAL(LL_getContent(*test_root), ptr);
 
-  int *number = h_alloc_struct(new_heap, "*i");
-  *number = 666;
-  test_root = get_alive_stack_pointers(new_heap, top, bottom);
-  CU_ASSERT_PTR_NOT_NULL(number);
+  char *ptr_a = h_alloc_data(new_heap, 32);
+  char *ptr_b = h_alloc_data(new_heap, 32);
+  char *ptr_c = h_alloc_data(new_heap, 32);
+
+  ll_head chars = get_alive_stack_pointers(new_heap, top, bottom);
+  CU_ASSERT_EQUAL(LL_length(chars), 3);
+
+  int *number_a = h_alloc_struct(new_heap, "*i");
+  int *number_b = h_alloc_struct(new_heap, "*i*i");
+  int *number_c = h_alloc_struct(new_heap, "*i*ii");
+
+  ll_head nums = get_alive_stack_pointers(new_heap, top, bottom);
+  CU_ASSERT_EQUAL(LL_length(nums), 6);
 
   h_delete(new_heap);
 }
