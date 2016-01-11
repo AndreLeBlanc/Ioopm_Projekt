@@ -367,7 +367,7 @@ int main(int argc, char const *argv[]) {
         NULL == CU_add_test(heapSuite, "testing test_metadata_check", test_metadata_check) ||
         NULL == CU_add_test(heapSuite, "testing get_pointers_within_object", testGETPOINTERSWITHINOBJECT) ||
         NULL == CU_add_test(heapSuite, "test_pointers_within_object", test_pointers_within_object) ||
-        NULL == CU_add_test(stackSuite, "testing get_alive_stack_pointers", test_get_alive_stack_pointers) ||
+        // NULL == CU_add_test(stackSuite, "testing get_alive_stack_pointers", test_get_alive_stack_pointers) ||
         NULL == CU_add_test(stackSuite, "testing is_pointing_at_heap", test_is_pointing_at_heap) ||
         NULL == CU_add_test(stackSuite, "testing get_stack_top", test_get_stack_top)) {
         CU_cleanup_registry();
