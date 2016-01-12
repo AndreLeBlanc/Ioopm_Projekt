@@ -78,17 +78,27 @@ void test_traverse_stack_and_heap_empty() {
 
 void test_trigger_GC() {
 
-  heap_t *h = h_init(100000, true, 1.0);
+  heap_t *h = h_init(100000, false, 1.0);
 
-  int *pt_a = h_alloc_data(h, sizeof(int));
-  int *pt_b = h_alloc_data(h, sizeof(int));
-  int *pt_c = h_alloc_data(h, sizeof(int));
-  h_alloc_data(h, sizeof(int)); //this should be collected by collector
-  h_alloc_data(h, sizeof(int)); //this should be collected by collector
+  int *pt_a = h_alloc_struct(h, "*");
+  int *pt_b = h_alloc_struct(h, "*");
+  int *pt_c = h_alloc_struct(h, "*");
+  h_alloc_struct(h, "*"); //this should be collected by collector
+  h_alloc_struct(h, "*"); //this should be collected by collector
+  int a = 0;
+  int b = 0;
+  // printf("\n\nint: %p\n", &a); //shouldn't care
+  // printf("\n\nint: %p\n", &b); //shouldn't care
+  LL_map(h->val_list, printAddress);
+  // printf("\n\npt_a: %p ---> %p\n", pt_a, *pt_a);
+  // printf("\n\npt_b: %p ---> %p\n", pt_b, *pt_b);
+  // printf("\n\npt_c: %p ---> %p\n", pt_c, *pt_c);
 
   size_t collected = h_gc(h);
-
-  CU_FAIL();
+  b++;
+  a++;
+  printf("\n\n\tCOLLECTED: %d\n\n", collected);
+  CU_ASSERT_EQUAL(collected, sizeof(void *)*2);
 
 }
 

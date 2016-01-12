@@ -75,7 +75,7 @@ os_dump:
 	echo "-v : $(shell uname -v)"; \
 
 #compile test
-gc_test: $(FILES_TEST) gc_test.c
+gc_test: $(FILES_TEST) gc_test.debug.o
 	$(CC) -o $@.run $^ $(FLAGS_CUNIT)
 .PHONY: gc_test
 

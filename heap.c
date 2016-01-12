@@ -297,6 +297,8 @@ void *h_alloc_compact(heap_t* h, void* object) {
   char* format_string = md_get_format_string(object);
   size_t object_bytes = fs_calculate_size(format_string);
   if(object_bytes) {
+    //remove object from heap metadata list
+    // devalidate(h, object);
     // if calculation succeeded, allocate
     void *temp = h_alloc(h, object_bytes, format_string, true);
     return temp;
@@ -508,7 +510,7 @@ void *enqueue(void* to_be_added, heap_t *h) {
 
 bool validate_object(void* object, heap_t *h) {
 
-    if(h->val_list == NULL || LL_isEmpty(h->val_list) || object == NULL) {
+    if(h->val_list == NULL || object == NULL) {
       return false;
     }
 
@@ -526,7 +528,7 @@ bool validate_object(void* object, heap_t *h) {
 
 void devalidate(void* object, heap_t *h) {
 
-  if(h->val_list == NULL || LL_isEmpty(h->val_list)) {
+  if(h->val_list == NULL) {
     return;
   }
 

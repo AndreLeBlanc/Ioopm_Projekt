@@ -33,7 +33,9 @@ void bartlettCompact(heap_t *h, ll_head marked_list) { // performs the bartlett 
     void* pointer = LL_getContent(cursor);
     // update pointers
     update_objects_pointers(pointer);
-    
+
+    //TODO, update stack pointers
+
     // copy all data
     memcpy(md_get_forwarding_address(pointer),
 	   pointer,
@@ -41,7 +43,7 @@ void bartlettCompact(heap_t *h, ll_head marked_list) { // performs the bartlett 
 
     // set forwarding address of copied data to NULL
     md_set_forwarding_address(md_get_forwarding_address(pointer), NULL);
-	   
+
     // set copied flag
     md_set_copied_flag(LL_getContent(cursor), true);
 
@@ -61,4 +63,3 @@ void bartlettCompact(heap_t *h, ll_head marked_list) { // performs the bartlett 
 //   // put stack somewhere
 //   return do_main(argc, argv, envp);
 // }
-
