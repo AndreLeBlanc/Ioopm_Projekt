@@ -244,7 +244,14 @@ page_t *get_allocation_page(heap_t* h, size_t bytes,  bool compact) {
 
 void *h_alloc(heap_t* h, size_t bytes, char* format_string, bool compact) {
   size_t total_bytes = bytes + sizeof(metadata_t);
+
+  // check if garbage collection is needed
+  if(h->gc_threshold < ((float) h->total_size / (float) h->avail_space-total_bytes)) {
+    h_gc(h);
+  }
+
   page_t *p = get_allocation_page(h, total_bytes, compact);
+
 
   if(p && p->bump_p + total_bytes <= p->end_p) {// if there is a page and it has space, allocate
     // save bump pointer for returning. This pointer skips the metadata
