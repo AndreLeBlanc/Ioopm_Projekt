@@ -337,9 +337,6 @@ void testEMPTYLISTRTRAVERSE() {
   CU_ASSERT_EQUAL(LL_length(pointers), 1);
 
   LL_deleteList(stack_pointers);
-  if(!LL_isEmpty(pointers)) {
-    LL_deleteList(pointers);
-  }
 
 }
 
