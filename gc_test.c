@@ -71,7 +71,7 @@ void test_traverse_stack_and_heap_empty() {
 
   CU_ASSERT_TRUE(
     LL_isEmpty(stack_pts) &&
-    heap_pts == NULL
+    LL_isEmpty(heap_pts)
   );
 
   h_delete(h);

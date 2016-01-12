@@ -71,7 +71,7 @@ ll_head traverse_pointers_from_LL(ll_head pointers) {
     } else {
 
       free(new_nodes);
-      return NULL;
+      return LL_initRoot();
 
     }
 
