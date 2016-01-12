@@ -31,6 +31,51 @@ int clean_suite(void) {
   return 0;
 }
 
+void test_traverse_stack_and_heap() {
+
+  heap_t *h = h_init(2048, true, 1.0);
+  h_alloc_data(h, sizeof(int));
+  h_alloc_data(h, sizeof(int));
+  h_alloc_data(h, sizeof(int));
+  h_alloc_data(h, sizeof(int));
+  ll_head stack_pts = get_alive_stack_pointers(h);
+  ll_head heap_pts = traverse_pointers_from_LL(stack_pts);
+
+  void *stack_cursor = *stack_pts;
+  void *heap_cursor = *heap_pts;
+  bool identical = true;
+  while(stack_cursor != NULL) {
+    if(LL_getContent(stack_cursor) != LL_getContent(heap_cursor)) {
+      identical = false;
+      break;
+    }
+    stack_cursor = LL_getNext(stack_cursor);
+    heap_cursor = LL_getNext(heap_cursor);
+  }
+
+  int n_stack_pts = LL_length(stack_pts);
+  int n_heap_pts = LL_length(heap_pts);
+
+  CU_ASSERT_TRUE(
+    identical &&
+    n_stack_pts == n_heap_pts
+  );
+
+}
+
+void test_traverse_stack_and_heap_empty() {
+
+  heap_t *h = h_init(2048, true, 1.0);
+  ll_head stack_pts = get_alive_stack_pointers(h);
+  ll_head heap_pts = traverse_pointers_from_LL(stack_pts);
+
+  CU_ASSERT_TRUE(
+    LL_isEmpty(stack_pts) &&
+    heap_pts == NULL
+  );
+
+}
+
 void testGETPOINTERSWITHINOBJECT() {
 
   struct test *object = NULL;
@@ -366,14 +411,14 @@ void test_get_alive_stack_pointers() {
   h_alloc_data(new_heap, 32);
   h_alloc_data(new_heap, 32);
 
-  ll_head chars = get_alive_stack_pointers(new_heap, top, bottom);
+  ll_head chars = get_alive_stack_pointers_in_range(new_heap, top, bottom);
   CU_ASSERT_EQUAL(LL_length(chars), 3);
 
   h_alloc_struct(new_heap, "*i");
   h_alloc_struct(new_heap, "*i*i");
   h_alloc_struct(new_heap, "*i*ii");
 
-  ll_head nums = get_alive_stack_pointers(new_heap, top, bottom);
+  ll_head nums = get_alive_stack_pointers_in_range(new_heap, top, bottom);
   CU_ASSERT_EQUAL(LL_length(nums), 6);
 
   h_delete(new_heap);
@@ -416,7 +461,9 @@ int main(int argc, char const *argv[]) {
         NULL == CU_add_test(heapSuite, "testing traverseEmptyList", testEMPTYLISTRTRAVERSE) ||
         NULL == CU_add_test(heapSuite, "testing traverseEmptyPointerList", testEMPTYPOINTERLIST) ||
         NULL == CU_add_test(heapSuite, "testing traverseAdvancedStruct", testTRAVERSESTRUCT) ||
+        NULL == CU_add_test(heapSuite, "testing test_traverse_stack_and_heap_empty", test_traverse_stack_and_heap_empty) ||
         NULL == CU_add_test(heapSuite, "testing test_object_metadata", test_object_metadata) ||
+        NULL == CU_add_test(heapSuite, "testing test_traverse_stack_and_heap", test_traverse_stack_and_heap) ||
         NULL == CU_add_test(heapSuite, "testing test_update_object_pointers", test_update_object_pointers) ||
         NULL == CU_add_test(heapSuite, "testing test_alloc_struct_all_types_upper", test_alloc_struct_all_types_upper) ||
         NULL == CU_add_test(heapSuite, "testing test_alloc_struct_all_types_lower", test_alloc_struct_all_types_lower) ||
