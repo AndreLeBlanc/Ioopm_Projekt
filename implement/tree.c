@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include "tree.h"
 
+extern void *our_heap;
 
 struct tree{
   void*        key;
@@ -79,7 +80,7 @@ void replace(tree_t** dest, tree_t** src){
   (*dest)->right = right;
 }
 
-tree_t* tree_remove(tree_t* tree, void* key, cmpkey _cmpkey){  
+tree_t* tree_remove(tree_t* tree, void* key, cmpkey _cmpkey){
   int dir = tree_dir(tree, key, _cmpkey);
 
   if(dir == LEFT )
@@ -106,20 +107,20 @@ tree_t* tree_remove(tree_t* tree, void* key, cmpkey _cmpkey){
   return tree;
 }
 
-bool tree_insert(tree_t** tree, void* key, cmpkey _cmpkey, 
+bool tree_insert(tree_t** tree, void* key, cmpkey _cmpkey,
 		 void* data, cmpdata _cmpdata, int data_size,
 		 free_data _free_data, free_key _free_key, col collision){
   int dir = tree_dir(*tree, key, _cmpkey);
-  
+
   if(dir == EMPTY){
     *tree = tree_new(data_size, _free_data, _free_key);
     (*tree)->key = key;
     list_append((*tree)->list, data);
   }
-  else if(dir == LEFT ) 
+  else if(dir == LEFT )
     return tree_insert(&(*tree)->left , key, _cmpkey, data, _cmpdata,
 		data_size, _free_data, _free_key, collision);
-  else if(dir == RIGHT) 
+  else if(dir == RIGHT)
     return tree_insert(&(*tree)->right, key, _cmpkey, data, _cmpdata,
 		data_size, _free_data, _free_key, collision);
   else{ //dir == MATCH
@@ -189,18 +190,18 @@ bool tree_for_all(tree_t* tree, void* key, cmpkey _cmpkey,
 }
 
 
-void for_all_nodes(tree_t *tree, print _print ,int *tree_index,int page, int ware_choice) 
+void for_all_nodes(tree_t *tree, print _print ,int *tree_index,int page, int ware_choice)
 {
   if(!tree) return;
-  if (tree->left != NULL) 
-    { 
-      for_all_nodes(tree->left, _print, tree_index, page,ware_choice); 
-    } 
- 
+  if (tree->left != NULL)
+    {
+      for_all_nodes(tree->left, _print, tree_index, page,ware_choice);
+    }
+
   _print(tree, tree->key, tree_index, page, ware_choice);
-        
-  if (tree->right != NULL) 
-    { 
-      for_all_nodes(tree->right, _print,tree_index,page,ware_choice); 
-    } 
+
+  if (tree->right != NULL)
+    {
+      for_all_nodes(tree->right, _print,tree_index,page,ware_choice);
+    }
 }

@@ -3,8 +3,8 @@ FLAGS=-Wall -std=c11 -ggdb
 
 all: main
 
-main: main.o util.o list.o tree.o extern.o heap.o
-	$(CC) $(FLAGS) util.o list.o tree.o extern.o heap.o  main.o -o main
+main: util.o list.o tree.o extern.o gc.o linked_list.o heap.o stack_traverser.o traverser.o
+	$(CC) $(FLAGS) $^ main.c -o main
 
 test: test.o util.o list.o tree.o
 	$(CC) $(FLAGS) util.o list.o tree.o test.o -o test
@@ -21,7 +21,7 @@ test_list.o: test_list.c
 test.o: test.c
 	$(CC) $(FLAGS) -c test.c -o test.o
 
-extern.o: extern.c 
+extern.o: extern.c
 	$(CC) $(FLAGS) -c extern.c -o extern.o
 
 main.o: main.c main.h
@@ -36,8 +36,11 @@ list.o: list.c list.h
 util.o: util.c util.h
 	$(CC) $(FLAGS) -c util.c -o util.o
 
-heap.o: heap.c heap.h
-	$(CC) $(FLAGS) -c heap.c -o heap.o
+%.o:
+	@cd ../; \
+	make $@; \
+	mv $@ implement/; \
+	cd implement/;
 
 run: main
 	./main

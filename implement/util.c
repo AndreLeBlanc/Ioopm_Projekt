@@ -6,14 +6,16 @@
 #include "util.h"
 #include "main.h"
 
+extern void *our_heap;
+
 char toupper_ex(char input){
   switch(input){
-  case 'å': return 'Å';
-  case 'ä': return 'Ä';
-  case 'ö': return 'Ö';
+  // case 'ï¿½': return 'ï¿½';
+  // case 'ï¿½': return 'ï¿½';
+  // case 'ï¿½': return 'ï¿½';
   default : return toupper(input);
   }
-}   
+}
 
 bool char_allowed(char input, char *allowed){
   if(allowed == NULL) return false;
@@ -37,7 +39,7 @@ char ask_question_char(char *msg, char *allowed){
     }
 
     if(!have_answer){
-      printf("Ej tillåtet svar; godkända tecken [%s]\n", allowed);
+      printf("Ej tillï¿½tet svar; godkï¿½nda tecken [%s]\n", allowed);
     }
   }
   return toupper_ex(input);
@@ -63,16 +65,16 @@ int ask_question_int(char *msg, int start, int end){
       have_answer = false;
     }
     else if(buffer[sizeof(buffer)/sizeof(char)-2] != '\0' && buffer[sizeof(buffer)/sizeof(char)-2] != '\n'){
-      printf("Fel; talet du angav är för stort\n");
+      printf("Fel; talet du angav ï¿½r fï¿½r stort\n");
       while(getchar() != '\n');
       have_answer = false;
     }
     else if(have_answer && (atoi(buffer) < start || atoi(buffer) > end)){
-      printf("Fel; talet är inte inom spannet %d till %d.\n", start, end);
+      printf("Fel; talet ï¿½r inte inom spannet %d till %d.\n", start, end);
       have_answer = false;
     }
     else if(!have_answer)
-      printf("Ej tillåtet svar; godkända tecken [0123456789]\n");
+      printf("Ej tillï¿½tet svar; godkï¿½nda tecken [0123456789]\n");
   }
   return atoi(buffer);
 }
@@ -93,21 +95,21 @@ char* ask_question_string(char *msg, char *allowed){
     }
 
     if(str[0] == '\n'){
-      printf("Fel; du måste skriva något\n");
+      printf("Fel; du mï¿½ste skriva nï¿½got\n");
       have_answer = false;
     }
     else if(str[sizeof(str)-2] != '\0' && str[sizeof(str)-2] != '\n'){
-      printf("Fel; För mycket text\n");
+      printf("Fel; Fï¿½r mycket text\n");
       while(getchar() != '\n');
       have_answer = false;
     }
     else if(!have_answer)
-      printf("Ej tillåtet svar; godkända tecken [%s]\n", allowed);
+      printf("Ej tillï¿½tet svar; godkï¿½nda tecken [%s]\n", allowed);
   }
 
   int c=-1;
   while(str[++c] != '\0');
-  if(str[c-1] == '\n') 
+  if(str[c-1] == '\n')
     str[c-1] = '\0';
 
   char *return_str = h_alloc_data(our_heap, (strlen(str)+1));

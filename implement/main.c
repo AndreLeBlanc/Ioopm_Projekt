@@ -6,9 +6,12 @@
 #include <limits.h>
 #include "util.h"
 #include "tree.h"
+#include "../gc.h"
 
-#define ALPHA "ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖåäö"
-#define ALPHA_EX "ABCDEFGHIJKLMNOPQRSTUVWXYZ ,.;:-?!ÅÄÖåäö"
+#define ALPHA "ABCDEFGHIJKLMNOPQRSTUVWXYZï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"
+#define ALPHA_EX "ABCDEFGHIJKLMNOPQRSTUVWXYZ ,.;:-?!ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"
+
+heap_t *our_heap;
 
 typedef struct ware{
   char* name;
@@ -39,21 +42,21 @@ void free_name(void* name);
 
 int main(int argc, char *argv[]){
   printf("\n===========================================\n\n"
-	 "    Välkommen till Lagerhanteraren 2.0\n");
-  
+	 "    Vï¿½lkommen till Lagerhanteraren 2.0\n");
+
   tree_t* tree = NULL;
-  bool running = true;  
+  bool running = true;
 
   while(running){
     switch(ask_question_char
 	   ("\n===========================================\n"
-	    "[L]ägg till en vara\n"
+	    "[L]ï¿½gg till en vara\n"
 	    "[T]a bort en vara\n"
 	    "[R]edigera en vara\n"
 	    "Lista [h]ela varukatalogen\n"
 	    "[P]acka en pall\n"
 	    "[A]vsluta\n\n"
-	    "Vad vill du göra? > ",
+	    "Vad vill du gï¿½ra? > ",
 	    "LTRHPA")){
     case 'L': add_ware(&tree); break;
     case 'T': remove_ware(&tree); break;
@@ -87,17 +90,17 @@ void* shelf_collision(void* dest, void* src){
 }
 
 void print_ware(void* ware){
-    printf("\n%s%s \n%s%c%d \n%s%s \n%s%d \n%s%d\n", 
+    printf("\n%s%s \n%s%c%d \n%s%s \n%s%d \n%s%d\n",
 	 "Namn : ",((ware_t*)ware)->name,
-	 "Hylla : ",((ware_t*)ware)->shelf_letter,((ware_t*)ware)->shelf_number, 
-	 "Beskrivning : ", ((ware_t*)ware)->desc, 
+	 "Hylla : ",((ware_t*)ware)->shelf_letter,((ware_t*)ware)->shelf_number,
+	 "Beskrivning : ", ((ware_t*)ware)->desc,
 	 "Pris : ",((ware_t*)ware)->price,
 	 "Antal : ", ((ware_t*)ware)->amount);
     printf("----------------------------\n");
 }
 
 void print_all_wares(tree_t *tree,void* str1, int *tree_index,int page,int ware_choice)
-{ 
+{
   *tree_index = *tree_index + 1;
   printf("%d%s",(*tree_index), " : ");
   printf("%s\n", (char*)str1);
@@ -108,24 +111,24 @@ void print_string_tree(void* str1, int depth, char root){
   else printf("%s\t|", (char*)str1);
   for(int c=0; c<depth; c++) printf(" ");
   printf("%c%d\n", root, depth);
-} 
+}
 
 void print_string_index(tree_t *tree,void* str1, int *tree_index,int page,int ware_choice)
-{ 
+{
   *tree_index = *tree_index + 1;
-  //övre och undre gräns för vad som printas 
+  //ï¿½vre och undre grï¿½ns fï¿½r vad som printas
   if ((((page+1)*20) >=  *tree_index)&&((page*20)<*tree_index))
-    { 
+    {
       printf("%d%s",(*tree_index) - ((page)*20), " : ");
       printf("%s\n", (char*)str1);
     }
-} 
+}
 
-void print_list_for_index(tree_t *tree, void* str1, int *tree_index,int page,int ware_choice){ 
+void print_list_for_index(tree_t *tree, void* str1, int *tree_index,int page,int ware_choice){
   *tree_index = *tree_index + 1;
-  if (*tree_index == (ware_choice+(20*page))){ 
-    list_t *list = tree_getList(tree); 
-    for(int c=1; c <= list_length(list); c++){ 
+  if (*tree_index == (ware_choice+(20*page))){
+    list_t *list = tree_getList(tree);
+    for(int c=1; c <= list_length(list); c++){
       void *data = list_get(list,c);
       print_ware(data);
     }
@@ -180,15 +183,15 @@ void add_ware(tree_t** tree){
       keyName = h_alloc_data(our_heap, sizeof(char)*(strlen(ware->name)+1));
       strcpy(keyName, ware->name);
     }
-    if(!tree_insert(tree, keyName, cmpname, ware, cmpshelf, 
-		    sizeof(ware_t), free_ware, free_name, 
+    if(!tree_insert(tree, keyName, cmpname, ware, cmpshelf,
+		    sizeof(ware_t), free_ware, free_name,
 		    shelf_collision)){
       //free(ware->name);
       //free(ware->desc);
     }
   }
   else{
-    printf("Lagerplatsen är upptagen.\n");
+    printf("Lagerplatsen ï¿½r upptagen.\n");
     //  free(ware->name);
     //free(ware->desc);
   }
@@ -200,7 +203,7 @@ void add_ware(tree_t** tree){
 void remove_ware(tree_t** tree){
   char* str = ask_question_string("Vad vill du ta bort? > ", ALPHA_EX);
   tree_t* found = tree_find(*tree, str, cmpname);
-  
+
   if(found){
     if(list_length(tree_getList(found)) > 1){
       for(int c=1; c<= list_length(tree_getList(found)); c++){
@@ -244,7 +247,7 @@ ware_t* make_new_ware(tree_t* tree, tree_t* itemtree, int index){
 
     printf("\n");
     print_ware(existing_ware);
-    printf("Vad vill du ändra?\n");
+    printf("Vad vill du ï¿½ndra?\n");
     printf("[B]eskrivning\n");
     printf("[P]ris\n");
     printf("[A]ntal\n");
@@ -257,7 +260,7 @@ ware_t* make_new_ware(tree_t* tree, tree_t* itemtree, int index){
       if(!strcmp(new_ware->desc, existing_ware->desc))
 	new_ware->desc = ask_question_string("Ange ny beskrivning > ", ALPHA_EX);
       else printf("Fel, redan redigerat beskrivningen.\n");
-      
+
       break;
     case 'P':
       if(new_ware->price == existing_ware->price)
@@ -280,7 +283,7 @@ ware_t* make_new_ware(tree_t* tree, tree_t* itemtree, int index){
     case 'V':
       run = false;
       break;
-    }  
+    }
   }
 
   if(ware_allowed(tree, new_ware->name, new_ware)){
@@ -299,7 +302,7 @@ ware_t* make_new_ware(tree_t* tree, tree_t* itemtree, int index){
 }
 
 void edit_ware(tree_t** tree){
-  char* ans = ask_question_string("Vilken vara vill du ändra? > ", ALPHA);
+  char* ans = ask_question_string("Vilken vara vill du ï¿½ndra? > ", ALPHA);
 
   tree_t* itemtree = tree_find(*tree, ans, cmpname);
   if(itemtree){
@@ -308,7 +311,7 @@ void edit_ware(tree_t** tree){
 	print_ware(list_get(tree_getList(itemtree), c));
       }
     printf("0. Avbryt\n");
-    int val = ask_question_int("Vilket nr vill du ändra? > ", 0, 
+    int val = ask_question_int("Vilket nr vill du ï¿½ndra? > ", 0,
 			       list_length(tree_getList(itemtree)));
     if(val){
       ware_t* new_ware = make_new_ware(*tree, itemtree, val);
@@ -320,7 +323,7 @@ void edit_ware(tree_t** tree){
 	print_ware(list_tail(tree_getList(itemtree)));
       }
       else{
-	printf("Ändring misslyckades\n");
+	printf("ï¿½ndring misslyckades\n");
       }
     }
     else printf("Avbryter.\n\n");
@@ -344,36 +347,36 @@ void list(tree_t** tree)
   int page = 0;
   char choice = 1;
   int amountofwares = tree_nodes(*tree);
-  int h = 0; 
+  int h = 0;
   int *tree_index = &h;
   int ware_choice;
 
   while (choice != 'G' && choice != 'g')
-    { 
+    {
       h = 0;
      for_all_nodes(*tree, print_string_index, tree_index, page, ware_choice);
 
      if (amountofwares >((1+page)*20))
        {
-	 choice = ask_question_char("\n[N]ästa sida, [g]å tillbaka eller [v]älj vara > ", "NnGgVv");
+	 choice = ask_question_char("\n[N]ï¿½sta sida, [g]ï¿½ tillbaka eller [v]ï¿½lj vara > ", "NnGgVv");
 	 printf("\n");
        }
-     else 
+     else
        {
-	 choice = ask_question_char("\n[G]å tillbaka  eller [v]älj vara > ", "GgVv"); 
-       }	
+	 choice = ask_question_char("\n[G]ï¿½ tillbaka  eller [v]ï¿½lj vara > ", "GgVv");
+       }
      if (choice == 'N' || choice == 'n')
        {
        page++;
-       } 
-     if (choice == 'V' || choice == 'v') 
-       { 
-	 ware_choice = ask_question_int ("\nVälj vara genom att mata in index > ", 1, 20); 
-	 h = 0; 
-	 for_all_nodes(*tree, print_list_for_index, tree_index,page,ware_choice);
-	 choice = ask_question_char( "\nVill du [f]ortsätta eller [g]å tillbaka?", "FfGg");
        }
-    } 
+     if (choice == 'V' || choice == 'v')
+       {
+	 ware_choice = ask_question_int ("\nVï¿½lj vara genom att mata in index > ", 1, 20);
+	 h = 0;
+	 for_all_nodes(*tree, print_list_for_index, tree_index,page,ware_choice);
+	 choice = ask_question_char( "\nVill du [f]ortsï¿½tta eller [g]ï¿½ tillbaka?", "FfGg");
+       }
+    }
 
 }
 
@@ -386,7 +389,7 @@ void shopitem_free(void* shopitem){
 
 void shop_print_list(list_t* shoplist){
   if(list_length(shoplist)){
-    printf("Din pall innehåller:\n");
+    printf("Din pall innehï¿½ller:\n");
     for(int c=1; c<=list_length(shoplist); c++){
       shopitem_t* item = list_get(shoplist, c);
       printf("  - %s (%d)\n", item->name, item->amount);
@@ -394,7 +397,7 @@ void shop_print_list(list_t* shoplist){
     printf("\n");
   }
   else{
-    printf("Din pall är tom.\n\n");
+    printf("Din pall ï¿½r tom.\n\n");
   }
 }
 
@@ -413,13 +416,13 @@ void shop_take(shopitem_t** item, ware_t** ware){
 void shop_pack(tree_t** tree, list_t* shoplist){
   if(!list_length(shoplist)) return;
 
-  printf("Lagerplatser för att packa pallen:\n");
+  printf("Lagerplatser fï¿½r att packa pallen:\n");
 
   int total_cost = 0;
   while(list_length(shoplist) > 0){
     shopitem_t* iteminfo = list_get(shoplist, 1);
     tree_t* itemtree = tree_find(*tree, iteminfo->name, cmpname);
-    
+
     while(iteminfo->amount > 0){
       int index = 1, value = 0;
       for(int n=1; n<=list_length(tree_getList(itemtree)); n++){
@@ -428,7 +431,7 @@ void shop_pack(tree_t** tree, list_t* shoplist){
 	  value = ((ware_t*)list_get(tree_getList(itemtree),n))->amount;
 	}
       }
-      
+
       ware_t* ware = list_get(tree_getList(itemtree), index);
       shop_take(&iteminfo, &ware);
       value -= ware->amount;
@@ -448,7 +451,7 @@ void shop_pack(tree_t** tree, list_t* shoplist){
     list_remove(shoplist, 1);
   }
 
-  printf("Totalt pris för pallen: %d kr\n\n", total_cost);
+  printf("Totalt pris fï¿½r pallen: %d kr\n\n", total_cost);
 }
 
 // [x] Buid the ui & exit command
@@ -470,7 +473,7 @@ void shop(tree_t** tree){
   list_t* shoplist = list_new(sizeof(shopitem_t), shopitem_free);
   bool run = true;
   int tree_index = 0;
-  
+
   while(run){
     shop_print_list(shoplist);
     tree_index = 0;
@@ -485,7 +488,7 @@ void shop(tree_t** tree){
 
       //added the item before?
       for(int c=1; c<=list_length(shoplist); c++){
-	if(!strcmp(((shopitem_t*)list_get(shoplist, c))->name, 
+	if(!strcmp(((shopitem_t*)list_get(shoplist, c))->name,
 		   item.name)){
 	  max_value += ((shopitem_t*)list_get(shoplist, c))->amount;
 	}
@@ -517,7 +520,7 @@ void shop(tree_t** tree){
 
 bool quit(){
   //  printf("Total memory: %zu\n", global_counter);
-  switch(ask_question_char("Säker att du vill avsluta? [J]a/[N]ej > ", "JN")){
+  switch(ask_question_char("Sï¿½ker att du vill avsluta? [J]a/[N]ej > ", "JN")){
   case 'J':
     h_delete(our_heap);
     return false;

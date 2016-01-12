@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include "list.h"
 
+extern void* our_heap;
+
 struct listNode{
   void* data;
   struct listNode *next;
@@ -24,7 +26,7 @@ list_t* list_new(int elementSize, free_data _free_data){
   list->length = 0;
   list->elementSize = elementSize;
   list->_free_data = _free_data;
-  
+
   return list;
 }
 
@@ -46,7 +48,7 @@ bool list_append(list_t* list, void* data){
   listNode_t* node = h_alloc_struct(our_heap, "**");
   node->data = h_alloc_data(our_heap, "*");
   memcpy(node->data, data, list->elementSize);
-  
+
   if(list->length == 0) list->tail = list->head = node;
   else list->tail = list->tail->next = node;
   list->length++;
