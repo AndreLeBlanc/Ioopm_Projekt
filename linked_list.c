@@ -3,11 +3,11 @@
 
 // NODE STRUCT
 
-typedef struct node{
+struct node{
   struct node* next;
   struct node* previous;
   void* nodeContent;
-}ll_node;
+};
 
 // CREATE FUNCTIONS
 

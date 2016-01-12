@@ -54,6 +54,7 @@ heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold) {
 }
 
 void h_delete(heap_t *h) {
+  LL_deleteList(h->val_list);
   if(h != NULL) {
     free(h);
   }
@@ -243,7 +244,14 @@ page_t *get_allocation_page(heap_t* h, size_t bytes,  bool compact) {
 
 void *h_alloc(heap_t* h, size_t bytes, char* format_string, bool compact) {
   size_t total_bytes = bytes + sizeof(metadata_t);
+
+  // check if garbage collection is needed
+  if(h->gc_threshold < ((float) h->total_size / (float) h->avail_space-total_bytes)) {
+    size_t collected = h_gc(h);
+  }
+
   page_t *p = get_allocation_page(h, total_bytes, compact);
+
 
   if(p && p->bump_p + total_bytes <= p->end_p) {// if there is a page and it has space, allocate
     // save bump pointer for returning. This pointer skips the metadata
@@ -289,6 +297,8 @@ void *h_alloc_compact(heap_t* h, void* object) {
   char* format_string = md_get_format_string(object);
   size_t object_bytes = fs_calculate_size(format_string);
   if(object_bytes) {
+    //remove object from heap metadata list
+    // devalidate(h, object);
     // if calculation succeeded, allocate
     void *temp = h_alloc(h, object_bytes, format_string, true);
     return temp;
@@ -500,7 +510,7 @@ void *enqueue(void* to_be_added, heap_t *h) {
 
 bool validate_object(void* object, heap_t *h) {
 
-    if(h->val_list == NULL || LL_isEmpty(h->val_list) || object == NULL) {
+    if(h->val_list == NULL || object == NULL) {
       return false;
     }
 
@@ -518,14 +528,15 @@ bool validate_object(void* object, heap_t *h) {
 
 void devalidate(void* object, heap_t *h) {
 
-  if(h->val_list == NULL || LL_isEmpty(h->val_list)) {
+  if(h->val_list == NULL) {
     return;
   }
 
   ll_node *cursor = *h->val_list;
   while(cursor != NULL) {
     if(LL_getContent(cursor) == object) {
-      LL_removePointer(h->val_list, cursor);
+      void *content = LL_deletePointer(h->val_list, cursor);
+
       break;
     }
     cursor = LL_getNext(cursor);
