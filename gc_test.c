@@ -74,6 +74,9 @@ void test_traverse_stack_and_heap_empty() {
     heap_pts == NULL
   );
 
+  h_delete(h);
+  LL_deleteList(stack_pts);
+
 }
 
 void test_trigger_GC() {
@@ -89,7 +92,7 @@ void test_trigger_GC() {
   int b = 0;
   // printf("\n\nint: %p\n", &a); //shouldn't care
   // printf("\n\nint: %p\n", &b); //shouldn't care
-  LL_map(h->val_list, printAddress);
+  // LL_map(h->val_list, printAddress);
   // printf("\n\npt_a: %p ---> %p\n", pt_a, *pt_a);
   // printf("\n\npt_b: %p ---> %p\n", pt_b, *pt_b);
   // printf("\n\npt_c: %p ---> %p\n", pt_c, *pt_c);
@@ -99,6 +102,7 @@ void test_trigger_GC() {
   a++;
   printf("\n\n\tCOLLECTED: %d\n\n", collected);
   CU_ASSERT_EQUAL(collected, sizeof(void *)*2);
+  h_delete(h);
 
 }
 

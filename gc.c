@@ -16,12 +16,12 @@ size_t h_gc(heap_t *h) {
     ll_head heap_pts = traverse_pointers_from_LL(stack_pts);
 
     if(heap_pts != NULL) {
-      puts("addr");
-      LL_map(stack_addr, printAddress);
-      puts("stack_pts");
-      LL_map(stack_pts, printAddress);
-      puts("heap");
-      LL_map(heap_pts, printAddress);
+      // puts("addr");
+      // LL_map(stack_addr, printAddress);
+      // puts("stack_pts");
+      // LL_map(stack_pts, printAddress);
+      // puts("heap");
+      // LL_map(heap_pts, printAddress);
 
       void *heap_cursor = *heap_pts;
       void *stack_cursor = *stack_addr;
@@ -44,16 +44,15 @@ size_t h_gc(heap_t *h) {
       return 0;
     }
 
-    ll_head stack_pts_after = get_alive_stack_pointers(h);
-    ll_head stack_addr_after = get_alive_stack_address_pointers(h); //same as above but stack address
-    ll_head heap_pts_after = traverse_pointers_from_LL(stack_pts_after);
-    puts("addr_after");
-    LL_map(stack_addr_after, printAddress);
-    puts("stack_pts_after");
-    LL_map(stack_pts_after, printAddress);
-    puts("heap_after");
-    LL_map(heap_pts_after, printAddress);
-    // LL_map(heap_p, h_alloc_compact_map); //TODO this isn't correct
+    // ll_head stack_pts_after = get_alive_stack_pointers(h);
+    // ll_head stack_addr_after = get_alive_stack_address_pointers(h); //same as above but stack address
+    // ll_head heap_pts_after = traverse_pointers_from_LL(stack_pts_after);
+    // puts("addr_after");
+    // LL_map(stack_addr_after, printAddress);
+    // puts("stack_pts_after");
+    // LL_map(stack_pts_after, printAddress);
+    // puts("heap_after");
+    // LL_map(heap_pts_after, printAddress);
 
     post_compact_page_reset(h);
     return num_bytes_collected;
