@@ -247,7 +247,7 @@ void *h_alloc(heap_t* h, size_t bytes, char* format_string, bool compact) {
 
   // check if garbage collection is needed
   if(h->gc_threshold < ((float) h->total_size / (float) h->avail_space-total_bytes)) {
-    h_gc(h);
+    size_t collected = h_gc(h);
   }
 
   page_t *p = get_allocation_page(h, total_bytes, compact);

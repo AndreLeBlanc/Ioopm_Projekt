@@ -76,6 +76,22 @@ void test_traverse_stack_and_heap_empty() {
 
 }
 
+void test_trigger_GC() {
+
+  heap_t *h = h_init(100000, true, 1.0);
+
+  int *pt_a = h_alloc_data(h, sizeof(int));
+  int *pt_b = h_alloc_data(h, sizeof(int));
+  int *pt_c = h_alloc_data(h, sizeof(int));
+  h_alloc_data(h, sizeof(int)); //this should be collected by collector
+  h_alloc_data(h, sizeof(int)); //this should be collected by collector
+
+  size_t collected = h_gc(h);
+
+  CU_FAIL();
+
+}
+
 void testGETPOINTERSWITHINOBJECT() {
 
   struct test *object = NULL;
@@ -468,6 +484,7 @@ int main(int argc, char const *argv[]) {
         NULL == CU_add_test(heapSuite, "testing test_alloc_struct_all_types_upper", test_alloc_struct_all_types_upper) ||
         NULL == CU_add_test(heapSuite, "testing test_alloc_struct_all_types_lower", test_alloc_struct_all_types_lower) ||
         NULL == CU_add_test(heapSuite, "testing test_small_heap_init", test_small_heap_init) ||
+        NULL == CU_add_test(heapSuite, "testing test_trigger_GC", test_trigger_GC) ||
         NULL == CU_add_test(heapSuite, "testing test_is_devalidate_object_false", test_is_devalidate_object_false) ||
         NULL == CU_add_test(heapSuite, "testing test_is_valid_object_false", test_is_valid_object_false) ||
         NULL == CU_add_test(heapSuite, "testing test_pointers_inside_multiple_pointers_struct", test_pointers_inside_multiple_pointers_struct) ||
