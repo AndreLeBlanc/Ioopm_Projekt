@@ -3,7 +3,7 @@ FLAGS=-Wall -std=c11 -ggdb
 
 all: main
 
-main: util.o list.o tree.o extern.o gc.o linked_list.o heap.o stack_traverser.o traverser.o
+main: util.o list.o tree.o extern.o gc.debug.o linked_list.debug.o heap.debug.o stack_traverser.debug.o traverser.debug.o
 	$(CC) $(FLAGS) $^ main.c -o main
 
 test: test.o util.o list.o tree.o

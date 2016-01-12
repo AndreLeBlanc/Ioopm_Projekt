@@ -41,6 +41,8 @@ void free_name(void* name);
 /// ###################################################
 
 int main(int argc, char *argv[]){
+  our_heap = h_init(10000, true, 1.0);
+
   printf("\n===========================================\n\n"
 	 "    V�lkommen till Lagerhanteraren 2.0\n");
 

@@ -112,7 +112,7 @@ char* ask_question_string(char *msg, char *allowed){
   if(str[c-1] == '\n')
     str[c-1] = '\0';
 
-  char *return_str = h_alloc_data(our_heap, (strlen(str)+1));
+  char *return_str = h_alloc_data(our_heap, (strlen(str)+1) * sizeof(char));
   strcpy(return_str, str);
 
   return return_str;
