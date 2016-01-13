@@ -56,3 +56,7 @@ go: zip
 	else \
 		echo "$(RED)Your username seems to be incorrect. [$$username]$(NC)"; \
 	fi
+
+clean:
+	cd ../; \
+	make clean;

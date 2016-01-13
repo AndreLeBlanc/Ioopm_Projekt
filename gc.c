@@ -28,6 +28,7 @@ size_t h_gc(heap_t *h) {
 
       while(heap_cursor != NULL) {
         void **stack_content = (void **)LL_getContent(stack_cursor);
+        if(stack_content != NULL) {
         // printf("\n\nheap: %p --> %p\n", heap_cursor, LL_getContent(heap_cursor));
         // printf("\nstack: %p --> %p\n", stack_cursor, LL_getContent(stack_cursor));
       	void* curr_obj = LL_getContent(heap_cursor);
@@ -36,6 +37,7 @@ size_t h_gc(heap_t *h) {
         // printf("before: %p\n", *stack_content);
       	*stack_content = h_alloc_compact(h, curr_obj);
         // printf("after: %p\n", *stack_content);
+        }
         heap_cursor = LL_getNext(heap_cursor);
         stack_cursor = LL_getNext(stack_cursor);
       }
