@@ -11,11 +11,6 @@
 #ifndef __stack_traverser__
 #define __stack_traverser__
 
-/// Checks if the heap grows upwards.
-///
-/// \returns true if the heap grows upwards
-bool heap_grows_upwards();
-
 /// Creates a stack top and returns it.
 ///
 /// \returns the new stack top
