@@ -41,7 +41,7 @@ void free_name(void* name);
 /// ###################################################
 
 int main(int argc, char *argv[]){
-  our_heap = h_init(10000, true, 1.0);
+  our_heap = h_init(10000, true, 0.0);
 
   printf("\n===========================================\n\n"
 	 "    V�lkommen till Lagerhanteraren 2.0\n");
@@ -70,6 +70,10 @@ int main(int argc, char *argv[]){
     }
   }
   tree_destroy(&tree);
+  int collected = h_gc(our_heap);
+  printf("Used data: %d\n", h_used(our_heap));
+  printf("Collected data: %d\n", collected);
+  h_delete(our_heap);
 
   return 0;
 }

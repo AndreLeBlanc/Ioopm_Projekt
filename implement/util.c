@@ -5,8 +5,9 @@
 #include <string.h>
 #include "util.h"
 #include "main.h"
+#include "../gc.h"
 
-extern void *our_heap;
+extern heap_t *our_heap;
 
 char toupper_ex(char input){
   switch(input){
@@ -112,8 +113,8 @@ char* ask_question_string(char *msg, char *allowed){
   if(str[c-1] == '\n')
     str[c-1] = '\0';
 
-  char *return_str = h_alloc_data(our_heap, (strlen(str)+1) * sizeof(char));
-  strcpy(return_str, str);
+  void *return_str = h_alloc_data(our_heap, (strlen(str)+1) * sizeof(char));
+  strcpy((char *)return_str, str);
 
   return return_str;
 }

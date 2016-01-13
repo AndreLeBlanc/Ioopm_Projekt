@@ -4,22 +4,20 @@
 #include <assert.h>
 #include <stdio.h>
 #include "tree.h"
+#include "../gc.h"
 
-extern void *our_heap;
+extern heap_t *our_heap;
 
 struct tree{
   void*        key;
   list_t*      list;
   struct tree* left;
   struct tree* right;
-  free_key     _free_key;
 };
 
-tree_t* tree_new(int data_size, free_data _free_data,
-		 free_key _free_key){
-  tree_t* tree = h_alloc_struct(our_heap, "*****");
+tree_t* tree_new(int data_size, free_data _free_data, free_key _free_key){
+  tree_t* tree = h_alloc_struct(our_heap, "****");
   tree->list = list_new(data_size, _free_data);
-  tree->_free_key = _free_key;
   return tree;
 }
 
@@ -58,7 +56,7 @@ tree_t** successor(tree_t** tree, int dir){
 void tree_clean(tree_t** tree){
   if(!*tree) return;
   list_destroy((*tree)->list);
-  (*tree)->_free_key((*tree)->key);
+  // (*tree)->_free_key((*tree)->key);
   (*tree)->key = (*tree)->list = NULL;
 }
 
