@@ -52,7 +52,7 @@ void bartlettCompact(heap_t *h, ll_head marked_list) { // performs the bartlett 
   }
 
   // set pages
-  post_compact_page_reset;
+  post_compact_page_reset(h);
 }
 
 /*

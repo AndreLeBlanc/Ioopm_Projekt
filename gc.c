@@ -27,7 +27,7 @@ size_t h_gc(heap_t *h) {
       void *stack_cursor = *stack_addr;
 
       while(heap_cursor != NULL) {
-        void ***stack_content = (void ***)LL_getContent(stack_cursor);
+        void **stack_content = (void **)LL_getContent(stack_cursor);
         // printf("\n\nheap: %p --> %p\n", heap_cursor, LL_getContent(heap_cursor));
         // printf("\nstack: %p --> %p\n", stack_cursor, LL_getContent(stack_cursor));
       	void* curr_obj = LL_getContent(heap_cursor);
@@ -55,5 +55,5 @@ size_t h_gc(heap_t *h) {
     // LL_map(heap_pts_after, printAddress);
 
     post_compact_page_reset(h);
-    return num_bytes_collected;
+    return h_used(h) - num_bytes_collected;
  }

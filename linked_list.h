@@ -1,3 +1,4 @@
+/// \file
 #ifndef __LINKEDLIST_H__
 #define __LINKEDLIST_H__
 

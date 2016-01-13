@@ -41,7 +41,7 @@ void free_name(void* name);
 /// ###################################################
 
 int main(int argc, char *argv[]){
-  our_heap = h_init(10000, true, 0.0);
+  our_heap = h_init(10000, true, 1.0);
 
   printf("\n===========================================\n\n"
 	 "    Vlkommen till Lagerhanteraren 2.0\n");
@@ -520,7 +520,6 @@ bool quit(){
   //  printf("Total memory: %zu\n", global_counter);
   switch(ask_question_char("Sker att du vill avsluta? [J]a/[N]ej > ", "JN")){
   case 'J':
-    h_delete(our_heap);
     return false;
   default :
     return true;

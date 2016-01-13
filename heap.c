@@ -54,7 +54,9 @@ heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold) {
 }
 
 void h_delete(heap_t *h) {
-  LL_deleteList(h->val_list);
+  for(int i = LL_length(h->val_list); i > 0; i--) {
+    LL_deletePointer(h->val_list, *h->val_list);
+  }
   if(h != NULL) {
     free(h);
   }
