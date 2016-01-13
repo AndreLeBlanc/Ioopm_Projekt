@@ -11,9 +11,9 @@ extern heap_t *our_heap;
 
 char toupper_ex(char input){
   switch(input){
-  // case '�': return '�';
-  // case '�': return '�';
-  // case '�': return '�';
+  // case '': return '';
+  // case '': return '';
+  // case '': return '';
   default : return toupper(input);
   }
 }
@@ -40,7 +40,7 @@ char ask_question_char(char *msg, char *allowed){
     }
 
     if(!have_answer){
-      printf("Ej till�tet svar; godk�nda tecken [%s]\n", allowed);
+      printf("Ej tilltet svar; godknda tecken [%s]\n", allowed);
     }
   }
   return toupper_ex(input);
@@ -66,16 +66,16 @@ int ask_question_int(char *msg, int start, int end){
       have_answer = false;
     }
     else if(buffer[sizeof(buffer)/sizeof(char)-2] != '\0' && buffer[sizeof(buffer)/sizeof(char)-2] != '\n'){
-      printf("Fel; talet du angav �r f�r stort\n");
+      printf("Fel; talet du angav r fr stort\n");
       while(getchar() != '\n');
       have_answer = false;
     }
     else if(have_answer && (atoi(buffer) < start || atoi(buffer) > end)){
-      printf("Fel; talet �r inte inom spannet %d till %d.\n", start, end);
+      printf("Fel; talet r inte inom spannet %d till %d.\n", start, end);
       have_answer = false;
     }
     else if(!have_answer)
-      printf("Ej till�tet svar; godk�nda tecken [0123456789]\n");
+      printf("Ej tilltet svar; godknda tecken [0123456789]\n");
   }
   return atoi(buffer);
 }
@@ -96,16 +96,16 @@ char* ask_question_string(char *msg, char *allowed){
     }
 
     if(str[0] == '\n'){
-      printf("Fel; du m�ste skriva n�got\n");
+      printf("Fel; du mste skriva ngot\n");
       have_answer = false;
     }
     else if(str[sizeof(str)-2] != '\0' && str[sizeof(str)-2] != '\n'){
-      printf("Fel; F�r mycket text\n");
+      printf("Fel; Fr mycket text\n");
       while(getchar() != '\n');
       have_answer = false;
     }
     else if(!have_answer)
-      printf("Ej till�tet svar; godk�nda tecken [%s]\n", allowed);
+      printf("Ej tilltet svar; godknda tecken [%s]\n", allowed);
   }
 
   int c=-1;

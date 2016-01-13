@@ -7,17 +7,20 @@
 #include "util.h"
 #include "list.h"
 #include "tree.h"
+#include "../gc.h"
 
 // https://github.com/IOOPM-UU/ioopm15/blob/master/forelasningar/L8/f8.pdf
 
-#define ALPHA "ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖåäö"
-#define ALPHA_EX "ABCDEFGHIJKLMNOPQRSTUVWXYZ ,.;:-?!ÅÄÖåäö"
+#define ALPHA "ABCDEFGHIJKLMNOPQRSTUVWXYZï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"
+#define ALPHA_EX "ABCDEFGHIJKLMNOPQRSTUVWXYZ ,.;:-?!ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"
 
 //#define TEST_CHAR
 //#define TEST_INT
 //#define TEST_STRING
 //#define TEST_LIST
 #define TEST_TREE
+
+heap_t *h;
 
 typedef struct ware{
   char* name;
@@ -28,26 +31,16 @@ typedef struct ware{
 #if defined(TEST_LIST) || defined(TEST_TREE)
 
 void free_ware(void* ware){
-  free(((ware_t*)ware)->name);
-  free((ware_t*)ware);
+  // free(((ware_t*)ware)->name);
+  // free((ware_t*)ware);
 }
 
 void free_name(void* name){
-  free((char*)name);
+  // free((char*)name);
 }
-
-/*
-void free_data_f(void* data){
-  free((int*)data);
-}
-
-void free_key_f(void* data){
-  free((int*)data);
-}
-*/
 
 ware_t* ware_new(){
-  ware_t* ware = malloc(sizeof(ware_t));
+  ware_t* ware = h_alloc_struct(h, "*ic");
   ware->name =   ask_question_string("Enter name > ", ALPHA);
   ware->price =  ask_question_int("Enter price > ", INT_MIN, INT_MAX);
   ware->letter = ask_question_char("Enter letter > ", ALPHA);
@@ -81,15 +74,15 @@ void print_int(void* int1){
 }
 
 void print_int_2(void* int1, int *tree_index,int page)
-{ 
+{
   *tree_index = *tree_index + 1;
-  //övre och undre gräns för vad som printas 
+  //ï¿½vre och undre grï¿½ns fï¿½r vad som printas
   if ((((page+1)*20) >=  *tree_index)&&((page*20)<*tree_index))
-    { 
+    {
       printf("%d%s",(*tree_index) - ((page)*20), " : ");
       printf("%d\n", *(int*)int1);
     }
-} 
+}
 
 void print_string_tree(void* str1, int depth, char root){
   if(strlen((char*)str1) < 8) printf("%s\t\t|", (char*)str1);
@@ -121,12 +114,14 @@ void print_name(void* name){
 
 int main(void){
 
+  h = h_init(10000, true, 1.0);
+
   #ifdef TEST_CHAR
   while(true) printf("%c\n", ask_question_char("Enter something: ", ALPHA));
   #endif
 
   #ifdef TEST_INT
-  while(true) printf("%d\n", ask_question_int("Ange något mellan -1337 och 1337: ", -1337, 1337));
+  while(true) printf("%d\n", ask_question_int("Ange nï¿½got mellan -1337 och 1337: ", -1337, 1337));
   #endif
 
   #ifdef TEST_STRING
@@ -142,7 +137,7 @@ int main(void){
     printf("\n%d. ", c);
     ware_print(list_tail(list));
   }
-  
+
   printf("\nBefore\n");
   for(int c=1; c<=list_length(list); c++){
     printf("%d. ", c);
@@ -150,13 +145,13 @@ int main(void){
   }
 
   list_remove(list, ask_question_int("Enter a number to remove > ", 1, list_length(list)));
-  
+
   printf("\nAfter\n");
   for(int c=1; c<=list_length(list); c++){
     printf("%d. ", c);
     ware_print(list_get(list, c));
   }
-  
+
   list_destroy(list);
   #endif
 
@@ -169,8 +164,7 @@ int main(void){
     //list_append(list, ware);
     char* key = malloc(sizeof(char)*(strlen(ware->name)+1));
     strcpy(key, ware->name);
-    tree_insert(&tree, key, cmpname, ware, cmpshelf, 
-		sizeof(ware_t), free_ware, free_name);
+    tree_insert(&tree, key, cmpname, ware, cmpshelf, sizeof(ware_t), free_ware, free_name);
     printf("\n.%s .%c .%d\n", ware->name, ware->letter, ware->price);
     free(ware);
   }
@@ -179,14 +173,14 @@ int main(void){
   printf("  \tnodes:%d\n", tree_nodes(tree));
   tree_print(tree, print_string_tree);
 
-  
+
   char* keyToRemove = ask_question_string("Enter key to be removed > ", ALPHA);
   tree_remove(tree, keyToRemove, cmpname);
   free(keyToRemove);
   printf("\n-------------------\nTree after remove\n");
   printf("\n-------------------\ndepth:%d",tree_depth(tree));
   printf("  \tnodes:%d\n", tree_nodes(tree));
-  tree_print(tree, print_string_tree);  
+  tree_print(tree, print_string_tree);
 
   tree_destroy(&tree);
   #endif

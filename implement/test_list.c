@@ -8,8 +8,8 @@
 #include "list.h"
 #include "tree.h"
 
-#define ALPHA "ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖåäö"
-#define ALPHA_EX "ABCDEFGHIJKLMNOPQRSTUVWXYZ ,.;:-?!ÅÄÖåäö"
+#define ALPHA "ABCDEFGHIJKLMNOPQRSTUVWXYZï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"
+#define ALPHA_EX "ABCDEFGHIJKLMNOPQRSTUVWXYZ ,.;:-?!ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"
 
 typedef struct ware{
   char* name;
@@ -18,8 +18,8 @@ typedef struct ware{
 } ware_t;
 
 void free_data(void* data){
-  free(((ware_t*)data)->name);
-  free((ware_t*)data);
+  // free(((ware_t*)data)->name);
+  // free((ware_t*)data);
 }
 
 ware_t* ware_new(){
@@ -56,11 +56,11 @@ int main(void){
 
   print_list(list);
 
-  list_remove(list, ask_question_int("Enter a number to remove > ", 
+  list_remove(list, ask_question_int("Enter a number to remove > ",
 				     1, list_length(list)));
-  
+
   print_list(list);
-  
+
   list_destroy(list);
 
   return 0;

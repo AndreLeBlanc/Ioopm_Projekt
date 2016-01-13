@@ -30,16 +30,13 @@ list_t* list_new(int elementSize, free_data _free_data){
 }
 
 listNode_t* list_node_free(list_t* list, listNode_t* node){
-  /*listNode_t* next = node->next;
-  list->_free_data(node->data);
-  free(node);*/
+  listNode_t* next = node->next;
   return NULL;
 }
 
 void list_destroy(list_t* list){
-  /*if(list == NULL) return;
+  if(list == NULL) return;
   while(list->head != NULL) list->head = list_node_free(list, list->head);
-  free(list);*/
 }
 
 bool list_append(list_t* list, void* data){
@@ -55,7 +52,7 @@ bool list_append(list_t* list, void* data){
 }
 
 void list_remove(list_t* list, int index){
-  /*  if(!list || index < 1 || index > list->length) return;
+  if(!list || index < 1 || index > list->length) return;
 
   if(index==1){
     list->head = list_node_free(list, list->head);
@@ -71,11 +68,9 @@ void list_remove(list_t* list, int index){
     listNode_t* temp = list->head;
     while(++c < index-1) temp = temp->next;
     listNode_t* temp2 = temp->next->next;
-    list->_free_data(temp->next->data);
-    free(temp->next);
     temp->next = temp2;
   }
-  list->length--;*/
+  list->length--;
 }
 
 void* list_tail(list_t* list){

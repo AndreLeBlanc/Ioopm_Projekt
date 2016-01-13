@@ -57,6 +57,3 @@ r
 1
 h
 t
-olja
-a
-j

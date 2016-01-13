@@ -22,16 +22,11 @@ tree_t* tree_new(int data_size, free_data _free_data, free_key _free_key){
 }
 
 void tree_free(tree_t** tree){
-  /*  if((*tree)->key ) (*tree)->_free_key((*tree)->key);
-  if((*tree)->list) list_destroy((*tree)->list);
-  if(*tree) free(*tree);*/
+  return;
 }
 
 void tree_destroy(tree_t** tree){
-  /*if(*tree == NULL) return;
-  tree_destroy(&(*tree)->left );
-  tree_destroy(&(*tree)->right);
-  tree_free(tree);*/
+  if(*tree == NULL) return;
 }
 
 int tree_dir(tree_t* tree, void* key, cmpkey _cmpkey){
@@ -56,7 +51,6 @@ tree_t** successor(tree_t** tree, int dir){
 void tree_clean(tree_t** tree){
   if(!*tree) return;
   list_destroy((*tree)->list);
-  // (*tree)->_free_key((*tree)->key);
   (*tree)->key = (*tree)->list = NULL;
 }
 
